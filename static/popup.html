@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="ui.css">
+</head>
+<body class="popup">
+  <header>
+    <img src="icons/48.png" alt="" width="24" height="24">
+    <h1>Canlı Altyazı TR</h1>
+  </header>
+
+  <div id="status" class="status">Hazır</div>
+  <div id="bar" class="bar" hidden><div></div></div>
+  <div id="latency" class="muted small"></div>
+
+  <button id="toggle" class="primary">Altyazıyı başlat</button>
+
+  <div id="pairs"></div>
+
+  <label class="field">Konuşulan dil
+    <select id="source">
+      <option value="auto">Otomatik algıla</option>
+      <option value="en">İngilizce</option>
+      <option value="de">Almanca</option>
+      <option value="fr">Fransızca</option>
+      <option value="es">İspanyolca</option>
+      <option value="it">İtalyanca</option>
+      <option value="pt">Portekizce</option>
+      <option value="nl">Hollandaca</option>
+      <option value="pl">Lehçe</option>
+      <option value="ru">Rusça</option>
+      <option value="uk">Ukraynaca</option>
+      <option value="ar">Arapça</option>
+      <option value="hi">Hintçe</option>
+      <option value="ja">Japonca</option>
+      <option value="ko">Korece</option>
+      <option value="zh">Çince</option>
+      <option value="tr">Türkçe</option>
+    </select>
+  </label>
+
+  <label class="field">Model
+    <select id="model">
+      <option value="tiny">En hızlı (Whisper tiny, ~45 MB)</option>
+      <option value="base">Hızlı, önerilen (Whisper base, ~90 MB)</option>
+      <option value="small">Dengeli (Whisper small, ~250 MB)</option>
+      <option value="turbo">En iyi kalite (large-v3 turbo, ~700 MB, güçlü GPU)</option>
+    </select>
+  </label>
+
+  <label class="check"><input type="checkbox" id="showOriginal"> Orijinal altyazıyı da göster</label>
+
+  <p id="restartHint" class="muted small" hidden>Dil ve model değişikliği yeniden başlatınca geçerli olur.</p>
+
+  <footer>
+    <a href="#" id="openOptions">Altyazı görünüm ayarları</a>
+    <span class="muted small">Kısayol: Alt+Shift+T</span>
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

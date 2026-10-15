@@ -1,0 +1,16 @@
+{
+  "name": "canli-altyazi-tr",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "private": true
+}

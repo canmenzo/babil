@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Altyazı Ayarları</title>
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <h1>Altyazı görünüm ayarları</h1>
+    <p class="muted">Değişiklikler açık videodaki altyazıya anında uygulanır. Altyazıyı videonun üstünde yukarı aşağı sürükleyerek de taşıyabilirsiniz.</p>
+
+    <div class="preview" id="preview">
+      <div class="scene"></div>
+      <div class="box" id="previewBox"></div>
+    </div>
+
+    <div class="grid">
+      <section class="card" data-track="tr">
+        <h2>Türkçe altyazı</h2>
+      </section>
+      <section class="card" data-track="orig">
+        <h2>Orijinal dil altyazısı</h2>
+      </section>
+      <section class="card">
+        <h2>Genel</h2>
+        <label class="check"><input type="checkbox" data-key="showOriginal"> Orijinal altyazıyı göster</label>
+        <label class="check"><input type="checkbox" data-key="originalFirst"> Orijinal altyazı üstte olsun</label>
+        <label class="field">Kenar stili <select data-key="edge"></select></label>
+        <label class="field">Konum (videonun altından, %) <span class="range"><input type="range" min="0" max="85" step="1" data-key="position"><output></output></span></label>
+        <label class="field">Ekranda kalan altyazı sayısı <span class="range"><input type="range" min="1" max="4" step="1" data-key="cues"><output></output></span></label>
+        <label class="field">Ekranda kalma süresi (sn) <span class="range"><input type="range" min="1" max="10" step="0.5" data-key="hold"><output></output></span></label>
+        <label class="check"><input type="checkbox" data-key="scaleWithVideo"> Boyutu video boyutuna göre ölçekle</label>
+        <button id="reset">Varsayılanlara dön</button>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
