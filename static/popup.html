@@ -7,7 +7,7 @@
 <body class="popup">
   <header>
     <img src="icons/48.png" alt="" width="24" height="24">
-    <h1>Canlı Altyazı TR</h1>
+    <h1>Babil</h1>
   </header>
 
   <div id="status" class="status">Hazır</div>
@@ -18,32 +18,17 @@
 
   <div id="pairs"></div>
 
-  <label class="field">Konuşulan dil
-    <select id="source">
-      <option value="auto">Otomatik algıla</option>
-      <option value="en">İngilizce</option>
-      <option value="de">Almanca</option>
-      <option value="fr">Fransızca</option>
-      <option value="es">İspanyolca</option>
-      <option value="it">İtalyanca</option>
-      <option value="pt">Portekizce</option>
-      <option value="nl">Hollandaca</option>
-      <option value="pl">Lehçe</option>
-      <option value="ru">Rusça</option>
-      <option value="uk">Ukraynaca</option>
-      <option value="ar">Arapça</option>
-      <option value="hi">Hintçe</option>
-      <option value="ja">Japonca</option>
-      <option value="ko">Korece</option>
-      <option value="zh">Çince</option>
-      <option value="tr">Türkçe</option>
-    </select>
-  </label>
+  <div class="row">
+    <label class="field">Konuşulan dil <select id="source"></select></label>
+    <span class="arrow">→</span>
+    <label class="field">Çeviri dili <select id="target"></select></label>
+  </div>
 
   <label class="field">Model
     <select id="model">
+      <option value="auto">Otomatik, önerilen (GPU: small, CPU: base)</option>
       <option value="tiny">En hızlı (Whisper tiny, ~45 MB)</option>
-      <option value="base">Hızlı, önerilen (Whisper base, ~90 MB)</option>
+      <option value="base">Hızlı (Whisper base, ~90 MB)</option>
       <option value="small">Dengeli (Whisper small, ~250 MB)</option>
       <option value="turbo">En iyi kalite (large-v3 turbo, ~700 MB, güçlü GPU)</option>
     </select>

@@ -79,7 +79,7 @@ async function init() {
       const el = document.createElement('div');
       el.className = 'cue';
       const tr = document.createElement('div');
-      tr.className = 'tr';
+      tr.className = 'trans';
       const orig = document.createElement('div');
       orig.className = 'orig';
       tr.append(document.createElement('span'));
@@ -96,9 +96,8 @@ async function init() {
     // Keep the previous translation until the new one arrives so the line does not flicker.
     if (m.translated) c.tr.firstChild.textContent = m.translated;
     c.tr.style.display = c.tr.firstChild.textContent ? '' : 'none';
-    // Turkish source: the two lines would be identical.
-    c.orig.style.visibility = m.language === 'tr' ? 'hidden' : '';
-    c.orig.style.height = m.language === 'tr' ? '0' : '';
+    // Speech already in the target language: the two lines would be identical.
+    c.orig.style.display = m.language === s.target ? 'none' : '';
     if (m.final) {
       c.final = true;
       clearTimeout(c.timer);
@@ -115,8 +114,11 @@ async function init() {
     if (fs) return fs.getBoundingClientRect();
     let best = null;
     let bestArea = 200 * 120;
-    for (const v of document.querySelectorAll('video')) {
+    // Cross-origin players (embedded YouTube, Twitch) hide their <video> inside an iframe;
+    // a large iframe shaped like a video is the next best target.
+    for (const v of document.querySelectorAll('video, iframe')) {
       const r = v.getBoundingClientRect();
+      if (v.tagName === 'IFRAME' && (r.width / r.height < 1.2 || r.width / r.height > 2.6)) continue;
       const w = Math.min(r.right, innerWidth) - Math.max(r.left, 0);
       const h = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
       if (w > 0 && h > 0 && w * h > bestArea) {

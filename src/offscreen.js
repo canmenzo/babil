@@ -1,5 +1,4 @@
 // Audio capture, segmentation, ASR scheduling and translation. One instance per extension.
-const TARGET = 'tr';
 const FRAME = 1600; // 100 ms at 16 kHz, matches worklet.js
 
 // Latency tuning, all in 100 ms frames.
@@ -10,6 +9,7 @@ const CUT_SEARCH = 15; // on a hard cut, split at the quietest frame within the 
 const PARTIAL_EVERY = 6; // re-run the open segment every 0.6 s of new audio
 const MIN_SPEECH = 3; // segments with fewer loud frames are dropped (Whisper hallucinates on silence)
 const MAX_BACKLOG = 2; // finals waiting beyond this are committed with their last partial text
+const PREROLL = 3; // quiet frames kept before speech onset so the first syllable is not clipped
 
 const HALLUCINATIONS = [
   /altyaz[ıi].*m\.?\s?k\.?/i,
@@ -19,6 +19,19 @@ const HALLUCINATIONS = [
   /^(\.|,|!|\?|-|\s)+$/,
 ];
 
+// Chrome's translator sees one sentence without context, so English streaming slang gets literal
+// translations ("stream" -> "akış", "corriente"). Rewrite it into words that translate right.
+const EN_GLOSSARY = [
+  [/\bstreamers\b/gi, 'broadcasters'],
+  [/\bstreamer\b/gi, 'broadcaster'],
+  [/\bstreaming\b/gi, 'broadcasting'],
+  [/\bstreams\b/gi, 'broadcasts'],
+  [/\bstream(ed)?\b/gi, 'broadcast'],
+  [/\bsubs\b/gi, 'subscribers'],
+  [/\bsubbed\b/gi, 'subscribed'],
+  [/\bguys\b/gi, 'friends'],
+];
+
 let stream, playCtx, asrCtx, worker;
 let settings = {};
 let running = false;
@@ -26,6 +39,7 @@ let ready = false;
 let lagReported = 0;
 
 let seg = null; // { id, frames: Float32Array[], rms: number[], speech, quiet, sinceProbe, partial }
+let preroll = []; // [frame, rms] while no segment is open
 let nextId = 1;
 let noise = 0.005;
 let lastLang = null;
@@ -83,7 +97,7 @@ async function start(streamId, s) {
   worker.postMessage({ type: 'load', model: settings.model });
   busy = true; // released on 'ready'
 
-  if (settings.source !== 'auto' && settings.source !== TARGET) getTranslator(settings.source);
+  if (settings.source !== 'auto' && settings.source !== settings.target) getTranslator(settings.source);
 }
 
 function stop(text) {
@@ -113,8 +127,21 @@ function onFrame(f) {
   const loud = r > Math.max(0.004, noise * 2.5);
 
   if (!seg) {
-    if (!loud) return;
-    seg = { id: nextId++, frames: [], rms: [], speech: 0, quiet: 0, sinceProbe: 0, partial: null };
+    if (!loud) {
+      preroll.push([f, r]);
+      if (preroll.length > PREROLL) preroll.shift();
+      return;
+    }
+    seg = {
+      id: nextId++,
+      frames: preroll.map(([pf]) => pf),
+      rms: preroll.map(([, pr]) => pr),
+      speech: 0,
+      quiet: 0,
+      sinceProbe: preroll.length,
+      partial: null,
+    };
+    preroll = [];
   }
   seg.frames.push(f);
   seg.rms.push(r);
@@ -205,7 +232,8 @@ function onWorker(m) {
   } else if (m.type === 'ready') {
     busy = false;
     ready = true;
-    status('running', m.device === 'webgpu' ? 'Çalışıyor (GPU)' : 'Çalışıyor (CPU, yavaş olabilir)', { device: m.device });
+    const where = m.device === 'webgpu' ? 'GPU' : 'CPU, yavaş olabilir';
+    status('running', `Çalışıyor (${where}, Whisper ${m.model})`, { device: m.device });
     pump();
   } else if (m.type === 'error') {
     status('error', `Model yüklenemedi: ${m.message}`);
@@ -268,7 +296,8 @@ function getTranslator(src) {
           reported.add('none');
           return null;
         }
-        const avail = await Translator.availability({ sourceLanguage: src, targetLanguage: TARGET });
+        const pair = { sourceLanguage: src, targetLanguage: settings.target };
+        const avail = await Translator.availability(pair);
         if (avail === 'unavailable') return null;
         if (avail === 'downloadable') {
           // Download needs a user click, which only the popup can provide.
@@ -277,7 +306,7 @@ function getTranslator(src) {
           reported.add(src);
           return null;
         }
-        return Translator.create({ sourceLanguage: src, targetLanguage: TARGET });
+        return Translator.create(pair);
       })().catch(() => {
         translators.delete(src);
         return null;
@@ -288,9 +317,10 @@ function getTranslator(src) {
 }
 
 async function translate(text, src) {
-  if (src === TARGET) return text;
+  if (src === settings.target) return text;
   const t = await getTranslator(src);
   if (!t) return null;
+  if (src === 'en') for (const [re, to] of EN_GLOSSARY) text = text.replace(re, to);
   try {
     return await t.translate(text);
   } catch {

@@ -1,10 +1,10 @@
-import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss } from './settings.js';
+import { DEFAULTS, FONTS, EDGES, SOURCE_LANGS, TARGET_LANGS, langName, loadSettings, captionCss } from './settings.js';
 
 let s = await loadSettings();
 
 const SAMPLE = [
-  { tr: 'Bunu gerçekten yapacağımı düşünmedin, değil mi?', orig: "You didn't really think I'd do that, did you?" },
-  { tr: 'Tamam, bir sonraki tura geçiyoruz.', orig: "Alright, we're moving on to the next round." },
+  { trans: 'Bunu gerçekten yapacağımı düşünmedin, değil mi?', orig: "You didn't really think I'd do that, did you?" },
+  { trans: 'Tamam, bir sonraki tura geçiyoruz.', orig: "Alright, we're moving on to the next round." },
 ];
 
 function options(select, map) {
@@ -29,9 +29,12 @@ function trackControls(track) {
   options(card.querySelector('select'), FONTS);
 }
 
-trackControls('tr');
+trackControls('trans');
 trackControls('orig');
 options(document.querySelector('[data-key="edge"]'), EDGES);
+const sourceSelect = document.querySelector('[data-key="source"]');
+sourceSelect.append(new Option('Otomatik algıla', 'auto'), ...SOURCE_LANGS.map((c) => new Option(langName(c), c)));
+document.querySelector('[data-key="target"]').append(...TARGET_LANGS.map((c) => new Option(langName(c), c)));
 
 const inputs = [...document.querySelectorAll('[data-key]')];
 
@@ -63,10 +66,10 @@ function preview() {
   }
   style.textContent = captionCss(s);
   box.replaceChildren(
-    ...SAMPLE.slice(-s.cues).map(({ tr, orig }) => {
+    ...SAMPLE.slice(-s.cues).map(({ trans, orig }) => {
       const cue = document.createElement('div');
       cue.className = 'cue';
-      for (const [cls, text] of [['tr', tr], ['orig', orig]]) {
+      for (const [cls, text] of [['trans', trans], ['orig', orig]]) {
         const line = document.createElement('div');
         line.className = cls;
         line.append(Object.assign(document.createElement('span'), { textContent: text }));
@@ -90,8 +93,56 @@ for (const el of inputs) {
   });
 }
 
+function progress(which, pct, text) {
+  document.getElementById(`${which}Bar`).style.width = `${pct}%`;
+  document.getElementById(`${which}Text`).textContent = text;
+}
+
+// Same downloads the first caption run would do, so they land in this origin's cache ahead of time.
+document.getElementById('prepare').onclick = async (e) => {
+  const button = e.currentTarget;
+  button.disabled = true;
+  const src = s.source === 'auto' ? (s.target === 'en' ? 'es' : 'en') : s.source;
+
+  // Translator first: create() must run while this click still counts as user activation.
+  const translation = (async () => {
+    if (src === s.target) return progress('tr', 100, 'Gerekmiyor');
+    if (!('Translator' in self)) return progress('tr', 0, 'Chrome 138+ gerekli');
+    try {
+      const t = await Translator.create({
+        sourceLanguage: src,
+        targetLanguage: s.target,
+        monitor(m) {
+          m.addEventListener('downloadprogress', (ev) => progress('tr', ev.loaded * 100, `%${Math.round(ev.loaded * 100)}`));
+        },
+      });
+      t.destroy();
+      progress('tr', 100, `${langName(src)} → ${langName(s.target)} hazır`);
+    } catch (err) {
+      progress('tr', 0, `Hata: ${err.message}`);
+    }
+  })();
+
+  const recognition = new Promise((resolve) => {
+    const w = new Worker('asr-worker.js', { type: 'module' });
+    w.onmessage = ({ data }) => {
+      if (data.type === 'progress') progress('asr', data.progress, `%${Math.round(data.progress)}`);
+      if (data.type === 'ready') progress('asr', 100, `Whisper ${data.model} hazır (${data.device === 'webgpu' ? 'GPU' : 'CPU'})`);
+      if (data.type === 'error') progress('asr', 0, `Hata: ${data.message}`);
+      if (data.type === 'ready' || data.type === 'error') {
+        w.terminate();
+        resolve();
+      }
+    };
+    w.postMessage({ type: 'load', model: s.model });
+  });
+
+  await Promise.all([translation, recognition]);
+  button.disabled = false;
+};
+
 document.getElementById('reset').onclick = async () => {
-  const { model, source, ...look } = DEFAULTS;
+  const { model, source, target, ...look } = DEFAULTS;
   await chrome.storage.local.set(look);
   s = await loadSettings();
   fill();

@@ -28,3 +28,7 @@ select, input[type=number] { font: inherit; color: var(--fg); background: var(--
 footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
 a { color: var(--accent); }
 .pair { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
+.row { display: flex; align-items: flex-end; gap: 6px; }
+.row .field { flex: 1; min-width: 0; }
+.row select { width: 100%; }
+.arrow { padding-bottom: 7px; color: var(--muted); }

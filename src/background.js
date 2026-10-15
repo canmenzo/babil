@@ -20,7 +20,7 @@ function inject(tabId) {
 async function start(tabId, streamId) {
   await restored;
   if (state.running) await stop();
-  const { model, source } = await loadSettings();
+  const { model, source, target } = await loadSettings();
   await inject(tabId);
   if (!(await hasOffscreen())) {
     await chrome.offscreen.createDocument({
@@ -29,8 +29,8 @@ async function start(tabId, streamId) {
       justification: 'Sekme sesini yakalayıp lokal olarak yazıya dökmek için',
     });
   }
-  await save({ running: true, tabId, status: { state: 'loading', text: 'Başlatılıyor...' }, asrMs: null, needPairs: [] });
-  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source } });
+  await save({ running: true, tabId, target, status: { state: 'loading', text: 'Başlatılıyor...' }, asrMs: null, needPairs: [] });
+  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source, target } });
 }
 
 async function stop(text = 'Durduruldu') {
@@ -75,6 +75,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
     reply?.(true);
   })();
   return true;
+});
+
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === 'install') chrome.tabs.create({ url: 'options.html#setup' });
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {

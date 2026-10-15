@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Canlı Altyazı TR",
-  "version": "0.1.0",
-  "description": "Tarayıcıdaki videonun sesini lokal olarak yazıya döker ve Türkçeye çevirir.",
+  "name": "Babil: Canlı Altyazı ve Çeviri",
+  "version": "0.2.0",
+  "description": "Tarayıcıdaki herhangi bir videonun sesini lokal olarak yazıya döker ve canlı çevirir. Orijinal ve çeviri altyazı aynı anda.",
   "minimum_chrome_version": "138",
   "permissions": ["tabCapture", "offscreen", "scripting", "activeTab", "storage"],
   "background": { "service_worker": "background.js", "type": "module" },
-  "action": { "default_popup": "popup.html", "default_title": "Canlı Altyazı TR" },
+  "action": { "default_popup": "popup.html", "default_title": "Babil" },
   "options_ui": { "page": "options.html", "open_in_tab": true },
   "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
   "commands": {

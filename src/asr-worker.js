@@ -57,6 +57,8 @@ async function load(name) {
   const adapter = await navigator.gpu?.requestAdapter();
   const device = adapter ? 'webgpu' : 'wasm';
   const f16 = adapter?.features.has('shader-f16');
+  // small costs ~70 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
+  if (name === 'auto') name = device === 'webgpu' ? 'small' : 'base';
   let dtype;
   if (device === 'wasm') dtype = 'q8';
   else if (name === 'turbo') dtype = { encoder_model: f16 ? 'fp16' : 'q4', decoder_model_merged: 'q4' };
@@ -82,20 +84,16 @@ async function load(name) {
 
   // First run compiles the WebGPU shaders; do it now instead of on the first caption.
   await transcribe(new Float32Array(16000), 'en');
-  postMessage({ type: 'ready', device });
+  postMessage({ type: 'ready', device, model: name });
 }
 
 async function transcribe(audio, language) {
   const { input_features } = await processor(audio);
   const auto = !language;
-  const decoder_input_ids = auto
-    ? [gen.decoder_start_token_id]
-    : [
-        gen.decoder_start_token_id,
-        gen.lang_to_id[`<|${language}|>`],
-        gen.task_to_id.transcribe,
-        gen.no_timestamps_token_id,
-      ];
+  const decoder_input_ids = [
+    gen.decoder_start_token_id,
+    ...(auto ? [] : [gen.lang_to_id[`<|${language}|>`], gen.task_to_id.transcribe, gen.no_timestamps_token_id]),
+  ];
   let logits_processor = null;
   if (auto) {
     logits_processor = new LogitsProcessorList();

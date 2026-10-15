@@ -2,12 +2,34 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<title>Altyazı Ayarları</title>
+<title>Babil Ayarları</title>
 <link rel="stylesheet" href="ui.css">
 <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <main>
+    <section class="card setup" id="setup">
+      <h2>Hazırlık</h2>
+      <p class="muted">İlk kullanımda konuşma tanıma modeli ve Chrome'un çeviri modeli indirilir. Şimdi indirirseniz videoyu açtığınızda beklemezsiniz. Her şey bilgisayarınızda çalışır, ses hiçbir sunucuya gitmez.</p>
+      <div class="row">
+        <label class="field">Konuşulan dil <select data-key="source"></select></label>
+        <span class="arrow">→</span>
+        <label class="field">Çeviri dili <select data-key="target"></select></label>
+        <label class="field">Model
+          <select data-key="model">
+            <option value="auto">Otomatik (önerilen)</option>
+            <option value="tiny">En hızlı (tiny)</option>
+            <option value="base">Hızlı (base)</option>
+            <option value="small">Dengeli (small)</option>
+            <option value="turbo">En iyi kalite (turbo, ~700 MB)</option>
+          </select>
+        </label>
+      </div>
+      <div class="progress"><span>Konuşma tanıma</span><div class="bar"><div id="asrBar"></div></div><span id="asrText" class="muted small"></span></div>
+      <div class="progress"><span>Çeviri</span><div class="bar"><div id="trBar"></div></div><span id="trText" class="muted small"></span></div>
+      <button id="prepare" class="primary">Modelleri şimdi indir</button>
+    </section>
+
     <h1>Altyazı görünüm ayarları</h1>
     <p class="muted">Değişiklikler açık videodaki altyazıya anında uygulanır. Altyazıyı videonun üstünde yukarı aşağı sürükleyerek de taşıyabilirsiniz.</p>
 
@@ -17,8 +39,8 @@
     </div>
 
     <div class="grid">
-      <section class="card" data-track="tr">
-        <h2>Türkçe altyazı</h2>
+      <section class="card" data-track="trans">
+        <h2>Çeviri altyazısı</h2>
       </section>
       <section class="card" data-track="orig">
         <h2>Orijinal dil altyazısı</h2>

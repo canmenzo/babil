@@ -1,7 +1,6 @@
-import { loadSettings } from './settings.js';
+import { loadSettings, langName, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
 
 const $ = (id) => document.getElementById(id);
-const langName = new Intl.DisplayNames(['tr'], { type: 'language' });
 let state = {};
 
 function bg(msg) {
@@ -24,23 +23,23 @@ function render() {
       const div = document.createElement('div');
       div.className = 'pair';
       div.innerHTML = `<span class="small"></span><button></button>`;
-      div.firstChild.textContent = `${langName.of(src)} konuşma algılandı. Türkçe çeviri için Chrome'un çeviri modeli gerekiyor.`;
-      div.lastChild.textContent = `${langName.of(src)} → Türkçe modelini indir`;
-      div.lastChild.onclick = () => ensurePair(src, div.lastChild);
+      div.firstChild.textContent = `${langName(src)} konuşma algılandı. Çeviri için Chrome'un çeviri modeli gerekiyor.`;
+      div.lastChild.textContent = `${langName(src)} → ${langName(state.target)} modelini indir`;
+      div.lastChild.onclick = () => ensurePair(src, state.target, div.lastChild);
       return div;
     }),
   );
 }
 
 // Translator.create needs a user click when the model is not on disk yet, and only the popup gets clicks.
-async function ensurePair(src, button) {
-  if (src === 'tr' || !('Translator' in self)) return;
+async function ensurePair(src, target, button) {
+  if (src === target || !('Translator' in self)) return;
   try {
-    const avail = await Translator.availability({ sourceLanguage: src, targetLanguage: 'tr' });
+    const avail = await Translator.availability({ sourceLanguage: src, targetLanguage: target });
     if (avail === 'available' || avail === 'unavailable') return;
     const t = await Translator.create({
       sourceLanguage: src,
-      targetLanguage: 'tr',
+      targetLanguage: target,
       monitor(m) {
         m.addEventListener('downloadprogress', (e) => {
           if (button) button.textContent = `İndiriliyor %${Math.round(e.loaded * 100)}`;
@@ -58,8 +57,9 @@ $('toggle').onclick = async () => {
   if (state.running) return bg({ type: 'stop' });
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const source = $('source').value;
+  const target = $('target').value;
   // Fire-and-forget: the click's activation is consumed by create(), the download continues on its own.
-  ensurePair(source === 'auto' ? 'en' : source);
+  ensurePair(source === 'auto' ? (target === 'en' ? 'es' : 'en') : source, target);
   try {
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
     await bg({ type: 'start', tabId: tab.id, streamId });
@@ -74,7 +74,7 @@ $('openOptions').onclick = (e) => {
   chrome.runtime.openOptionsPage();
 };
 
-for (const id of ['source', 'model']) {
+for (const id of ['source', 'target', 'model']) {
   $(id).onchange = () => {
     chrome.storage.local.set({ [id]: $(id).value });
     $('restartHint').hidden = !state.running;
@@ -89,8 +89,16 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
+function fillLangs(select, codes) {
+  select.append(...codes.map((c) => new Option(langName(c), c)));
+}
+$('source').append(new Option('Otomatik algıla', 'auto'));
+fillLangs($('source'), SOURCE_LANGS);
+fillLangs($('target'), TARGET_LANGS);
+
 const s = await loadSettings();
 $('source').value = s.source;
+$('target').value = s.target;
 $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
 state = (await chrome.storage.session.get('state')).state ?? {};

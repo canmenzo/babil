@@ -1,6 +1,7 @@
 export const DEFAULTS = {
-  model: 'base',
+  model: 'auto',
   source: 'auto',
+  target: 'tr',
   showOriginal: true,
   originalFirst: false,
   position: 8, // % of the video height, measured from its bottom
@@ -8,9 +9,26 @@ export const DEFAULTS = {
   cues: 2, // how many caption blocks stay on screen
   hold: 4, // seconds a final caption stays
   scaleWithVideo: true,
-  tr: { font: 'sans', size: 30, color: '#ffffff', bg: '#000000', bgOpacity: 0.75, bold: true },
+  trans: { font: 'sans', size: 30, color: '#ffffff', bg: '#000000', bgOpacity: 0.75, bold: true },
   orig: { font: 'sans', size: 20, color: '#ffe066', bg: '#000000', bgOpacity: 0.6, bold: false },
 };
+
+// Whisper can transcribe all of these.
+export const SOURCE_LANGS = [
+  'en', 'es', 'fr', 'de', 'it', 'pt', 'nl', 'pl', 'ru', 'uk', 'tr', 'ar', 'fa', 'hi', 'bn', 'ur',
+  'id', 'vi', 'th', 'ja', 'ko', 'zh', 'el', 'sv', 'ro', 'cs', 'hu', 'he',
+];
+
+// Subset of Chrome Translator API targets, most spoken first.
+export const TARGET_LANGS = [
+  'tr', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi', 'bn', 'zh', 'zh-Hant', 'ja', 'ko',
+  'id', 'vi', 'th', 'nl', 'pl', 'uk', 'el', 'sv', 'ro', 'cs', 'hu',
+];
+
+export function langName(code) {
+  const name = new Intl.DisplayNames(['tr'], { type: 'language' }).of(code);
+  return name.charAt(0).toLocaleUpperCase('tr') + name.slice(1);
+}
 
 export const FONTS = {
   sans: { label: 'Sans (Arial)', css: 'Roboto, Arial, Helvetica, sans-serif' },
@@ -38,7 +56,7 @@ export async function loadSettings() {
   return {
     ...DEFAULTS,
     ...stored,
-    tr: { ...DEFAULTS.tr, ...stored.tr },
+    trans: { ...DEFAULTS.trans, ...stored.trans },
     orig: { ...DEFAULTS.orig, ...stored.orig },
   };
 }
@@ -61,9 +79,9 @@ export function captionCss(s) {
     .${cls} span { background: ${rgba(t.bg, t.bgOpacity)}; }`;
   return `
     .cue { display: flex; flex-direction: ${s.originalFirst ? 'column-reverse' : 'column'}; align-items: center; gap: .15em; margin-top: .3em; }
-    .tr, .orig { line-height: 1.35; text-align: center; text-shadow: ${EDGES[s.edge]?.css ?? 'none'}; }
-    .tr span, .orig span { padding: .08em .35em; border-radius: .18em; box-decoration-break: clone; -webkit-box-decoration-break: clone; white-space: pre-wrap; }
+    .trans, .orig { line-height: 1.35; text-align: center; text-shadow: ${EDGES[s.edge]?.css ?? 'none'}; }
+    .trans span, .orig span { padding: .08em .35em; border-radius: .18em; box-decoration-break: clone; -webkit-box-decoration-break: clone; white-space: pre-wrap; }
     .orig { display: ${s.showOriginal ? 'block' : 'none'}; }
-    ${line('tr', s.tr)}
+    ${line('trans', s.trans)}
     ${line('orig', s.orig)}`;
 }
