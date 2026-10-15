@@ -11,18 +11,20 @@
 - 🎧 Her sitedeki videoyu dinler: YouTube, Twitch, Kick, hepsi
 - 🌍 26 dile canlı çeviri (Türkçe, İngilizce, İspanyolca, Almanca, Japonca...)
 - 👀 Orijinal ve çeviri altyazı aynı anda, dil öğrenmek için birebir
-- ⚡ Konuşmadan 1 saniye bile geçmeden ekranda
+- 📝 Çeviri cümle bitince bir kere gelir, okurken değişmez
+- 🤫 "Um", "uh", nefes ve arka plan gürültüsü altyazıya girmez
+- ⚡ Cümle biter bitmez (~0.5 sn) ekranda
 - 🔒 Ses bilgisayarından çıkmaz. Hesap yok, API anahtarı yok, ücret yok
 - 🎨 Font, boyut, renk, arka plan istediğin gibi
 - 🖥️ Tam ekranda da çalışır
 
 ## 📦 Kurulum
 
-1. [**Releases**](https://github.com/canmenzo/babil/releases/latest) sayfasından `babil-v0.2.0.zip` dosyasını indir ve klasöre çıkar
+1. [**Releases**](https://github.com/canmenzo/babil/releases/latest) sayfasından `babil-v...zip` dosyasını indir ve klasöre çıkar
 2. Chrome'da adres çubuğuna `chrome://extensions` yaz
 3. Sağ üstten **Geliştirici modu**nu aç
-4. **Paketlenmemiş öğe yükle** butonuna bas, çıkardığın `babil-v0.2.0` klasörünü seç (içinde `manifest.json` olan klasör)
-5. Açılan sayfada dilleri seç, **Modelleri şimdi indir**e bas (bir kerelik, ~250 MB)
+4. **Paketlenmemiş öğe yükle** butonuna bas, çıkardığın klasörü seç (içinde `manifest.json` olan klasör)
+5. Açılan sayfada dilleri seç, **Modelleri şimdi indir**e bas (bir kerelik, ~250 MB, sonra diskten açılır)
 
 > 💡 Eklenti ikonunu kolay bulmak için Chrome'un sağ üstündeki 🧩 simgesinden Babil'i sabitle.
 
@@ -32,6 +34,7 @@ Video açıkken Babil ikonuna tıkla → **Altyazıyı başlat**. Kısayol: `Alt
 
 - 🗣️ Konuşulan dili biliyorsan seç, daha isabetli olur
 - 🖱️ Altyazıyı videonun üstünde sürükleyerek taşıyabilirsin
+- 🔢 Ekranda kaç cümle kalacağını popup'tan seç
 - ⚙️ Görünüm ayarları popup'taki **Altyazı görünüm ayarları** linkinde
 
 ## 💻 Gereksinimler

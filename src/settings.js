@@ -2,11 +2,12 @@ export const DEFAULTS = {
   model: 'auto',
   source: 'auto',
   target: 'tr',
+  instant: false, // translate the sentence while it is still being spoken
   showOriginal: true,
   originalFirst: false,
   position: 8, // % of the video height, measured from its bottom
   edge: 'shadow',
-  cues: 2, // how many caption blocks stay on screen
+  cues: 2, // finished sentences kept on screen, besides the one being spoken
   hold: 4, // seconds a final caption stays
   scaleWithVideo: true,
   trans: { font: 'sans', size: 30, color: '#ffffff', bg: '#000000', bgOpacity: 0.75, bold: true },

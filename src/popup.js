@@ -81,6 +81,7 @@ for (const id of ['source', 'target', 'model']) {
   };
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
+$('cues').onchange = () => chrome.storage.local.set({ cues: Number($('cues').value) });
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.state) {
@@ -101,5 +102,6 @@ $('source').value = s.source;
 $('target').value = s.target;
 $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
+$('cues').value = s.cues;
 state = (await chrome.storage.session.get('state')).state ?? {};
 render();

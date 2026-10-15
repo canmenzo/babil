@@ -35,7 +35,8 @@ async function init() {
     .box.dragging { cursor: grabbing; }
     .status { font: 13px/1.4 system-ui, sans-serif; color: #fff; background: rgba(20,20,20,.85); padding: 4px 10px; border-radius: 999px; margin-bottom: 6px; }
     .status:empty { display: none; }
-    .cue.leaving { opacity: 0; transition: opacity .25s; }`;
+    .cue.leaving { opacity: 0; transition: opacity .25s; }
+    .cue.live .orig { opacity: .85; }`;
   const box = document.createElement('div');
   box.className = 'box';
   const statusEl = document.createElement('div');
@@ -72,37 +73,66 @@ async function init() {
     setTimeout(() => c.el.remove(), 250);
   }
 
-  function onCaption(m) {
-    if (m.remove) return removeCue(m.id);
-    let c = cues.get(m.id);
-    if (!c) {
-      const el = document.createElement('div');
-      el.className = 'cue';
-      const tr = document.createElement('div');
-      tr.className = 'trans';
-      const orig = document.createElement('div');
-      orig.className = 'orig';
-      tr.append(document.createElement('span'));
-      orig.append(document.createElement('span'));
-      el.append(tr, orig);
-      box.append(el);
-      c = { el, tr, orig, final: false };
-      cues.set(m.id, c);
-      // Oldest captions go first once the limit is reached.
-      for (const id of [...cues.keys()].slice(0, Math.max(0, cues.size - s.cues))) removeCue(id);
-    }
-    if (c.final && !m.final) return;
+  function makeCue() {
+    const el = document.createElement('div');
+    el.className = 'cue';
+    const tr = document.createElement('div');
+    tr.className = 'trans';
+    const orig = document.createElement('div');
+    orig.className = 'orig';
+    tr.append(document.createElement('span'));
+    orig.append(document.createElement('span'));
+    el.append(tr, orig);
+    return { el, tr, orig };
+  }
+
+  function fill(c, m) {
     c.orig.firstChild.textContent = m.original;
     // Keep the previous translation until the new one arrives so the line does not flicker.
     if (m.translated) c.tr.firstChild.textContent = m.translated;
     c.tr.style.display = c.tr.firstChild.textContent ? '' : 'none';
     // Speech already in the target language: the two lines would be identical.
     c.orig.style.display = m.language === s.target ? 'none' : '';
-    if (m.final) {
-      c.final = true;
-      clearTimeout(c.timer);
-      c.timer = setTimeout(() => removeCue(m.id), s.hold * 1000);
+  }
+
+  // The sentence still being spoken: always the bottom block, not counted in the limit.
+  let live = null;
+  function onLive(m) {
+    if (!m.original) {
+      live?.el.remove();
+      live = null;
+      return;
     }
+    if (!live) {
+      live = makeCue();
+      live.el.classList.add('live');
+      box.append(live.el);
+    }
+    fill(live, m);
+    // With the original hidden, a long sentence would show nothing until it ends; hint that speech is heard.
+    if (!s.showOriginal && !live.tr.firstChild.textContent) {
+      live.tr.firstChild.textContent = '…';
+      live.tr.style.display = '';
+    }
+    show();
+    place();
+  }
+
+  function onCaption(m) {
+    if (m.live) return onLive(m);
+    let c = cues.get(m.id);
+    if (!c) {
+      c = makeCue();
+      box.append(c.el);
+      if (live) box.append(live.el);
+      cues.set(m.id, c);
+      // Oldest captions go first once the limit is reached.
+      for (const id of [...cues.keys()].slice(0, Math.max(0, cues.size - s.cues))) removeCue(id);
+    }
+    fill(c, m);
+    // Long sentences stay long enough to read (~15 characters per second).
+    clearTimeout(c.timer);
+    c.timer = setTimeout(() => removeCue(m.id), Math.max(s.hold, (m.translated ?? m.original).length / 15) * 1000);
     show();
     place();
   }
@@ -191,6 +221,7 @@ async function init() {
       else setStatus(m.text, 5000);
     } else if (m.type === 'clear') {
       for (const id of [...cues.keys()]) removeCue(id);
+      onLive({ original: '' });
       setStatus('');
       if (host.matches(':popover-open')) host.hidePopover();
     }

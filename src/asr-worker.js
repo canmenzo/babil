@@ -15,6 +15,31 @@ env.backends.onnx.wasm.wasmPaths = {
   wasm: new URL('ort/ort-wasm-simd-threaded.asyncify.wasm', self.location.href).href,
 };
 
+// CacheStorage throws "Unexpected internal error" on chrome-extension:// origins and transformers.js
+// swallows it, so every start re-downloaded the model. Keep the files in OPFS instead.
+const fileName = (key) => encodeURIComponent(key);
+const opfsCache = {
+  async match(key) {
+    try {
+      const dir = await navigator.storage.getDirectory();
+      const file = await (await dir.getFileHandle(fileName(key))).getFile();
+      return new Response(file, { headers: { 'content-length': String(file.size) } });
+    } catch {
+      return undefined;
+    }
+  },
+  async put(key, response) {
+    const dir = await navigator.storage.getDirectory();
+    // Write under a temporary name so an interrupted download never looks like a cached file.
+    const part = await dir.getFileHandle(`${fileName(key)}.part`, { create: true });
+    await response.body.pipeTo(await part.createWritable());
+    await part.move(fileName(key));
+  },
+};
+env.useBrowserCache = false;
+env.useCustomCache = true;
+env.customCache = opfsCache;
+
 const MODELS = {
   tiny: 'onnx-community/whisper-tiny',
   base: 'onnx-community/whisper-base',
@@ -22,42 +47,57 @@ const MODELS = {
   turbo: 'onnx-community/whisper-large-v3-turbo',
 };
 
-// After <|startoftranscript|>: allow only a language token, then force <|transcribe|> <|notimestamps|>.
-// This gives Whisper's own language detection and the transcript in a single pass.
-class AutoLanguageProcessor extends LogitsProcessor {
-  constructor(langIds, transcribeId, noTimestampsId) {
+// Decoding starts at <|startoftranscript|>. At the first step this records Whisper's no-speech
+// probability, then allows only language tokens (all of them for auto-detect), and forces
+// <|transcribe|> <|notimestamps|> after that. One pass gives speech check, language and text.
+class PromptProcessor extends LogitsProcessor {
+  noSpeech = 0;
+
+  constructor(gen) {
     super();
-    this.langIds = langIds;
-    this.transcribeId = transcribeId;
-    this.noTimestampsId = noTimestampsId;
+    this.transcribeId = gen.task_to_id.transcribe;
+    this.noTimestampsId = gen.no_timestamps_token_id;
+    this.noSpeechId = gen.no_timestamps_token_id - 1; // <|nocaptions|> (v2) / <|nospeech|> (v3)
   }
 
   _call(input_ids, logits) {
     for (let i = 0; i < input_ids.length; i++) {
       const data = logits[i].data;
       const n = input_ids[i].length;
-      if (n > 3) continue;
       if (n === 1) {
-        const kept = this.langIds.map((id) => data[id]);
+        let max = -Infinity;
+        for (const v of data) if (v > max) max = v;
+        let sum = 0;
+        for (const v of data) sum += Math.exp(v - max);
+        this.noSpeech = Math.exp(data[this.noSpeechId] - max) / sum;
+        const kept = this.allowed.map((id) => data[id]);
         data.fill(-Infinity);
-        this.langIds.forEach((id, k) => (data[id] = kept[k]));
-      } else {
+        this.allowed.forEach((id, k) => (data[id] = kept[k]));
+      } else if (n <= 3) {
         // The default suppress list already set <|transcribe|> to -Infinity, so force it outright.
         data.fill(-Infinity);
         data[n === 2 ? this.transcribeId : this.noTimestampsId] = 0;
+      } else {
+        data[this.noSpeechId] = -Infinity;
       }
     }
     return logits;
   }
 }
 
-let model, processor, tokenizer, gen, idToLang, autoProcessor;
+let model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
+
+async function hasCachedFiles(id) {
+  const dir = await navigator.storage.getDirectory();
+  for await (const name of dir.keys()) if (name.includes(encodeURIComponent(id)) && !name.endsWith('.part')) return true;
+  return false;
+}
 
 async function load(name) {
   const adapter = await navigator.gpu?.requestAdapter();
   const device = adapter ? 'webgpu' : 'wasm';
   const f16 = adapter?.features.has('shader-f16');
-  // small costs ~70 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
+  // small costs ~50 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
   if (name === 'auto') name = device === 'webgpu' ? 'small' : 'base';
   let dtype;
   if (device === 'wasm') dtype = 'q8';
@@ -65,8 +105,9 @@ async function load(name) {
   else dtype = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
 
   const id = MODELS[name] ?? MODELS.base;
+  const fromDisk = await hasCachedFiles(id);
   const progress_callback = (p) => {
-    if (p.status === 'progress_total') postMessage({ type: 'progress', progress: p.progress });
+    if (p.status === 'progress_total') postMessage({ type: 'progress', progress: p.progress, fromDisk });
   };
   [model, processor, tokenizer] = await Promise.all([
     WhisperForConditionalGeneration.from_pretrained(id, { dtype, device, progress_callback }),
@@ -76,11 +117,9 @@ async function load(name) {
 
   gen = model.generation_config;
   idToLang = new Map(Object.entries(gen.lang_to_id).map(([tok, tid]) => [tid, tok.slice(2, -2)]));
-  autoProcessor = new AutoLanguageProcessor(
-    [...idToLang.keys()],
-    gen.task_to_id.transcribe,
-    gen.no_timestamps_token_id,
-  );
+  langIds = [...idToLang.keys()];
+  prompter = new PromptProcessor(gen);
+  suppress_tokens = gen.suppress_tokens.filter((t) => t !== prompter.noSpeechId);
 
   // First run compiles the WebGPU shaders; do it now instead of on the first caption.
   await transcribe(new Float32Array(16000), 'en');
@@ -89,28 +128,23 @@ async function load(name) {
 
 async function transcribe(audio, language) {
   const { input_features } = await processor(audio);
-  const auto = !language;
-  const decoder_input_ids = [
-    gen.decoder_start_token_id,
-    ...(auto ? [] : [gen.lang_to_id[`<|${language}|>`], gen.task_to_id.transcribe, gen.no_timestamps_token_id]),
-  ];
-  let logits_processor = null;
-  if (auto) {
-    logits_processor = new LogitsProcessorList();
-    logits_processor.push(autoProcessor);
-  }
+  prompter.allowed = language ? [gen.lang_to_id[`<|${language}|>`]] : langIds;
+  const logits_processor = new LogitsProcessorList();
+  logits_processor.push(prompter);
   // Cap output by audio length so a hallucination loop cannot run for hundreds of tokens.
   const max_new_tokens = Math.min(128, Math.ceil((audio.length / 16000) * 7) + 8);
   const out = await model.generate({
     inputs: input_features,
-    decoder_input_ids,
+    decoder_input_ids: [gen.decoder_start_token_id],
     logits_processor,
+    suppress_tokens,
     max_new_tokens,
   });
   const ids = (out.sequences ?? out).tolist()[0].map(Number);
   return {
     text: tokenizer.decode(ids, { skip_special_tokens: true }).trim(),
-    language: language || idToLang.get(ids[1]) || 'en',
+    language: idToLang.get(ids[1]) || language || 'en',
+    noSpeech: prompter.noSpeech,
   };
 }
 

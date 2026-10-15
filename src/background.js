@@ -20,7 +20,7 @@ function inject(tabId) {
 async function start(tabId, streamId) {
   await restored;
   if (state.running) await stop();
-  const { model, source, target } = await loadSettings();
+  const { model, source, target, instant } = await loadSettings();
   await inject(tabId);
   if (!(await hasOffscreen())) {
     await chrome.offscreen.createDocument({
@@ -30,7 +30,7 @@ async function start(tabId, streamId) {
     });
   }
   await save({ running: true, tabId, target, status: { state: 'loading', text: 'Başlatılıyor...' }, asrMs: null, needPairs: [] });
-  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source, target } });
+  chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source, target, instant } });
 }
 
 async function stop(text = 'Durduruldu') {
