@@ -8,28 +8,6 @@
 </head>
 <body>
   <main>
-    <section class="card setup" id="setup">
-      <h2>Hazırlık</h2>
-      <p class="muted">İlk kullanımda konuşma tanıma modeli ve Chrome'un çeviri modeli indirilir. Şimdi indirirseniz videoyu açtığınızda beklemezsiniz. Her şey bilgisayarınızda çalışır, ses hiçbir sunucuya gitmez.</p>
-      <div class="row">
-        <label class="field">Konuşulan dil <select data-key="source"></select></label>
-        <span class="arrow">→</span>
-        <label class="field">Çeviri dili <select data-key="target"></select></label>
-        <label class="field">Model
-          <select data-key="model">
-            <option value="auto">Otomatik (önerilen)</option>
-            <option value="tiny">En hızlı (tiny)</option>
-            <option value="base">Hızlı (base)</option>
-            <option value="small">Dengeli (small)</option>
-            <option value="turbo">En iyi kalite (turbo, ~700 MB)</option>
-          </select>
-        </label>
-      </div>
-      <div class="progress"><span>Konuşma tanıma</span><div class="bar"><div id="asrBar"></div></div><span id="asrText" class="muted small"></span></div>
-      <div class="progress"><span>Çeviri</span><div class="bar"><div id="trBar"></div></div><span id="trText" class="muted small"></span></div>
-      <button id="prepare" class="primary">Modelleri şimdi indir</button>
-    </section>
-
     <h1>Altyazı görünüm ayarları</h1>
     <p class="muted">Değişiklikler açık videodaki altyazıya anında uygulanır. Altyazıyı videonun üstünde yukarı aşağı sürükleyerek de taşıyabilirsiniz.</p>
 
@@ -51,7 +29,7 @@
         <label class="check"><input type="checkbox" data-key="originalFirst"> Orijinal altyazı üstte olsun</label>
         <label class="field">Kenar stili <select data-key="edge"></select></label>
         <label class="field">Konum (videonun altından, %) <span class="range"><input type="range" min="0" max="85" step="1" data-key="position"><output></output></span></label>
-        <label class="field">Ekranda kalan cümle sayısı <span class="range"><input type="range" min="1" max="6" step="1" data-key="cues"><output></output></span></label>
+        <label class="field">Ekranda kaç cümle görünsün <span class="range"><input type="range" min="1" max="6" step="1" data-key="cues"><output></output></span></label>
         <label class="check"><input type="checkbox" data-key="instant"> Anlık çeviri (cümle bitmeden çevir; daha hızlı ama çeviri sürekli değişir)</label>
         <label class="field">Ekranda kalma süresi (sn) <span class="range"><input type="range" min="1" max="10" step="0.5" data-key="hold"><output></output></span></label>
         <label class="check"><input type="checkbox" data-key="scaleWithVideo"> Boyutu video boyutuna göre ölçekle</label>

@@ -32,3 +32,4 @@ a { color: var(--accent); }
 .row .field { flex: 1; min-width: 0; }
 .row select { width: 100%; }
 .arrow { padding-bottom: 7px; color: var(--muted); }
+.hint { margin: -6px 0 0; line-height: 1.4; }

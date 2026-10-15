@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Babil: Canlı Altyazı ve Çeviri",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Tarayıcıdaki herhangi bir videonun sesini lokal olarak yazıya döker ve canlı çevirir. Orijinal ve çeviri altyazı aynı anda.",
   "minimum_chrome_version": "138",
   "permissions": ["tabCapture", "offscreen", "scripting", "activeTab", "storage", "unlimitedStorage"],

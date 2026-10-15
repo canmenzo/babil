@@ -1,4 +1,6 @@
 // Audio capture, segmentation, ASR scheduling and translation. One instance per extension.
+import { MODELS } from './settings.js';
+
 const FRAME = 1600; // 100 ms at 16 kHz, matches worklet.js
 
 // Latency tuning, all in 100 ms frames.
@@ -22,6 +24,10 @@ const HALLUCINATIONS = [
 // silence/noise/music >0.8 (where it would otherwise hallucinate "you").
 const NO_SPEECH = 0.5;
 const UNSURE = 0.12; // above this, one- or two-word results are treated as noise
+// large-v3-turbo has no working no-speech score; its language confidence (top two languages)
+// is ~1 on speech, 0.5-0.6 on noise and music, ~0.75 on "hmm".
+const LANG_MIN = 0.7;
+const LANG_UNSURE = 0.85;
 
 // Hesitations dropped from the text, keeping any sentence-ending punctuation they carried.
 const FILLERS = {
@@ -62,7 +68,8 @@ let seg = null; // { id, frames, rms, speech, quiet, sinceProbe, words, language
 let preroll = []; // [frame, rms] while no segment is open
 let nextId = 1;
 let noise = 0.005;
-let lastLang = null;
+let langScore = {}; // language -> recent share of sentences, steers auto-detect
+let lastSentence = { text: '', t: 0 };
 
 const finals = []; // closed segments waiting for ASR
 let busy = false;
@@ -88,8 +95,38 @@ function status(state, text, extra = {}) {
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.target !== 'offscreen') return;
   if (msg.type === 'start') start(msg.streamId, msg.settings);
+  else if (msg.type === 'settings') reconfigure(msg.settings);
   else if (msg.type === 'stop') stop('Durduruldu');
 });
+
+// Changes made while running apply right away; the tab capture keeps going.
+function reconfigure(s) {
+  if (!running) return;
+  const prev = settings;
+  settings = s;
+  if (s.source !== prev.source) langScore = {};
+  if (s.target !== prev.target || s.source !== prev.source) {
+    translators.forEach((p) => p.then((t) => t?.destroy()).catch(() => {}));
+    translators.clear();
+    reported.clear();
+    if (s.source !== 'auto' && s.source !== s.target) getTranslator(s.source);
+  }
+  if (s.model !== prev.model) {
+    worker.terminate();
+    jobs.clear();
+    finals.length = 0;
+    loadModel();
+  }
+}
+
+function loadModel() {
+  ready = false;
+  busy = true; // released on 'ready'
+  worker = new Worker('asr-worker.js', { type: 'module' });
+  worker.onmessage = ({ data }) => onWorker(data);
+  status('loading', 'Model yükleniyor...', { progress: 0 });
+  worker.postMessage({ type: 'load', model: settings.model });
+}
 
 async function start(streamId, s) {
   settings = s;
@@ -118,11 +155,7 @@ async function start(streamId, s) {
   asrCtx.createMediaStreamSource(stream).connect(node).connect(mute).connect(asrCtx.destination);
   node.port.onmessage = ({ data }) => onFrame(data);
 
-  worker = new Worker('asr-worker.js', { type: 'module' });
-  worker.onmessage = ({ data }) => onWorker(data);
-  status('loading', 'Model yükleniyor...', { progress: 0 });
-  worker.postMessage({ type: 'load', model: settings.model });
-  busy = true; // released on 'ready'
+  loadModel();
 
   if (settings.source !== 'auto' && settings.source !== settings.target) getTranslator(settings.source);
 }
@@ -197,9 +230,13 @@ function newSegment(frames, rms, speech) {
 
 // Close the open segment at frame `end`; frames after it start the next segment.
 function closeSegment(end) {
-  const closed = { ...seg, frames: seg.frames.slice(0, end), rms: seg.rms.slice(0, end) };
+  // Same object, not a copy: a partial still in flight must not emit into a stale copy and then
+  // have the final emit the same sentence again.
+  const closed = seg;
   const rest = seg.frames.slice(end);
   const restRms = seg.rms.slice(end);
+  closed.frames = closed.frames.slice(0, end);
+  closed.rms = closed.rms.slice(0, end);
   seg = null;
   const threshold = Math.max(0.004, noise * 2.5);
   if (restRms.some((r) => r > threshold)) {
@@ -242,8 +279,8 @@ function pump() {
   busy = true;
   const id = ++jobSeq;
   jobs.set(id, job);
-  const language = settings.source === 'auto' ? (job.final ? null : lastLang) : settings.source;
-  worker.postMessage({ type: 'transcribe', id, audio: job.audio, language }, [job.audio.buffer]);
+  const language = settings.source === 'auto' ? null : settings.source;
+  worker.postMessage({ type: 'transcribe', id, audio: job.audio, language, prior: langScore }, [job.audio.buffer]);
 }
 
 function onWorker(m) {
@@ -253,8 +290,8 @@ function onWorker(m) {
   } else if (m.type === 'ready') {
     busy = false;
     ready = true;
-    const where = m.device === 'webgpu' ? 'GPU' : 'CPU, yavaş olabilir';
-    status('running', `Çalışıyor (${where}, Whisper ${m.model})`, { device: m.device });
+    const where = m.device === 'webgpu' ? 'ekran kartı' : 'işlemci, yavaş olabilir';
+    status('running', `Çalışıyor: ${MODELS[m.model].name} (${where})`, { device: m.device });
     pump();
   } else if (m.type === 'error') {
     status('error', `Model yüklenemedi: ${m.message}`);
@@ -269,10 +306,11 @@ function onWorker(m) {
   }
 }
 
-function clean(text, language, noSpeech) {
-  if (noSpeech > NO_SPEECH) return '';
+function clean(text, language, noSpeech, langConf) {
+  if (noSpeech > NO_SPEECH || langConf < LANG_MIN) return '';
   const t = text
     .replace(/\[[^\]]*\]|\([^)]*\)|\*[^*]*\*|[♪♫]/g, ' ')
+    .replace(/(\S+)(?:\s+\1){3,}/gi, '$1 $1 $1')
     .replace(FILLERS[language] ?? FILLERS.other, (_, pre, punct) => (/[.!?…]/.test(punct) ? punct.replace(/,/g, '') : ' '))
     .replace(/,+([.!?…])/g, '$1')
     .replace(/\s+([,.!?…])/g, '$1')
@@ -281,19 +319,30 @@ function clean(text, language, noSpeech) {
     .trim();
   if (!/\p{L}/u.test(t)) return '';
   if (HALLUCINATIONS.some((re) => re.test(t)) || INTERJECTIONS[language]?.test(t)) return '';
-  if (noSpeech > UNSURE && t.split(' ').length <= 2) return '';
+  if ((noSpeech > UNSURE || langConf < LANG_UNSURE) && t.split(' ').length <= 2) return '';
   return t;
 }
 
 function handleResult(job, m) {
-  const text = clean(m.text, m.language, m.noSpeech);
+  const text = clean(m.text, m.language, m.noSpeech, m.langConf);
   const words = text ? text.split(' ') : [];
   if (job.final) {
-    if (settings.source === 'auto' && text) lastLang = m.language;
+    if (words.length >= 3) {
+      for (const l in langScore) langScore[l] *= 0.7;
+      langScore[m.language] = (langScore[m.language] ?? 0) + 0.3;
+    }
     finishSegment(job.seg, words, m.language);
-  } else if (words.length) {
+  } else if (words.length && job.seg === seg) {
+    // A partial that finishes after its segment closed may contain audio of the next segment.
     partial(job.seg, words, m.language);
   }
+}
+
+// A word cut in half at a segment boundary is heard by both segments ("input the" + "The whole").
+function joinCarry(words) {
+  const norm = (w) => w?.toLowerCase().replace(/[^\p{L}\p{N}']/gu, '');
+  const dup = carry.words.length && norm(carry.words.at(-1)) === norm(words[0]);
+  return [...carry.words, ...words.slice(dup ? 1 : 0)];
 }
 
 // Words both of the last two partials agree on are stable; complete sentences inside them
@@ -308,13 +357,13 @@ function partial(s, words, language) {
   let end = -1;
   for (let i = s.emitted; i < stable; i++) if (TERMINATOR.test(words[i])) end = i;
   if (end >= 0) {
-    emit([...carry.words, ...words.slice(s.emitted, end + 1)], language);
+    emit(joinCarry(words.slice(s.emitted, end + 1)), language);
     carry.words = [];
     s.lastEmitted = words[end];
     s.emitted = end + 1;
   }
   clearTimeout(flushTimer);
-  live([...carry.words, ...words.slice(s.emitted)], language);
+  live(joinCarry(words.slice(s.emitted)), language);
 }
 
 function finishSegment(s, words, language) {
@@ -327,7 +376,7 @@ function finishSegment(s, words, language) {
       if (words[j] === s.lastEmitted) skip = j + 1;
     }
   }
-  const all = [...carry.words, ...words.slice(skip)];
+  const all = joinCarry(words.slice(skip));
   let start = 0;
   all.forEach((w, i) => {
     if (TERMINATOR.test(w)) {
@@ -352,6 +401,9 @@ function flush() {
 async function emit(words, language) {
   const original = words.join(' ').trim();
   if (!original) return;
+  // "Please. Please." or a sentence the final repeats: one caption is enough.
+  if (original.toLowerCase() === lastSentence.text && Date.now() - lastSentence.t < 5000) return;
+  lastSentence = { text: original.toLowerCase(), t: Date.now() };
   const id = ++sentenceSeq;
   send({ type: 'caption', id, original, translated: null, language, final: true });
   const translated = await translate(original, language);

@@ -1,4 +1,4 @@
-import { loadSettings, langName, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
+import { loadSettings, langName, isCached, MODELS, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
 
 const $ = (id) => document.getElementById(id);
 let state = {};
@@ -53,13 +53,17 @@ async function ensurePair(src, target, button) {
   }
 }
 
+// With auto-detect, English is the best guess (Spanish when translating into English).
+function likelySource() {
+  const source = $('source').value;
+  return source === 'auto' ? ($('target').value === 'en' ? 'es' : 'en') : source;
+}
+
 $('toggle').onclick = async () => {
   if (state.running) return bg({ type: 'stop' });
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const source = $('source').value;
-  const target = $('target').value;
   // Fire-and-forget: the click's activation is consumed by create(), the download continues on its own.
-  ensurePair(source === 'auto' ? (target === 'en' ? 'es' : 'en') : source, target);
+  ensurePair(likelySource(), $('target').value);
   try {
     const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
     await bg({ type: 'start', tabId: tab.id, streamId });
@@ -74,18 +78,32 @@ $('openOptions').onclick = (e) => {
   chrome.runtime.openOptionsPage();
 };
 
+// Changes apply to running captions right away (background.js forwards them).
 for (const id of ['source', 'target', 'model']) {
   $(id).onchange = () => {
     chrome.storage.local.set({ [id]: $(id).value });
-    $('restartHint').hidden = !state.running;
+    if (id === 'model') modelHint();
+    // This change event is a user click, so a missing translation model can start downloading now.
+    else if (state.running) ensurePair(likelySource(), $('target').value);
   };
+}
+
+const autoModel = navigator.gpu?.requestAdapter().then((a) => (a ? 'small' : 'base')) ?? Promise.resolve('base');
+async function modelHint() {
+  const choice = $('model').value;
+  const model = choice === 'auto' ? await autoModel : choice;
+  const which = choice === 'auto' ? `Bu bilgisayar için: ${MODELS[model].name}. ` : '';
+  const disk = (await isCached(model)) ? 'İndirildi, diskten açılır.' : `İlk başlatmada bir kez indirilir (${MODELS[model].size}).`;
+  $('modelHint').textContent = `${which}${disk} Altyazı hızı hepsinde aynı; büyük model daha az hata yapar ama bilgisayarı daha çok yorar.`;
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
 $('cues').onchange = () => chrome.storage.local.set({ cues: Number($('cues').value) });
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'session' && changes.state) {
+    const wasLoading = state.status?.state === 'loading';
     state = changes.state.newValue ?? {};
+    if (wasLoading && state.status?.state !== 'loading') modelHint();
     render();
   }
 });
@@ -96,6 +114,10 @@ function fillLangs(select, codes) {
 $('source').append(new Option('Otomatik algıla', 'auto'));
 fillLangs($('source'), SOURCE_LANGS);
 fillLangs($('target'), TARGET_LANGS);
+$('model').append(
+  new Option('Otomatik (önerilen)', 'auto'),
+  ...Object.entries(MODELS).map(([k, m]) => new Option(`${m.name} (${m.size})`, k)),
+);
 
 const s = await loadSettings();
 $('source').value = s.source;
@@ -103,5 +125,6 @@ $('target').value = s.target;
 $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
 $('cues').value = s.cues;
+modelHint();
 state = (await chrome.storage.session.get('state')).state ?? {};
 render();

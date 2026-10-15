@@ -77,8 +77,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   return true;
 });
 
-chrome.runtime.onInstalled.addListener(({ reason }) => {
-  if (reason === 'install') chrome.tabs.create({ url: 'options.html#setup' });
+// Language and model changes reach the running session without a restart.
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !['model', 'source', 'target', 'instant'].some((k) => k in changes)) return;
+  await restored;
+  if (!state.running) return;
+  const { model, source, target, instant } = await loadSettings();
+  await save({ target, needPairs: [] });
+  chrome.runtime.sendMessage({ target: 'offscreen', type: 'settings', settings: { model, source, target, instant } }).catch(() => {});
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {

@@ -1,6 +1,6 @@
 {
   "name": "babil",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "build": "node build.mjs",
     "watch": "node build.mjs --watch"

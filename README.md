@@ -12,7 +12,7 @@
 - 🌍 26 dile canlı çeviri (Türkçe, İngilizce, İspanyolca, Almanca, Japonca...)
 - 👀 Orijinal ve çeviri altyazı aynı anda, dil öğrenmek için birebir
 - 📝 Çeviri cümle bitince bir kere gelir, okurken değişmez
-- 🤫 "Um", "uh", nefes ve arka plan gürültüsü altyazıya girmez
+- 🤫 "Um", "uh", oyun sesi, müzik ve arka plan gürültüsü altyazıya girmez
 - ⚡ Cümle biter bitmez (~0.5 sn) ekranda
 - 🔒 Ses bilgisayarından çıkmaz. Hesap yok, API anahtarı yok, ücret yok
 - 🎨 Font, boyut, renk, arka plan istediğin gibi
@@ -24,7 +24,6 @@
 2. Chrome'da adres çubuğuna `chrome://extensions` yaz
 3. Sağ üstten **Geliştirici modu**nu aç
 4. **Paketlenmemiş öğe yükle** butonuna bas, çıkardığın klasörü seç (içinde `manifest.json` olan klasör)
-5. Açılan sayfada dilleri seç, **Modelleri şimdi indir**e bas (bir kerelik, ~250 MB, sonra diskten açılır)
 
 > 💡 Eklenti ikonunu kolay bulmak için Chrome'un sağ üstündeki 🧩 simgesinden Babil'i sabitle.
 
@@ -32,7 +31,11 @@
 
 Video açıkken Babil ikonuna tıkla → **Altyazıyı başlat**. Kısayol: `Alt+Shift+T`
 
+İlk başlatmada seçtiğin model bir kez iner (otomatik seçimde ~600 MB), sonra hep diskten açılır.
+
 - 🗣️ Konuşulan dili biliyorsan seç, daha isabetli olur
+- 🎯 Model seçimi doğruluk içindir, altyazı hızı hepsinde aynı. Ekran kartın güçlüyse **En yüksek doğruluk**
+- 🔄 Dil ve model değişiklikleri altyazı açıkken anında uygulanır
 - 🖱️ Altyazıyı videonun üstünde sürükleyerek taşıyabilirsin
 - 🔢 Ekranda kaç cümle kalacağını popup'tan seç
 - ⚙️ Görünüm ayarları popup'taki **Altyazı görünüm ayarları** linkinde

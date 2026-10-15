@@ -26,6 +26,23 @@ export const TARGET_LANGS = [
   'id', 'vi', 'th', 'nl', 'pl', 'uk', 'el', 'sv', 'ro', 'cs', 'hu',
 ];
 
+// Sizes are the GPU downloads. Bigger models make fewer mistakes; captions come just as fast with
+// any of them, since they wait for the sentence to end, so the choice is about the computer.
+export const MODELS = {
+  tiny: { id: 'onnx-community/whisper-tiny', name: 'Temel doğruluk', size: '120 MB' },
+  base: { id: 'onnx-community/whisper-base', name: 'İyi doğruluk', size: '200 MB' },
+  small: { id: 'onnx-community/whisper-small', name: 'Yüksek doğruluk', size: '600 MB' },
+  turbo: { id: 'onnx-community/whisper-large-v3-turbo', name: 'En yüksek doğruluk', size: '1.6 GB' },
+};
+
+// Models are stored in OPFS by asr-worker.js, one file per download URL.
+export async function isCached(model) {
+  const dir = await navigator.storage.getDirectory();
+  const prefix = encodeURIComponent(`${MODELS[model].id}/`);
+  for await (const name of dir.keys()) if (name.includes(prefix) && name.includes('encoder_model') && !name.endsWith('.part')) return true;
+  return false;
+}
+
 export function langName(code) {
   const name = new Intl.DisplayNames(['tr'], { type: 'language' }).of(code);
   return name.charAt(0).toLocaleUpperCase('tr') + name.slice(1);

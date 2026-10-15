@@ -6,6 +6,7 @@ import {
   LogitsProcessor,
   LogitsProcessorList,
 } from '@huggingface/transformers';
+import { MODELS, isCached } from './settings.js';
 
 env.allowLocalModels = false;
 // The cache path turns the ORT factory into a blob: URL, which extension CSP refuses to import.
@@ -40,15 +41,10 @@ env.useBrowserCache = false;
 env.useCustomCache = true;
 env.customCache = opfsCache;
 
-const MODELS = {
-  tiny: 'onnx-community/whisper-tiny',
-  base: 'onnx-community/whisper-base',
-  small: 'onnx-community/whisper-small',
-  turbo: 'onnx-community/whisper-large-v3-turbo',
-};
+const PRIOR_FLOOR = 0.01;
 
 // Decoding starts at <|startoftranscript|>. At the first step this records Whisper's no-speech
-// probability, then allows only language tokens (all of them for auto-detect), and forces
+// probability and how sure it is of the language, then picks the language token, and forces
 // <|transcribe|> <|notimestamps|> after that. One pass gives speech check, language and text.
 class PromptProcessor extends LogitsProcessor {
   noSpeech = 0;
@@ -70,9 +66,23 @@ class PromptProcessor extends LogitsProcessor {
         let sum = 0;
         for (const v of data) sum += Math.exp(v - max);
         this.noSpeech = Math.exp(data[this.noSpeechId] - max) / sum;
-        const kept = this.allowed.map((id) => data[id]);
+        // large-v3-turbo always reports no-speech ~0, but on noise and music its language guess is
+        // spread thin (top two ~0.5) while speech gives ~1, so this doubles as a speech check.
+        const p = langIds.map((id) => Math.exp(data[id] - max));
+        const z = p.reduce((a, b) => a + b);
+        const [first, second] = [...p].sort((a, b) => b - a);
+        this.langConf = (first + second) / z;
+        // Auto-detect leans on the languages heard so far, so one noisy guess cannot switch to Korean.
+        let best = this.fixed;
+        if (!best) {
+          let bestScore = -Infinity;
+          langIds.forEach((id, k) => {
+            const score = Math.log(p[k]) + (this.prior ? Math.log(this.prior[idToLang.get(id)] ?? PRIOR_FLOOR) : 0);
+            if (score > bestScore) [best, bestScore] = [id, score];
+          });
+        }
         data.fill(-Infinity);
-        this.allowed.forEach((id, k) => (data[id] = kept[k]));
+        data[best] = 0;
       } else if (n <= 3) {
         // The default suppress list already set <|transcribe|> to -Infinity, so force it outright.
         data.fill(-Infinity);
@@ -87,12 +97,6 @@ class PromptProcessor extends LogitsProcessor {
 
 let model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
 
-async function hasCachedFiles(id) {
-  const dir = await navigator.storage.getDirectory();
-  for await (const name of dir.keys()) if (name.includes(encodeURIComponent(id)) && !name.endsWith('.part')) return true;
-  return false;
-}
-
 async function load(name) {
   const adapter = await navigator.gpu?.requestAdapter();
   const device = adapter ? 'webgpu' : 'wasm';
@@ -104,8 +108,9 @@ async function load(name) {
   else if (name === 'turbo') dtype = { encoder_model: f16 ? 'fp16' : 'q4', decoder_model_merged: 'q4' };
   else dtype = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
 
-  const id = MODELS[name] ?? MODELS.base;
-  const fromDisk = await hasCachedFiles(id);
+  if (!MODELS[name]) name = 'base';
+  const { id } = MODELS[name];
+  const fromDisk = await isCached(name);
   const progress_callback = (p) => {
     if (p.status === 'progress_total') postMessage({ type: 'progress', progress: p.progress, fromDisk });
   };
@@ -126,9 +131,11 @@ async function load(name) {
   postMessage({ type: 'ready', device, model: name });
 }
 
-async function transcribe(audio, language) {
+// prior: { language: weight } from earlier segments, used when the language is not fixed.
+async function transcribe(audio, language, prior) {
   const { input_features } = await processor(audio);
-  prompter.allowed = language ? [gen.lang_to_id[`<|${language}|>`]] : langIds;
+  prompter.fixed = language ? gen.lang_to_id[`<|${language}|>`] : null;
+  prompter.prior = prior && Object.keys(prior).length ? prior : null;
   const logits_processor = new LogitsProcessorList();
   logits_processor.push(prompter);
   // Cap output by audio length so a hallucination loop cannot run for hundreds of tokens.
@@ -145,6 +152,7 @@ async function transcribe(audio, language) {
     text: tokenizer.decode(ids, { skip_special_tokens: true }).trim(),
     language: idToLang.get(ids[1]) || language || 'en',
     noSpeech: prompter.noSpeech,
+    langConf: prompter.langConf,
   };
 }
 
@@ -158,7 +166,7 @@ self.onmessage = ({ data }) => {
     chain = chain.then(async () => {
       const t0 = performance.now();
       try {
-        const r = await transcribe(data.audio, data.language);
+        const r = await transcribe(data.audio, data.language, data.prior);
         postMessage({ type: 'result', id: data.id, ...r, ms: Math.round(performance.now() - t0) });
       } catch (e) {
         postMessage({ type: 'result', id: data.id, text: '', error: String(e?.message ?? e) });

@@ -25,29 +25,22 @@
   </div>
 
   <label class="field">Model
-    <select id="model">
-      <option value="auto">Otomatik, önerilen (GPU: small, CPU: base)</option>
-      <option value="tiny">En hızlı (Whisper tiny, ~45 MB)</option>
-      <option value="base">Hızlı (Whisper base, ~90 MB)</option>
-      <option value="small">Dengeli (Whisper small, ~250 MB)</option>
-      <option value="turbo">En iyi kalite (large-v3 turbo, ~700 MB, güçlü GPU)</option>
-    </select>
+    <select id="model"></select>
   </label>
+  <p id="modelHint" class="muted small hint"></p>
 
   <label class="check"><input type="checkbox" id="showOriginal"> Orijinal altyazıyı da göster</label>
 
-  <label class="field">Ekranda kalan cümle sayısı
+  <label class="field">Ekranda kaç cümle görünsün
     <select id="cues">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
+      <option value="1">Sadece son cümle</option>
+      <option value="2">Son 2 cümle</option>
+      <option value="3">Son 3 cümle</option>
+      <option value="4">Son 4 cümle</option>
+      <option value="5">Son 5 cümle</option>
+      <option value="6">Son 6 cümle</option>
     </select>
   </label>
-
-  <p id="restartHint" class="muted small" hidden>Dil ve model değişikliği yeniden başlatınca geçerli olur.</p>
 
   <footer>
     <a href="#" id="openOptions">Altyazı görünüm ayarları</a>
