@@ -21,7 +21,7 @@
 1. [**Releases**](https://github.com/canmenzo/babil/releases/latest) sayfasından `babil-v0.2.0.zip` dosyasını indir ve klasöre çıkar
 2. Chrome'da adres çubuğuna `chrome://extensions` yaz
 3. Sağ üstten **Geliştirici modu**nu aç
-4. **Paketlenmemiş öğe yükle** butonuna bas, çıkardığın `babil` klasörünü seç
+4. **Paketlenmemiş öğe yükle** butonuna bas, çıkardığın `babil-v0.2.0` klasörünü seç (içinde `manifest.json` olan klasör)
 5. Açılan sayfada dilleri seç, **Modelleri şimdi indir**e bas (bir kerelik, ~250 MB)
 
 > 💡 Eklenti ikonunu kolay bulmak için Chrome'un sağ üstündeki 🧩 simgesinden Babil'i sabitle.
