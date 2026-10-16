@@ -18,6 +18,14 @@
 
   <div id="pairs"></div>
 
+  <div id="update" class="pair" hidden>
+    <strong id="updateTitle"></strong>
+    <span class="small">Zip'i indir, mevcut Babil klasörünün üstüne çıkar, sonra aşağıdaki butona bas. Ayarlar ve indirilmiş modeller korunur.</span>
+    <a id="updateZip" class="button primary" target="_blank">Zip'i indir</a>
+    <button id="updateReload">Çıkardım, Babil'i yenile</button>
+    <a id="updateNotes" class="small" target="_blank">Neler yeni?</a>
+  </div>
+
   <div class="row">
     <label class="field">Konuşulan dil <select id="source"></select></label>
     <span class="arrow">→</span>
@@ -46,6 +54,7 @@
     <a href="#" id="openOptions">Altyazı görünüm ayarları</a>
     <span class="muted small">Kısayol: Alt+Shift+T</span>
   </footer>
+  <div class="muted small version"><span id="version"></span> · <a href="#" id="checkUpdate">Güncellemeleri denetle</a></div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

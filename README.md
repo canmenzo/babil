@@ -27,6 +27,10 @@
 
 > 💡 Eklenti ikonunu kolay bulmak için Chrome'un sağ üstündeki 🧩 simgesinden Babil'i sabitle.
 
+### 🔔 Güncelleme
+
+Yeni sürüm çıkınca popup haber verir (elle denetlemek için popup'ın altındaki **Güncellemeleri denetle**). Zip'i indir, mevcut Babil klasörünün üstüne çıkar, popup'taki **Babil'i yenile** butonuna bas. Ayarlar ve indirilmiş modeller korunur.
+
 ## ▶️ Kullanım
 
 Video açıkken Babil ikonuna tıkla → **Altyazıyı başlat**. Kısayol: `Alt+Shift+T`
