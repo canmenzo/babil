@@ -1,61 +1,50 @@
-# Babil
+# 🗼 Babil
 
-**Live translated captions for any video in Chrome. Runs entirely on your computer.**
+**Watch videos in your language. Live captions, translated on your computer.**
 
 ![Babil caption preview](docs/screenshot.png)
 
-## Features
+## ✨ What you get
 
-- Captures video audio from any site, including YouTube, Twitch, and Kick
-- Live translation into 26 languages, including Turkish, English, Spanish, German, and Japanese
-- Original and translated captions displayed together, ideal for language learning
-- Translations appear once each sentence is complete and stay unchanged while you read
-- Filters out filler words such as "um" and "uh", game audio, music, and background noise
-- Captions appear about 0.5 seconds after a sentence ends
-- Audio stays on your computer. No account, API key, or fees
-- Customizable font, size, color, and background
-- Works in fullscreen
+- 🌍 Translate videos into 26 languages on YouTube, Twitch, Kick, and more
+- 💬 See original and translated captions together, including in fullscreen
+- 🎨 Drag captions to move them; customize their font, size, and colors
+- 🔒 Audio stays on your computer. Free, with no account or API key needed
 
-## Installation
+## 📦 Install
 
-1. Download `babil-v...zip` from the [**latest release**](https://github.com/canmenzo/babil/releases/latest) and extract it
-2. Open `chrome://extensions` in Chrome
-3. Enable **Developer mode** in the top-right corner
-4. Click **Load unpacked** and select the extracted folder containing `manifest.json`
+You'll need **Chrome 138 or newer on a desktop computer**. A graphics card helps it run faster.
 
-> Pin Babil from Chrome's Extensions menu for quick access.
+1. Download the **Babil ZIP** from the [latest release](https://github.com/canmenzo/babil/releases/latest) and unzip it
+2. Type `chrome://extensions` into Chrome's address bar and press Enter
+3. Turn on **Developer mode** in the top-right corner
+4. Click **Load unpacked** and choose the unzipped folder containing `manifest.json`
 
-### Updating
+> 📌 Click the puzzle-piece icon in Chrome's toolbar, then pin Babil so it's easy to find.
 
-The popup notifies you when a new version is available. You can also check manually using the update check button at the bottom of the popup. Download the ZIP, extract it over your existing Babil folder, and click the reload button in the popup. Your settings and downloaded models are preserved.
+## ▶️ Start watching
 
-## Usage
+1. Play a video and click the **Babil icon** in Chrome's toolbar
+2. Choose the language you want captions translated into. Leave the model on automatic
+3. Click the **large button at the top** to start captions, or press `Alt+Shift+T`
 
-While a video is playing, click the Babil icon and press the button to start captions. Keyboard shortcut: `Alt+Shift+T`.
+The first start downloads a speech model (about **600 MB** on automatic). Wait for it to finish; future starts use the saved copy.
 
-On first use, the selected model downloads once (about 600 MB with automatic selection). After that, it loads from disk.
+💡 For better accuracy, select the video's spoken language. Use the link at the bottom of Babil's panel to change how captions look.
 
-- Select the spoken language if you know it to improve accuracy
-- Model selection controls accuracy; caption speed is the same across models. Choose the highest-accuracy model if you have a powerful GPU
-- Language and model changes take effect immediately while captions are running
-- Drag captions to reposition them over the video
-- Choose how many sentences remain visible from the popup
-- Open the caption appearance settings using the link in the popup
+## 🔄 Update
 
-## Requirements
+Babil's panel tells you when an update is ready. Download the new ZIP, unzip it into your existing Babil folder, and replace the old files. Then click the reload button in Babil's update notice. Your settings and downloaded models stay saved.
 
-- Desktop Chrome 138 or later
-- A GPU is recommended; the extension also works without one, but runs more slowly
-
-## Development
+## 🛠️ For developers
 
 ```sh
 npm install
 npm run build   # Output: dist/
 ```
 
-Whisper (transformers.js, WebGPU) transcribes audio, and Chrome's on-device Translator API translates it. Built with Manifest V3 and an offscreen document.
+Uses Whisper via transformers.js and Chrome's on-device Translator API.
 
-## License
+## 📄 License
 
 MIT
