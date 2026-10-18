@@ -140,8 +140,9 @@ async function init() {
   // --- Placement over the largest visible video ---
 
   function targetRect() {
-    const fs = document.fullscreenElement;
-    if (fs) return fs.getBoundingClientRect();
+    // A fullscreen element fills the screen, but its own rect can lie: YouTube fullscreens <html>,
+    // whose rect is the whole scrolled page, which put the captions above the screen.
+    if (document.fullscreenElement) return new DOMRect(0, 0, innerWidth, innerHeight);
     let best = null;
     let bestArea = 200 * 120;
     // Cross-origin players (embedded YouTube, Twitch) hide their <video> inside an iframe;

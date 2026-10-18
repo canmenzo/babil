@@ -25,6 +25,10 @@
 
 > Pin Babil from Chrome's Extensions menu for quick access.
 
+### Updating
+
+The popup notifies you when a new version is available. You can also check manually using the update check button at the bottom of the popup. Download the ZIP, extract it over your existing Babil folder, and click the reload button in the popup. Your settings and downloaded models are preserved.
+
 ## Usage
 
 While a video is playing, click the Babil icon and press the button to start captions. Keyboard shortcut: `Alt+Shift+T`.

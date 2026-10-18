@@ -20,7 +20,7 @@ h2 { font-size: 14px; margin: 0 0 8px; }
 .bar { height: 6px; background: var(--field); border-radius: 3px; overflow: hidden; }
 .bar > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 button { font: inherit; border: 1px solid var(--line); background: var(--field); color: var(--fg); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
-button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; padding: 9px; }
+button.primary, a.button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; padding: 9px; }
 button.primary.stop { background: var(--field); color: var(--fg); border-color: var(--line); }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
 select, input[type=number] { font: inherit; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
@@ -33,3 +33,5 @@ a { color: var(--accent); }
 .row select { width: 100%; }
 .arrow { padding-bottom: 7px; color: var(--muted); }
 .hint { margin: -6px 0 0; line-height: 1.4; }
+a.button { text-align: center; text-decoration: none; border-radius: 8px; }
+.version { margin-top: -4px; }
