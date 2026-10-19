@@ -5,6 +5,7 @@ import {
   WhisperForConditionalGeneration,
   LogitsProcessor,
   LogitsProcessorList,
+  pipeline,
 } from '@huggingface/transformers';
 import { MODELS, isCached } from './settings.js';
 
@@ -96,11 +97,14 @@ class PromptProcessor extends LogitsProcessor {
 }
 
 let model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
+let device = 'wasm';
+let f16 = false;
+let translator;
 
 async function load(name) {
   const adapter = await navigator.gpu?.requestAdapter();
-  const device = adapter ? 'webgpu' : 'wasm';
-  const f16 = adapter?.features.has('shader-f16');
+  device = adapter ? 'webgpu' : 'wasm';
+  f16 = adapter?.features.has('shader-f16') ?? false;
   // small costs ~50 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
   if (name === 'auto') name = device === 'webgpu' ? 'small' : 'base';
   let dtype;
@@ -129,6 +133,19 @@ async function load(name) {
   // First run compiles the WebGPU shaders; do it now instead of on the first caption.
   await transcribe(new Float32Array(16000), 'en');
   postMessage({ type: 'ready', device, model: name });
+}
+
+async function loadTranslator() {
+  if (translator) return;
+  const progress_callback = (p) => {
+    if (p.status === 'progress_total') postMessage({ type: 'translation-progress', progress: p.progress });
+  };
+  translator = await pipeline('translation', 'Xenova/m2m100_418M', {
+    device,
+    dtype: device === 'webgpu' && f16 ? 'q4f16' : 'q8',
+    progress_callback,
+  });
+  postMessage({ type: 'translation-ready' });
 }
 
 // prior: { language: weight } from earlier segments, used when the language is not fixed.
@@ -170,6 +187,19 @@ self.onmessage = ({ data }) => {
         postMessage({ type: 'result', id: data.id, ...r, ms: Math.round(performance.now() - t0) });
       } catch (e) {
         postMessage({ type: 'result', id: data.id, text: '', error: String(e?.message ?? e) });
+      }
+    });
+  } else if (data.type === 'translation-load') {
+    chain = chain.then(loadTranslator).catch((e) => postMessage({ type: 'translation-error', message: String(e?.message ?? e) }));
+  } else if (data.type === 'translate') {
+    chain = chain.then(async () => {
+      try {
+        await loadTranslator();
+        const [result] = await translator(data.text, { src_lang: data.source, tgt_lang: data.target });
+        postMessage({ type: 'translated', id: data.id, text: result.translation_text });
+      } catch (e) {
+        postMessage({ type: 'translation-error', message: String(e?.message ?? e) });
+        postMessage({ type: 'translated', id: data.id, text: null });
       }
     });
   }

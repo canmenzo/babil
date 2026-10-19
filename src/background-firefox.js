@@ -1,0 +1,103 @@
+import { loadSettings } from './settings.js';
+
+let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
+const restored = browser.storage.session.get('state').then((r) => r.state && (state = r.state));
+
+function save(patch) {
+  state = { ...state, ...patch };
+  return browser.storage.session.set({ state });
+}
+
+async function sendToEngine(message) {
+  return window.__babilEngineMessage({ target: 'offscreen', ...message });
+}
+
+async function inject(tabId, file) {
+  return browser.tabs.executeScript(tabId, { file });
+}
+
+async function start(tabId) {
+  await restored;
+  if (state.running) await stop();
+  const { model, source, target, instant } = await loadSettings();
+  const { firefoxTranslationEnabled = false } = await browser.storage.local.get('firefoxTranslationEnabled');
+  await inject(tabId, 'content.js');
+  await inject(tabId, 'capture-firefox.js');
+  await save({ running: true, tabId, target, status: { state: 'loading', text: 'Starting…' }, asrMs: null, needPairs: [] });
+  await sendToEngine({ type: 'start-frames', settings: { model, source, target, instant, translationEnabled: firefoxTranslationEnabled } });
+  await browser.tabs.sendMessage(tabId, { type: 'capture-start' });
+}
+
+async function stop(text = 'Stopped') {
+  await restored;
+  if (state.tabId != null) browser.tabs.sendMessage(state.tabId, { type: 'capture-stop' }).catch(() => {});
+  await sendToEngine({ type: 'stop' });
+  await save({ running: false, status: { state: 'stopped', text } });
+}
+
+async function handleBgMessage(msg) {
+  await restored;
+  switch (msg.type) {
+    case 'start':
+      await start(msg.tabId);
+      break;
+    case 'stop':
+      await stop();
+      break;
+    case 'translation-enable':
+      await browser.storage.local.set({ firefoxTranslationEnabled: true });
+      await sendToEngine({ type: 'translation-enable' });
+      break;
+    case 'caption':
+      browser.tabs.sendMessage(state.tabId, msg).catch(() => {});
+      break;
+    case 'status':
+      if (msg.state === 'stopped' || msg.state === 'error') {
+        await stop(msg.text);
+        break;
+      }
+      await save({ status: { state: msg.state, text: msg.text, progress: msg.progress } });
+      browser.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text: msg.text }).catch(() => {});
+      break;
+    case 'stats':
+      await save({ asrMs: msg.asrMs });
+      break;
+  }
+}
+
+window.__babilHandleBgMessage = handleBgMessage;
+browser.runtime.onMessage.addListener((msg) => {
+  if (msg.target === 'bg') return handleBgMessage(msg);
+  if (msg.target === 'offscreen') return window.__babilEngineMessage(msg);
+});
+
+browser.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !['model', 'source', 'target', 'instant'].some((k) => k in changes)) return;
+  await restored;
+  if (!state.running) return;
+  const { model, source, target, instant } = await loadSettings();
+  await save({ target });
+  const { firefoxTranslationEnabled = false } = await browser.storage.local.get('firefoxTranslationEnabled');
+  await sendToEngine({ type: 'settings', settings: { model, source, target, instant, translationEnabled: firefoxTranslationEnabled } });
+});
+
+browser.commands.onCommand.addListener(async (command, tab) => {
+  if (command !== 'toggle-captions') return;
+  await restored;
+  if (state.running) return stop();
+  await start(tab.id);
+});
+
+browser.tabs.onRemoved.addListener(async (tabId) => {
+  await restored;
+  if (state.running && tabId === state.tabId) stop('Tab closed');
+});
+
+browser.tabs.onUpdated.addListener(async (tabId, info) => {
+  await restored;
+  if (state.running && tabId === state.tabId && info.status === 'complete') {
+    await inject(tabId, 'content.js');
+    await inject(tabId, 'capture-firefox.js');
+    browser.tabs.sendMessage(tabId, { type: 'capture-start' }).catch(() => {});
+  }
+});

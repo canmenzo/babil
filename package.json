@@ -3,6 +3,7 @@
   "version": "0.5.0",
   "scripts": {
     "build": "node build.mjs",
+    "build:firefox": "node build.mjs --firefox",
     "watch": "node build.mjs --watch"
   },
   "type": "module",

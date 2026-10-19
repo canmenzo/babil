@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Babil: Live Captions and Translation",
+  "version": "0.5.0",
+  "description": "Transcribe video audio locally and translate captions on your computer.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "babil@canmenzo",
+      "data_collection_permissions": { "required": ["none"] },
+      "strict_min_version": "142.0"
+    }
+  },
+  "permissions": ["activeTab", "storage", "unlimitedStorage", "tabs", "<all_urls>", "https://huggingface.co/*", "https://cdn-lfs.huggingface.co/*", "https://cdn-lfs-us-1.huggingface.co/*", "https://cas-bridge.xethub.hf.co/*"],
+  "background": { "page": "background.html", "persistent": true },
+  "browser_action": { "default_popup": "popup.html", "default_title": "Babil" },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "icons": { "16": "icons/16.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "commands": {
+    "toggle-captions": {
+      "suggested_key": { "default": "Alt+Shift+T" },
+      "description": "Start or stop captions"
+    }
+  },
+  "web_accessible_resources": ["worklet.js"],
+  "content_security_policy": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+}

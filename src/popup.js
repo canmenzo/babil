@@ -2,6 +2,8 @@ import { loadSettings, langName, isCached, MODELS, SOURCE_LANGS, TARGET_LANGS } 
 
 const $ = (id) => document.getElementById(id);
 let state = {};
+const firefox = FIREFOX_BUILD;
+let translationEnabled = false;
 
 function bg(msg) {
   return chrome.runtime.sendMessage({ target: 'bg', ...msg });
@@ -19,6 +21,22 @@ function render() {
   $('toggle').classList.toggle('stop', !!state.running);
 
   $('pairs').replaceChildren(
+    ...(firefox && state.running && !translationEnabled ? [(() => {
+      const div = document.createElement('div');
+      div.className = 'pair';
+      const text = document.createElement('span');
+      text.className = 'small';
+      text.textContent = 'Firefox needs an additional offline translation model (about 1 GB). Video audio and captions stay on this device.';
+      const button = document.createElement('button');
+      button.textContent = 'Download translation model';
+      button.onclick = async () => {
+        translationEnabled = true;
+        render();
+        await bg({ type: 'translation-enable' });
+      };
+      div.append(text, button);
+      return div;
+    })()] : []),
     ...(state.needPairs ?? []).map((src) => {
       const div = document.createElement('div');
       div.className = 'pair';
@@ -65,8 +83,12 @@ $('toggle').onclick = async () => {
   // Fire-and-forget: the click's activation is consumed by create(), the download continues on its own.
   ensurePair(likelySource(), $('target').value);
   try {
-    const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
-    await bg({ type: 'start', tabId: tab.id, streamId });
+    if (FIREFOX_BUILD) {
+      await bg({ type: 'start', tabId: tab.id });
+    } else {
+      const streamId = await chrome.tabCapture.getMediaStreamId({ targetTabId: tab.id });
+      await bg({ type: 'start', tabId: tab.id, streamId });
+    }
   } catch (e) {
     $('status').textContent = `Başlatılamadı: ${e.message}`;
     $('status').className = 'status error';
@@ -173,4 +195,5 @@ $('showOriginal').checked = s.showOriginal;
 $('cues').value = s.cues;
 modelHint();
 state = (await chrome.storage.session.get('state')).state ?? {};
+translationEnabled = (await chrome.storage.local.get('firefoxTranslationEnabled')).firefoxTranslationEnabled ?? false;
 render();

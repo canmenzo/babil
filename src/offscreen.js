@@ -62,7 +62,10 @@ let stream, playCtx, asrCtx, worker;
 let settings = {};
 let running = false;
 let ready = false;
+let frameMode = false;
 let lagReported = 0;
+let translationSeq = 0;
+const translations = new Map();
 
 let seg = null; // { id, frames, rms, speech, quiet, sinceProbe, words, language, emitted, lastEmitted }
 let preroll = []; // [frame, rms] while no segment is open
@@ -85,19 +88,29 @@ let sentenceSeq = 0;
 let liveVersion = 0;
 
 function send(msg) {
-  chrome.runtime.sendMessage({ target: 'bg', ...msg }).catch(() => {});
+  if (FIREFOX_BUILD) window.__babilHandleBgMessage(msg);
+  else chrome.runtime.sendMessage({ target: 'bg', ...msg }).catch(() => {});
 }
 
 function status(state, text, extra = {}) {
   send({ type: 'status', state, text, ...extra });
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
+function receiveEngineMessage(msg) {
   if (msg.target !== 'offscreen') return;
   if (msg.type === 'start') start(msg.streamId, msg.settings);
+  else if (msg.type === 'start-frames') startFrames(msg.settings);
+  else if (msg.type === 'frame' && frameMode && running) onFrame(new Float32Array(msg.audio));
+  else if (msg.type === 'translation-enable') {
+    settings.translationEnabled = true;
+    worker?.postMessage({ type: 'translation-load' });
+  }
   else if (msg.type === 'settings') reconfigure(msg.settings);
   else if (msg.type === 'stop') stop('Durduruldu');
-});
+}
+
+if (FIREFOX_BUILD) window.__babilEngineMessage = receiveEngineMessage;
+else chrome.runtime.onMessage.addListener(receiveEngineMessage);
 
 // Changes made while running apply right away; the tab capture keeps going.
 function reconfigure(s) {
@@ -130,6 +143,7 @@ function loadModel() {
 
 async function start(streamId, s) {
   settings = s;
+  frameMode = false;
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: streamId } },
@@ -160,6 +174,13 @@ async function start(streamId, s) {
   if (settings.source !== 'auto' && settings.source !== settings.target) getTranslator(settings.source);
 }
 
+function startFrames(s) {
+  settings = s;
+  frameMode = true;
+  running = true;
+  loadModel();
+}
+
 function stop(text) {
   if (!running) return;
   running = false;
@@ -171,6 +192,8 @@ function stop(text) {
   worker?.terminate();
   translators.forEach((p) => p.then((t) => t?.destroy()).catch(() => {}));
   translators.clear();
+  translations.forEach((resolve) => resolve(null));
+  translations.clear();
   status('stopped', text);
 }
 
@@ -284,7 +307,16 @@ function pump() {
 }
 
 function onWorker(m) {
-  if (m.type === 'progress') {
+  if (m.type === 'translated') {
+    translations.get(m.id)?.(m.text);
+    translations.delete(m.id);
+  } else if (m.type === 'translation-progress') {
+    status('loading', `Translation model downloading ${Math.round(m.progress)}%`, { progress: m.progress });
+  } else if (m.type === 'translation-ready') {
+    status('running', 'Offline translation ready');
+  } else if (m.type === 'translation-error') {
+    status('warning', `Offline translation unavailable: ${m.message}`);
+  } else if (m.type === 'progress') {
     const verb = m.fromDisk ? 'yükleniyor' : 'indiriliyor';
     status('loading', `Model ${verb} %${Math.round(m.progress)}`, { progress: m.progress });
   } else if (m.type === 'ready') {
@@ -460,6 +492,20 @@ function getTranslator(src) {
 
 async function translate(text, src) {
   if (src === settings.target) return text;
+  if (!('Translator' in self)) {
+    if (!settings.translationEnabled || !worker) return null;
+    const id = ++translationSeq;
+    return new Promise((resolve) => {
+      translations.set(id, resolve);
+      worker.postMessage({
+        type: 'translate',
+        id,
+        text,
+        source: src === 'zh-Hant' ? 'zh' : src,
+        target: settings.target === 'zh-Hant' ? 'zh' : settings.target,
+      });
+    });
+  }
   const t = await getTranslator(src);
   if (!t) return null;
   if (src === 'en') for (const [re, to] of EN_GLOSSARY) text = text.replace(re, to);
