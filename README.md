@@ -24,9 +24,7 @@ You'll need **Chrome 138 or newer, or Firefox 142 or newer, on a desktop compute
 
 ### Firefox
 
-1. Download the **Firefox ZIP** from the [latest release](https://github.com/canmenzo/babil/releases/latest) and unzip it
-2. Type `about:debugging#/runtime/this-firefox` into Firefox's address bar
-3. Click **Load Temporary Add-on...** and choose `manifest.json` from the unzipped folder
+Firefox is not included in the current GitHub release ZIP. To build it from source, run `npm install` and `npm run build:firefox`; then load `dist-firefox/manifest.json` from `about:debugging#/runtime/this-firefox` using **Load Temporary Add-on...**.
 
 Firefox captures audio from the playing page's video element. Protected media and players that do not expose an audio track cannot be captured. The first Firefox translation requires an extra download (up to about 1.1 GB); audio and captions are processed on your computer.
 
