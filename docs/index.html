@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Babil: live translated captions for any video</title>
+<meta name="description" content="Babil is a free browser extension that turns the audio of any video into live captions in 26 languages. Whisper and translation run on your computer. No account, no API key.">
+<link rel="canonical" href="https://babil.menzo.dev/">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-128.png">
+<meta name="theme-color" content="#131209">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Babil">
+<meta property="og:title" content="Babil: live translated captions for any video">
+<meta property="og:description" content="Watch videos in your language. Live captions in 26 languages, generated and translated on your computer.">
+<meta property="og:url" content="https://babil.menzo.dev/">
+<meta property="og:image" content="https://babil.menzo.dev/store/chrome/01-captions.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://babil.menzo.dev/store/chrome/01-captions.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="pill" aria-label="Main">
+<a class="brand" href="#top"><img src="icon-128.png" alt="" width="24" height="24">Babil</a>
+<div class="links"><a href="#features">Features</a><a href="#install">Install</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></div>
+<a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a>
+</nav>
+<main id="main">
+<header class="hero" id="top">
+<h1>Watch any video in your own language</h1>
+<p class="sub">Babil adds live captions to YouTube, Twitch, Kick and more, translated into 26 languages. Everything runs on your computer.</p>
+<div class="cta"><a class="btn" href="https://github.com/canmenzo/babil/releases/latest">Download for Chrome</a><a class="btn ghost" href="#install">See install steps</a></div>
+<p class="proof">Free. No account. No API key. Audio never leaves your machine.</p>
+<div class="shot"><img src="screenshot.png" alt="Babil showing original and translated live captions over a video" width="1280" height="800" fetchpriority="high"></div>
+</header>
+
+<section class="wrap" id="features">
+<p class="eyebrow rv">What it does</p>
+<h2 class="rv">Captions that keep up with the video</h2>
+<div class="grid">
+<div class="card rv"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><h3>26 languages</h3><p>Pick the language you want and Babil translates speech from the video as it plays.</p></div>
+<div class="card rv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><h3>Original and translated together</h3><p>See both lines at once, in fullscreen too. Useful when you are learning a language.</p></div>
+<div class="card rv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg><h3>Captions your way</h3><p>Drag them anywhere. Change the font, size and colors until they feel right.</p></div>
+<div class="card rv"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><h3>Free and local</h3><p>No subscription, no account, no API key. Speech recognition is Whisper, running in your browser.</p></div>
+</div>
+</section>
+
+<div class="tagline"><div class="wrap"><p id="tag">Every video has a language you do not speak yet. Babil closes that gap while you watch, without sending a single second of audio anywhere.</p></div></div>
+
+<section class="wrap" id="install">
+<p class="eyebrow rv">Install</p>
+<h2 class="rv">Running in about two minutes</h2>
+<ol class="steps rv">
+<li><strong>Download the ZIP</strong><span>Grab the Babil ZIP from the <a href="https://github.com/canmenzo/babil/releases/latest">latest release</a> and unzip it.</span></li>
+<li><strong>Open the extensions page</strong><span>Type <code>chrome://extensions</code> in the address bar and turn on Developer mode.</span></li>
+<li><strong>Load unpacked</strong><span>Click Load unpacked and choose the folder that contains <code>manifest.json</code>. Pin Babil from the puzzle piece menu.</span></li>
+<li><strong>Start captions</strong><span>Play a video, choose your language, and press the big button or <kbd>Alt+Shift+T</kbd>. The first start downloads a speech model of about 600 MB. After that it is saved.</span></li>
+</ol>
+<div class="note rv"><strong>Requirements.</strong> Chrome 138 or newer, or Firefox 142 or newer, on a desktop computer. A graphics card makes it faster.</div>
+<div class="note rv"><strong>Firefox.</strong> The Firefox build is not in the release ZIP yet. Build it from source with <code>npm install</code> and <code>npm run build:firefox</code>, then load <code>dist-firefox/manifest.json</code> from <code>about:debugging#/runtime/this-firefox</code> using Load Temporary Add-on. The first Firefox translation downloads an extra model of up to about 1.1 GB.</div>
+</section>
+
+<section class="wrap" id="privacy">
+<p class="eyebrow rv">Privacy</p>
+<h2 class="rv">Your audio stays on your computer</h2>
+<p class="lead rv">Speech recognition and translation both run locally, so nothing you watch is uploaded for processing. There is no account to create and no server of ours in the loop. The code is MIT licensed and public on GitHub, so you can check it yourself.</p>
+</section>
+
+<section class="wrap" id="faq">
+<p class="eyebrow rv">FAQ</p>
+<h2 class="rv">Questions people ask</h2>
+<details class="rv"><summary>Is Babil really free?</summary><p>Yes. There is no paid tier, no trial and no API key to buy.</p></details>
+<details class="rv"><summary>Which sites does it work on?</summary><p>YouTube, Twitch, Kick and other sites with a standard video player. On Firefox, protected media and players that do not expose an audio track cannot be captured.</p></details>
+<details class="rv"><summary>Why is the first start slow?</summary><p>Babil downloads a Whisper speech model once, about 600 MB on automatic. Later starts reuse the saved copy.</p></details>
+<details class="rv"><summary>How do I get better accuracy?</summary><p>Select the video's spoken language instead of leaving it on automatic detection.</p></details>
+<details class="rv"><summary>How do I update?</summary><p>Babil's panel tells you when an update is ready. Download the new ZIP, unzip it over your existing Babil folder, then click reload in the update notice. Settings and models are kept.</p></details>
+<details class="rv"><summary>Is it in the Chrome Web Store?</summary><p>Not yet. For now, install it from the GitHub release as described above.</p></details>
+</section>
+
+<section class="wrap" id="hammurabi">
+<p class="eyebrow rv">Coming soon</p>
+<div class="sibling rv"><span class="tag">Desktop</span><h3>Hammurabi</h3><p>The desktop sibling of Babil. Live captions for system audio and your microphone, as a tray app for Windows, macOS and Linux. Not released yet.</p><a class="btn ghost" href="https://hammurabi.menzo.dev">Visit hammurabi.menzo.dev</a></div>
+</section>
+
+<section class="wrap final">
+<h2 class="rv">Start watching in your language</h2>
+<div class="cta rv"><a class="btn" href="https://github.com/canmenzo/babil/releases/latest">Download for Chrome</a></div>
+</section>
+</main>
+<footer><div class="wrap"><span>Babil, MIT licensed. Made by <a href="https://menzo.dev">menzo</a>.</span><nav aria-label="Footer"><a href="https://github.com/canmenzo/babil">GitHub</a><a href="https://github.com/canmenzo/babil/releases/latest">Releases</a><a href="https://menzo.dev">menzo.dev</a><a href="https://hammurabi.menzo.dev">Hammurabi</a></nav></div></footer>
+<script>
+(function(){
+var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+var t=document.getElementById("tag");
+t.innerHTML=t.textContent.split(" ").map(function(w){return '<span class="w">'+w+"</span>"}).join(" ");
+var ws=[].slice.call(t.querySelectorAll(".w"));
+var rv=[].slice.call(document.querySelectorAll(".rv"));
+function all(){ws.concat(rv).forEach(function(e){e.classList.add("on")})}
+if(!("IntersectionObserver" in window)||rm){all();return}
+function mk(m){var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("on");o.unobserve(e.target)}})},{rootMargin:m});return o}
+var wo=mk("0px 0px -40% 0px");ws.forEach(function(w){wo.observe(w)});
+var ro=mk("0px 0px -10% 0px");rv.forEach(function(e){ro.observe(e)});
+})();
+</script>
+</body>
+</html>
