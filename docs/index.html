@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;display=swap">
 <link rel="stylesheet" href="style.css">
+<script>document.documentElement.className="js"</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -87,11 +88,10 @@
 </section>
 
 <section class="wrap final">
-<h2 class="rv">Start watching in your language</h2>
-<div class="cta rv"><a class="btn" href="https://github.com/canmenzo/babil/releases/latest">Download for Chrome</a></div>
+<div class="panel rv"><h2>Start watching in your language</h2><p>Free, local and ready in about two minutes.</p><div class="cta"><a class="btn lg" href="https://github.com/canmenzo/babil/releases/latest">Download for Chrome</a><a class="btn ghost lg" href="https://github.com/canmenzo/babil">View source</a></div></div>
 </section>
 </main>
-<footer><div class="wrap"><span>Babil, MIT licensed. Made by <a href="https://menzo.dev">menzo</a>.</span><nav aria-label="Footer"><a href="https://github.com/canmenzo/babil">GitHub</a><a href="https://github.com/canmenzo/babil/releases/latest">Releases</a><a href="https://menzo.dev">menzo.dev</a><a href="https://hammurabi.menzo.dev">Hammurabi</a></nav></div></footer>
+<footer><div class="wrap"><div class="fb"><a class="brand" href="#top"><img src="icon-128.png" alt="" width="24" height="24">Babil</a><p>Live translated captions for any video. MIT licensed. Made by <a href="https://menzo.dev">menzo</a>.</p></div><nav aria-label="Footer"><a href="https://github.com/canmenzo/babil">GitHub</a><a href="https://github.com/canmenzo/babil/releases/latest">Releases</a><a href="https://menzo.dev">menzo.dev</a><a href="https://hammurabi.menzo.dev">Hammurabi</a></nav></div></footer>
 <script>
 (function(){
 var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -103,7 +103,10 @@ function all(){ws.concat(rv).forEach(function(e){e.classList.add("on")})}
 if(!("IntersectionObserver" in window)||rm){all();return}
 function mk(m){var o=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("on");o.unobserve(e.target)}})},{rootMargin:m});return o}
 var wo=mk("0px 0px -40% 0px");ws.forEach(function(w){wo.observe(w)});
-var ro=mk("0px 0px -10% 0px");rv.forEach(function(e){ro.observe(e)});
+var ro=mk("0px 0px -5% 0px");rv.forEach(function(e){ro.observe(e)});
+var links=[].slice.call(document.querySelectorAll(".links a"));
+var so=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){if(a.getAttribute("href")==="#"+e.target.id)a.setAttribute("aria-current","true");else a.removeAttribute("aria-current")})}})},{rootMargin:"-40% 0px -55% 0px"});
+links.forEach(function(a){var s=document.querySelector(a.getAttribute("href"));if(s)so.observe(s)});
 })();
 </script>
 </body>
