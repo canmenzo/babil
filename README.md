@@ -8,6 +8,7 @@
 
 - 🌍 Translate videos into 26 languages on YouTube, Twitch, Kick, and more
 - 💬 See original and translated captions together, including in fullscreen
+- 🔊 Hear translations read aloud, with the video turned down while each sentence is spoken (Chrome)
 - 🎨 Drag captions to move them; customize their font, size, and colors
 - 🔒 Audio stays on your computer. Free, with no account or API key needed
 
@@ -35,6 +36,8 @@ Firefox captures audio from the playing page's video element. Protected media an
 3. Click the **large button at the top** to start captions, or press `Alt+Shift+T`
 
 The first start downloads a speech model (about **600 MB** on automatic). Wait for it to finish; future starts use the saved copy.
+
+🔊 To hear the translation, tick **Çeviriyi sesli oku** (read the translation aloud) in Babil's panel. Voice and speed are in the settings page.
 
 💡 For better accuracy, select the video's spoken language. Use the link at the bottom of Babil's panel to change how captions look.
 

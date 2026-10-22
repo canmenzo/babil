@@ -1,4 +1,5 @@
 import { loadSettings } from './settings.js';
+import { createSpeaker, pickVoice, listVoices } from './speech.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = browser.storage.session.get('state').then((r) => r.state && (state = r.state));
@@ -7,6 +8,29 @@ function save(patch) {
   state = { ...state, ...patch };
   return browser.storage.session.set({ state });
 }
+
+let speech = {};
+let voice;
+const speechLoaded = loadSpeech();
+speechSynthesis.onvoiceschanged = loadSpeech;
+
+async function loadSpeech() {
+  speech = await loadSettings();
+  voice = pickVoice(await listVoices(), speech.target, speech.ttsVoice);
+}
+
+// No browser.tts in Firefox; the persistent background page can use speechSynthesis directly.
+const speaker = createSpeaker({
+  speak(text, done) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = speech.target;
+    u.rate = speech.ttsRate;
+    u.voice = voice?.voice ?? null;
+    u.onend = u.onerror = done;
+    speechSynthesis.speak(u);
+  },
+  cancel: () => speechSynthesis.cancel(),
+});
 
 async function sendToEngine(message) {
   return window.__babilEngineMessage({ target: 'offscreen', ...message });
@@ -30,6 +54,7 @@ async function start(tabId) {
 
 async function stop(text = 'Stopped') {
   await restored;
+  speaker.stop();
   if (state.tabId != null) browser.tabs.sendMessage(state.tabId, { type: 'capture-stop' }).catch(() => {});
   await sendToEngine({ type: 'stop' });
   await save({ running: false, status: { state: 'stopped', text } });
@@ -50,6 +75,8 @@ async function handleBgMessage(msg) {
       break;
     case 'caption':
       browser.tabs.sendMessage(state.tabId, msg).catch(() => {});
+      await speechLoaded;
+      if (speech.tts) speaker.caption(msg, speech.target);
       break;
     case 'status':
       if (msg.state === 'stopped' || msg.state === 'error') {
@@ -79,6 +106,12 @@ browser.storage.onChanged.addListener(async (changes, area) => {
   await save({ target });
   const { firefoxTranslationEnabled = false } = await browser.storage.local.get('firefoxTranslationEnabled');
   await sendToEngine({ type: 'settings', settings: { model, source, target, instant, translationEnabled: firefoxTranslationEnabled } });
+});
+
+browser.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !['target', 'tts', 'ttsVoice', 'ttsRate'].some((k) => k in changes)) return;
+  await loadSpeech();
+  if (!speech.tts) speaker.stop();
 });
 
 browser.commands.onCommand.addListener(async (command, tab) => {

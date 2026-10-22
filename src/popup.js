@@ -119,6 +119,7 @@ async function modelHint() {
   $('modelHint').textContent = `${which}${disk} Altyazı hızı hepsinde aynı; büyük model daha az hata yapar ama bilgisayarı daha çok yorar.`;
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
+$('tts').onchange = () => chrome.storage.local.set({ tts: $('tts').checked });
 $('cues').onchange = () => chrome.storage.local.set({ cues: Number($('cues').value) });
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -193,6 +194,7 @@ $('source').value = s.source;
 $('target').value = s.target;
 $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
+$('tts').checked = s.tts;
 $('cues').value = s.cues;
 modelHint();
 state = (await chrome.storage.session.get('state')).state ?? {};

@@ -58,7 +58,7 @@ const EN_GLOSSARY = [
   [/\bguys\b/gi, 'friends'],
 ];
 
-let stream, playCtx, asrCtx, worker;
+let stream, playCtx, playGain, asrCtx, worker;
 let settings = {};
 let running = false;
 let ready = false;
@@ -106,6 +106,7 @@ function receiveEngineMessage(msg) {
     worker?.postMessage({ type: 'translation-load' });
   }
   else if (msg.type === 'settings') reconfigure(msg.settings);
+  else if (msg.type === 'duck') playGain?.gain.setTargetAtTime(msg.gain, playCtx.currentTime, 0.15);
   else if (msg.type === 'stop') stop('Durduruldu');
 }
 
@@ -156,9 +157,11 @@ async function start(streamId, s) {
   running = true;
   stream.getAudioTracks()[0].addEventListener('ended', () => stop('Sekme sesi kesildi'));
 
-  // Capturing mutes the tab, so play it back untouched at the native rate.
+  // Capturing mutes the tab, so play it back at the native rate. The gain only ducks this
+  // playback under spoken translations; the ASR path below never hears it.
   playCtx = new AudioContext();
-  playCtx.createMediaStreamSource(stream).connect(playCtx.destination);
+  playGain = playCtx.createGain();
+  playCtx.createMediaStreamSource(stream).connect(playGain).connect(playCtx.destination);
 
   // Separate 16 kHz context: the browser resamples for us.
   asrCtx = new AudioContext({ sampleRate: 16000 });

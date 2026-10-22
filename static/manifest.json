@@ -4,7 +4,7 @@
   "version": "0.5.1",
   "description": "Tarayıcıdaki herhangi bir videonun sesini lokal olarak yazıya döker ve canlı çevirir. Orijinal ve çeviri altyazı aynı anda.",
   "minimum_chrome_version": "138",
-  "permissions": ["tabCapture", "offscreen", "scripting", "activeTab", "storage", "unlimitedStorage"],
+  "permissions": ["tabCapture", "offscreen", "scripting", "activeTab", "storage", "unlimitedStorage", "tts"],
   "background": { "service_worker": "background.js", "type": "module" },
   "action": { "default_popup": "popup.html", "default_title": "Babil" },
   "options_ui": { "page": "options.html", "open_in_tab": true },

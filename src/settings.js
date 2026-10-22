@@ -10,6 +10,10 @@ export const DEFAULTS = {
   cues: 2, // finished sentences kept on screen, besides the one being spoken
   hold: 4, // seconds a final caption stays
   scaleWithVideo: true,
+  tts: false, // read final captions aloud in the target language
+  ttsVoice: '', // empty: the best local voice for the target language
+  ttsRate: 1,
+  ttsDuck: true, // lower the video while speaking (Chrome only)
   trans: { font: 'sans', size: 30, color: '#ffffff', bg: '#000000', bgOpacity: 0.75, bold: true },
   orig: { font: 'sans', size: 20, color: '#ffe066', bg: '#000000', bgOpacity: 0.6, bold: false },
 };

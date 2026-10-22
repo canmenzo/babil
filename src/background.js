@@ -1,7 +1,31 @@
 import { loadSettings } from './settings.js';
+import { createSpeaker, pickVoice, listVoices } from './speech.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = chrome.storage.session.get('state').then((r) => r.state && (state = r.state));
+
+let speech = {};
+let voice;
+const speechLoaded = loadSpeech();
+
+async function loadSpeech() {
+  speech = await loadSettings();
+  voice = pickVoice(await listVoices(), speech.target, speech.ttsVoice);
+}
+
+// chrome.tts works from the service worker without a user gesture, unlike speechSynthesis in a page.
+const speaker = createSpeaker({
+  speak(text, done) {
+    const onEvent = (e) => ['end', 'interrupted', 'cancelled', 'error'].includes(e.type) && done();
+    chrome.tts.speak(text, { lang: speech.target, voiceName: voice?.name, rate: speech.ttsRate, onEvent }).catch(done);
+  },
+  cancel: () => chrome.tts.stop(),
+  // Lower the replayed tab audio while a translation is read out.
+  onSpeaking(on) {
+    const gain = on && speech.ttsDuck ? 0.3 : 1;
+    chrome.runtime.sendMessage({ target: 'offscreen', type: 'duck', gain }).catch(() => {});
+  },
+});
 
 function save(patch) {
   state = { ...state, ...patch };
@@ -35,6 +59,7 @@ async function start(tabId, streamId) {
 
 async function stop(text = 'Durduruldu') {
   await restored;
+  speaker.stop();
   if (await hasOffscreen()) await chrome.offscreen.closeDocument();
   if (state.tabId != null) chrome.tabs.sendMessage(state.tabId, { type: 'clear' }).catch(() => {});
   await save({ running: false, status: { state: 'stopped', text } });
@@ -53,6 +78,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         break;
       case 'caption':
         chrome.tabs.sendMessage(state.tabId, msg).catch(() => {});
+        await speechLoaded;
+        if (speech.tts) speaker.caption(msg, speech.target);
         break;
       case 'status':
         if (msg.state === 'stopped' || msg.state === 'error') {
@@ -85,6 +112,12 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
   const { model, source, target, instant } = await loadSettings();
   await save({ target, needPairs: [] });
   chrome.runtime.sendMessage({ target: 'offscreen', type: 'settings', settings: { model, source, target, instant } }).catch(() => {});
+});
+
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !['target', 'tts', 'ttsVoice', 'ttsRate', 'ttsDuck'].some((k) => k in changes)) return;
+  await loadSpeech();
+  if (!speech.tts) speaker.stop();
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {

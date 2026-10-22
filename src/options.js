@@ -1,4 +1,5 @@
-import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss } from './settings.js';
+import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss, langName } from './settings.js';
+import { listVoices } from './speech.js';
 
 let s = await loadSettings();
 
@@ -32,6 +33,14 @@ function trackControls(track) {
 trackControls('trans');
 trackControls('orig');
 options(document.querySelector('[data-key="edge"]'), EDGES);
+
+const base = s.target.split('-')[0];
+document.querySelector('[data-key="ttsVoice"]').append(
+  new Option(`Otomatik (${langName(s.target)})`, ''),
+  ...(await listVoices()).filter((v) => v.lang?.split(/[-_]/)[0].toLowerCase() === base).map((v) => new Option(v.name, v.name)),
+);
+// Firefox plays the video itself, so there is no audio path to duck.
+if (FIREFOX_BUILD) document.getElementById('ttsDuck').remove();
 
 const inputs = [...document.querySelectorAll('[data-key]')];
 
@@ -91,7 +100,7 @@ for (const el of inputs) {
 }
 
 document.getElementById('reset').onclick = async () => {
-  const { model, source, target, ...look } = DEFAULTS;
+  const { model, source, target, tts, ttsVoice, ttsRate, ttsDuck, ...look } = DEFAULTS;
   await chrome.storage.local.set(look);
   s = await loadSettings();
   fill();
