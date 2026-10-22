@@ -11,6 +11,7 @@ export const DEFAULTS = {
   hold: 4, // seconds a final caption stays
   scaleWithVideo: true,
   tts: false, // read final captions aloud in the target language
+  ttsPersona: 'lale', // see PERSONAS in speech.js; 'custom' uses ttsVoice and ttsRate
   ttsVoice: '', // empty: the best local voice for the target language
   ttsRate: 1,
   ttsDuck: true, // lower the video while speaking (Chrome only)
@@ -78,6 +79,8 @@ export async function loadSettings() {
   return {
     ...DEFAULTS,
     ...stored,
+    // Users who picked a voice or speed before personas existed keep it.
+    ttsPersona: stored.ttsPersona ?? (stored.ttsVoice || (stored.ttsRate ?? 1) !== 1 ? 'custom' : DEFAULTS.ttsPersona),
     trans: { ...DEFAULTS.trans, ...stored.trans },
     orig: { ...DEFAULTS.orig, ...stored.orig },
   };

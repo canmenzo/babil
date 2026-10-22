@@ -1,5 +1,5 @@
 import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss, langName } from './settings.js';
-import { listVoices } from './speech.js';
+import { listVoices, resolveVoice, sampleText, PERSONAS } from './speech.js';
 
 let s = await loadSettings();
 
@@ -34,11 +34,50 @@ trackControls('trans');
 trackControls('orig');
 options(document.querySelector('[data-key="edge"]'), EDGES);
 
-const base = s.target.split('-')[0];
-document.querySelector('[data-key="ttsVoice"]').append(
-  new Option(`Otomatik (${langName(s.target)})`, ''),
-  ...(await listVoices()).filter((v) => v.lang?.split(/[-_]/)[0].toLowerCase() === base).map((v) => new Option(v.name, v.name)),
-);
+let voices = await listVoices();
+function voiceOptions() {
+  const base = s.target.split('-')[0];
+  document.querySelector('[data-key="ttsVoice"]').replaceChildren(
+    new Option(`Otomatik (${langName(s.target)})`, ''),
+    ...voices.filter((v) => v.lang?.split(/[-_]/)[0].toLowerCase() === base).map((v) => new Option(v.name, v.name)),
+  );
+}
+voiceOptions();
+// Firefox loads its voices after the page opens.
+if (FIREFOX_BUILD) speechSynthesis.onvoiceschanged = async () => {
+  voices = await listVoices();
+  voiceOptions();
+  fill();
+};
+
+// A new preview replaces the one playing (chrome.tts.speak interrupts by default).
+function listen(ttsPersona) {
+  const { voice, rate, pitch } = resolveVoice(voices, s.target, { ...s, ttsPersona });
+  const text = sampleText(s.target);
+  if (!FIREFOX_BUILD) return chrome.tts.speak(text, { lang: s.target, voiceName: voice?.name, rate, pitch });
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  Object.assign(u, { lang: s.target, voice: voice?.voice ?? null, rate, pitch });
+  speechSynthesis.speak(u);
+}
+
+const personaCards = Object.entries(PERSONAS).map(([id, p]) => {
+  const card = document.createElement('label');
+  card.className = 'persona';
+  card.innerHTML = '<input type="radio" name="ttsPersona"><strong></strong><span class="small"></span><span class="small muted voice"></span><button type="button">Dinle</button>';
+  card.querySelector('strong').textContent = p.name;
+  card.querySelector('.small').textContent = p.desc;
+  card.querySelector('input').onchange = () => {
+    s.ttsPersona = id;
+    fill();
+    chrome.storage.local.set({ ttsPersona: id });
+  };
+  card.querySelector('button').onclick = () => listen(id);
+  return Object.assign(card, { personaId: id });
+});
+document.getElementById('personas').append(...personaCards);
+const customOnly = ['ttsVoice', 'ttsRate'].map((k) => document.querySelector(`[data-key="${k}"]`).closest('.field'));
+
 // Firefox plays the video itself, so there is no audio path to duck.
 if (FIREFOX_BUILD) document.getElementById('ttsDuck').remove();
 
@@ -56,6 +95,14 @@ function fill() {
     const out = el.parentElement.querySelector('output');
     if (out) out.textContent = el.dataset.key.endsWith('bgOpacity') ? `%${Math.round(v * 100)}` : v;
   }
+  for (const card of personaCards) {
+    const on = card.personaId === s.ttsPersona;
+    card.classList.toggle('selected', on);
+    card.querySelector('input').checked = on;
+    const name = resolveVoice(voices, s.target, { ...s, ttsPersona: card.personaId }).voice?.name ?? 'Sistem sesi';
+    Object.assign(card.querySelector('.voice'), { textContent: name, title: name });
+  }
+  for (const el of customOnly) el.hidden = s.ttsPersona !== 'custom';
 }
 
 function preview() {
@@ -100,16 +147,16 @@ for (const el of inputs) {
 }
 
 document.getElementById('reset').onclick = async () => {
-  const { model, source, target, tts, ttsVoice, ttsRate, ttsDuck, ...look } = DEFAULTS;
+  const { model, source, target, tts, ttsPersona, ttsVoice, ttsRate, ttsDuck, ...look } = DEFAULTS;
   await chrome.storage.local.set(look);
   s = await loadSettings();
   fill();
   preview();
 };
 
-// Dragging the captions on a video changes the position from another context.
+// Dragging the captions on a video changes the position from another context, the popup the persona.
 chrome.storage.onChanged.addListener(async (changes, area) => {
-  if (area === 'local' && changes.position) {
+  if (area === 'local' && (changes.position || changes.ttsPersona)) {
     s = await loadSettings();
     fill();
     preview();

@@ -11,3 +11,10 @@ h1 { font-size: 22px; margin: 0 0 4px; }
 .colors { display: flex; gap: 12px; }
 .colors label { flex: 1; }
 input[type=color] { width: 100%; height: 32px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); padding: 2px; }
+.personas { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.persona { position: relative; display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; cursor: pointer; }
+.persona.selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.persona input { position: absolute; opacity: 0; pointer-events: none; }
+.persona:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.persona .voice { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.persona button { align-self: flex-start; margin-top: 6px; padding: 4px 10px; font-size: 12px; }

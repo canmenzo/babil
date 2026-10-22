@@ -47,3 +47,54 @@ export async function listVoices() {
   if (FIREFOX_BUILD) return speechSynthesis.getVoices().map((v) => ({ name: v.name, lang: v.lang, remote: !v.localService, voice: v }));
   return (await chrome.tts.getVoices()).map((v) => ({ name: v.voiceName, lang: v.lang, remote: v.remote }));
 }
+
+// Shared with the Hammurabi desktop app; keep ids and values in sync. Rate and pitch: 1 is normal.
+export const PERSONAS = {
+  lale: { name: 'Lale', desc: 'Net ve doğal', gender: 'female', rate: 1, pitch: 1 },
+  ayla: { name: 'Ayla', desc: 'Neşeli ve sıcak', gender: 'female', rate: 1.05, pitch: 1.15 },
+  deniz: { name: 'Deniz', desc: 'Sakin ve dengeli', gender: 'male', rate: 0.95, pitch: 0.95 },
+  ates: { name: 'Ateş', desc: 'Tok ve güven veren', gender: 'male', rate: 1, pitch: 0.8 },
+  bilge: { name: 'Bilge', desc: 'Yavaş ve sabırlı, takibi kolay', gender: 'female', rate: 0.8, pitch: 1 },
+  ruzgar: { name: 'Rüzgar', desc: 'Hızlı, çabuk konuşanlara yetişir', gender: 'any', rate: 1.35, pitch: 1.05 },
+  custom: { name: 'Özel', desc: 'Kendi sesin ve hızın' },
+};
+
+// Neither chrome.tts nor speechSynthesis reports gender, so guess it from well-known Windows,
+// Edge and macOS voice names. Google voices are female unless their name says Male.
+const FEMALE = new Set('emel zira hazel susan katja hedda helena hortense elsa irina hoda aria jenny yelda samantha karen moira tessa victoria amélie anna monica milena'.split(' '));
+const MALE = new Set('tolga ahmet david mark george stefan pablo paul cosimo pavel naayf guy cem alex daniel fred thomas markus jorge yuri maged'.split(' '));
+
+export function voiceGender(name) {
+  const words = name.toLowerCase().split(/[^\p{L}]+/u);
+  if (words.includes('google')) return words.includes('male') ? 'male' : 'female';
+  if (words.some((w) => FEMALE.has(w))) return 'female';
+  if (words.some((w) => MALE.has(w))) return 'male';
+}
+
+// A voice of the persona's gender if the language has one, else the usual pick. Özel keeps the
+// user's own voice and rate.
+export function resolveVoice(voices, lang, s) {
+  const p = PERSONAS[s.ttsPersona] ?? PERSONAS.lale;
+  if (p === PERSONAS.custom) return { voice: pickVoice(voices, lang, s.ttsVoice), rate: s.ttsRate, pitch: 1 };
+  const voice = pickVoice(voices.filter((v) => voiceGender(v.name) === p.gender), lang, '') ?? pickVoice(voices, lang, '');
+  return { voice, rate: p.rate, pitch: p.pitch };
+}
+
+const SAMPLES = {
+  tr: 'Merhaba, çevirileri bu sesle okuyacağım.',
+  en: 'Hi, I will read the translations in this voice.',
+  de: 'Hallo, ich lese die Übersetzungen mit dieser Stimme vor.',
+  es: 'Hola, leeré las traducciones con esta voz.',
+  fr: 'Bonjour, je lirai les traductions avec cette voix.',
+  ar: 'مرحبًا، سأقرأ الترجمات بهذا الصوت.',
+  ru: 'Привет, я буду читать переводы этим голосом.',
+  it: 'Ciao, leggerò le traduzioni con questa voce.',
+  pt: 'Olá, vou ler as traduções com esta voz.',
+  ja: 'こんにちは、この声で翻訳を読み上げます。',
+  zh: '你好，我会用这个声音朗读翻译。',
+  ko: '안녕하세요, 이 목소리로 번역을 읽어 드릴게요.',
+};
+
+export function sampleText(lang) {
+  return SAMPLES[lang.split('-')[0]] ?? SAMPLES.en;
+}

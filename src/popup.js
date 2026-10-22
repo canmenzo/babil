@@ -1,4 +1,5 @@
 import { loadSettings, langName, isCached, MODELS, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
+import { PERSONAS } from './speech.js';
 
 const $ = (id) => document.getElementById(id);
 let state = {};
@@ -119,7 +120,11 @@ async function modelHint() {
   $('modelHint').textContent = `${which}${disk} Altyazı hızı hepsinde aynı; büyük model daha az hata yapar ama bilgisayarı daha çok yorar.`;
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
-$('tts').onchange = () => chrome.storage.local.set({ tts: $('tts').checked });
+$('tts').onchange = () => {
+  $('personaField').hidden = !$('tts').checked;
+  chrome.storage.local.set({ tts: $('tts').checked });
+};
+$('ttsPersona').onchange = () => chrome.storage.local.set({ ttsPersona: $('ttsPersona').value });
 $('cues').onchange = () => chrome.storage.local.set({ cues: Number($('cues').value) });
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -188,6 +193,7 @@ $('model').append(
   new Option('Otomatik (önerilen)', 'auto'),
   ...Object.entries(MODELS).map(([k, m]) => new Option(`${m.name} (${m.size})`, k)),
 );
+$('ttsPersona').append(...Object.entries(PERSONAS).map(([k, p]) => new Option(`${p.name} · ${p.desc}`, k)));
 
 const s = await loadSettings();
 $('source').value = s.source;
@@ -195,6 +201,8 @@ $('target').value = s.target;
 $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
 $('tts').checked = s.tts;
+$('ttsPersona').value = s.ttsPersona;
+$('personaField').hidden = !s.tts;
 $('cues').value = s.cues;
 modelHint();
 state = (await chrome.storage.session.get('state')).state ?? {};

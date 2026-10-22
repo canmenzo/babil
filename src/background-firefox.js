@@ -1,5 +1,5 @@
 import { loadSettings } from './settings.js';
-import { createSpeaker, pickVoice, listVoices } from './speech.js';
+import { createSpeaker, resolveVoice, listVoices } from './speech.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = browser.storage.session.get('state').then((r) => r.state && (state = r.state));
@@ -10,13 +10,13 @@ function save(patch) {
 }
 
 let speech = {};
-let voice;
+let say;
 const speechLoaded = loadSpeech();
 speechSynthesis.onvoiceschanged = loadSpeech;
 
 async function loadSpeech() {
   speech = await loadSettings();
-  voice = pickVoice(await listVoices(), speech.target, speech.ttsVoice);
+  say = resolveVoice(await listVoices(), speech.target, speech);
 }
 
 // No browser.tts in Firefox; the persistent background page can use speechSynthesis directly.
@@ -24,8 +24,9 @@ const speaker = createSpeaker({
   speak(text, done) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = speech.target;
-    u.rate = speech.ttsRate;
-    u.voice = voice?.voice ?? null;
+    u.rate = say.rate;
+    u.pitch = say.pitch;
+    u.voice = say.voice?.voice ?? null;
     u.onend = u.onerror = done;
     speechSynthesis.speak(u);
   },
@@ -109,7 +110,7 @@ browser.storage.onChanged.addListener(async (changes, area) => {
 });
 
 browser.storage.onChanged.addListener(async (changes, area) => {
-  if (area !== 'local' || !['target', 'tts', 'ttsVoice', 'ttsRate'].some((k) => k in changes)) return;
+  if (area !== 'local' || !['target', 'tts', 'ttsPersona', 'ttsVoice', 'ttsRate'].some((k) => k in changes)) return;
   await loadSpeech();
   if (!speech.tts) speaker.stop();
 });
