@@ -156,8 +156,9 @@ async function checkUpdate(force) {
   $('update').hidden = !available;
   if (available) {
     $('updateTitle').textContent = `Yeni sürüm çıktı: v${update.version}`;
-    $('updateZip').href = update.zip;
-    $('updateNotes').href = update.notes;
+    const safe = (url) => (typeof url === 'string' && url.startsWith('https://github.com/') ? url : 'https://github.com/canmenzo/babil/releases');
+    $('updateZip').href = safe(update.zip);
+    $('updateNotes').href = safe(update.notes);
   }
   return available;
 }
