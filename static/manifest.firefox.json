@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Babil: Live Captions and Translation",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Transcribe video audio locally and translate captions on your computer.",
   "browser_specific_settings": {
     "gecko": {
