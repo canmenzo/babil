@@ -71,12 +71,15 @@ export function voiceGender(name) {
   if (words.some((w) => MALE.has(w))) return 'male';
 }
 
-// A voice of the persona's gender if the language has one, else the usual pick. Özel keeps the
-// user's own voice and rate.
+// A voice of the persona's gender if the language has one, else the usual pick. Local voices come
+// first, even of the other gender: an online voice would send the captions off the computer. Özel
+// keeps the user's own voice and rate.
 export function resolveVoice(voices, lang, s) {
   const p = PERSONAS[s.ttsPersona] ?? PERSONAS.lale;
   if (p === PERSONAS.custom) return { voice: pickVoice(voices, lang, s.ttsVoice), rate: s.ttsRate, pitch: 1 };
-  const voice = pickVoice(voices.filter((v) => voiceGender(v.name) === p.gender), lang, '') ?? pickVoice(voices, lang, '');
+  const local = voices.filter((v) => !v.remote);
+  const gendered = (list) => list.filter((v) => voiceGender(v.name) === p.gender);
+  const voice = pickVoice(gendered(local), lang, '') ?? pickVoice(local, lang, '') ?? pickVoice(gendered(voices), lang, '') ?? pickVoice(voices, lang, '');
   return { voice, rate: p.rate, pitch: p.pitch };
 }
 
