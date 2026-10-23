@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="ui.css">
@@ -10,53 +10,46 @@
     <h1>Babil</h1>
   </header>
 
-  <div id="status" class="status">Hazır</div>
+  <div id="status" class="status"></div>
   <div id="bar" class="bar" hidden><div></div></div>
   <div id="latency" class="muted small"></div>
 
-  <button id="toggle" class="primary">Altyazıyı başlat</button>
+  <button id="toggle" class="primary"></button>
 
   <div id="pairs"></div>
 
   <div id="update" class="pair" hidden>
     <strong id="updateTitle"></strong>
-    <span class="small">Zip'i indir, mevcut Babil klasörünün üstüne çıkar, sonra aşağıdaki butona bas. Ayarlar ve indirilmiş modeller korunur.</span>
-    <a id="updateZip" class="button primary" target="_blank">Zip'i indir</a>
-    <button id="updateReload">Çıkardım, Babil'i yenile</button>
-    <a id="updateNotes" class="small" target="_blank">Neler yeni?</a>
+    <span class="small" data-i18n="update_hint"></span>
+    <a id="updateZip" class="button primary" target="_blank" data-i18n="update_zip"></a>
+    <button id="updateReload" data-i18n="update_reload"></button>
+    <a id="updateNotes" class="small" target="_blank" data-i18n="update_notes"></a>
   </div>
 
   <div class="row">
-    <label class="field">Konuşulan dil <select id="source"></select></label>
+    <label class="field"><span data-i18n="source_label"></span> <select id="source"></select></label>
     <span class="arrow">→</span>
-    <label class="field">Çeviri dili <select id="target"></select></label>
+    <label class="field"><span data-i18n="target_label"></span> <select id="target"></select></label>
   </div>
 
-  <label class="field">Model
+  <label class="field"><span data-i18n="model_label"></span>
     <select id="model"></select>
   </label>
   <p id="modelHint" class="muted small hint"></p>
 
-  <label class="check"><input type="checkbox" id="showOriginal"> Orijinal altyazıyı da göster</label>
-  <label class="check"><input type="checkbox" id="tts"> Çeviriyi sesli oku</label>
-  <label class="field" id="personaField">Ses <select id="ttsPersona"></select></label>
+  <label class="check"><input type="checkbox" id="showOriginal"> <span data-i18n="show_original_too"></span></label>
+  <label class="check"><input type="checkbox" id="tts"> <span data-i18n="tts"></span></label>
+  <label class="field" id="personaField"><span data-i18n="voice"></span> <select id="ttsPersona"></select></label>
 
-  <label class="field">Ekranda kaç cümle görünsün
-    <select id="cues">
-      <option value="1">Sadece son cümle</option>
-      <option value="2">Son 2 cümle</option>
-      <option value="3">Son 3 cümle</option>
-      <option value="4">Son 4 cümle</option>
-      <option value="5">Son 5 cümle</option>
-      <option value="6">Son 6 cümle</option>
-    </select>
+  <label class="field"><span data-i18n="cues_label"></span>
+    <select id="cues"></select>
   </label>
 
   <footer>
-    <a href="#" id="openOptions">Altyazı görünüm ayarları</a>
-    <span class="muted small">Kısayol: Alt+Shift+T</span>
+    <button type="button" id="openOptions" class="subtle" data-i18n="settings"></button>
+    <span class="shortcut muted small"><span data-i18n="shortcut"></span><kbd>Alt+Shift+T</kbd></span>
   </footer>
-  <div class="muted small version"><span id="version"></span> · <a href="#" id="checkUpdate">Güncellemeleri denetle</a></div>
+  <div class="muted small version"><span id="version"></span> · <a href="#" id="checkUpdate" data-i18n="check_update"></a></div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

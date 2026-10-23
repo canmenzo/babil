@@ -1,0 +1,359 @@
+{
+  "ext_name": {
+    "message": "Babil: subtítulos y traducción en directo"
+  },
+  "ext_description": {
+    "message": "Transcribe en tu equipo cualquier vídeo del navegador y lo traduce en directo, con subtítulos originales y traducidos a la vez."
+  },
+  "cmd_toggle": {
+    "message": "Iniciar o detener los subtítulos"
+  },
+  "offscreen_justification": {
+    "message": "Captura el audio de la pestaña para transcribirlo localmente"
+  },
+  "status_ready": {
+    "message": "Listo"
+  },
+  "start": {
+    "message": "Iniciar subtítulos"
+  },
+  "stop": {
+    "message": "Detener"
+  },
+  "latency": {
+    "message": "Tiempo de reconocimiento: $1 ms"
+  },
+  "update_hint": {
+    "message": "Descarga el zip, descomprímelo sobre tu carpeta actual de Babil y pulsa el botón de abajo. Tus ajustes y los modelos descargados se conservan."
+  },
+  "update_zip": {
+    "message": "Descargar zip"
+  },
+  "update_reload": {
+    "message": "Ya lo descomprimí, recargar Babil"
+  },
+  "update_notes": {
+    "message": "¿Qué hay de nuevo?"
+  },
+  "update_title": {
+    "message": "Nueva versión disponible: v$1"
+  },
+  "source_label": {
+    "message": "Idioma hablado"
+  },
+  "target_label": {
+    "message": "Idioma de traducción"
+  },
+  "model_label": {
+    "message": "Modelo"
+  },
+  "show_original_too": {
+    "message": "Mostrar también los subtítulos originales"
+  },
+  "tts": {
+    "message": "Leer la traducción en voz alta"
+  },
+  "voice": {
+    "message": "Voz"
+  },
+  "cues_label": {
+    "message": "Frases en pantalla"
+  },
+  "cues_last": {
+    "message": "Solo la última frase"
+  },
+  "cues_last_n": {
+    "message": "Últimas $1 frases"
+  },
+  "settings": {
+    "message": "Ajustes"
+  },
+  "shortcut": {
+    "message": "Atajo"
+  },
+  "check_update": {
+    "message": "Buscar actualizaciones"
+  },
+  "checking": {
+    "message": "Buscando..."
+  },
+  "update_available": {
+    "message": "Hay una actualización"
+  },
+  "up_to_date": {
+    "message": "Ya tienes la última versión"
+  },
+  "check_failed": {
+    "message": "No se pudo comprobar, inténtalo de nuevo"
+  },
+  "ff_translation_hint": {
+    "message": "Firefox necesita un modelo de traducción sin conexión adicional (alrededor de 1 GB). El audio del vídeo y los subtítulos no salen de este dispositivo."
+  },
+  "ff_translation_download": {
+    "message": "Descargar modelo de traducción"
+  },
+  "pair_detected": {
+    "message": "Idioma detectado: $1. Para traducirlo hace falta el modelo de traducción de Chrome."
+  },
+  "pair_download": {
+    "message": "Descargar modelo $1 → $2"
+  },
+  "downloading_pct": {
+    "message": "Descargando $1 %"
+  },
+  "error_detail": {
+    "message": "Error: $1"
+  },
+  "start_failed": {
+    "message": "No se pudo iniciar: $1"
+  },
+  "model_auto_pick": {
+    "message": "Para este equipo: $1."
+  },
+  "model_cached": {
+    "message": "Descargado, se carga desde el disco."
+  },
+  "model_download_once": {
+    "message": "Se descarga una sola vez la primera vez que lo inicias ($1)."
+  },
+  "model_speed_note": {
+    "message": "Los subtítulos van igual de rápido con todos; uno más grande se equivoca menos, pero exige más al equipo."
+  },
+  "auto_detect": {
+    "message": "Detectar automáticamente"
+  },
+  "model_auto": {
+    "message": "Automático (recomendado)"
+  },
+  "model_tiny": {
+    "message": "Precisión básica"
+  },
+  "model_base": {
+    "message": "Buena precisión"
+  },
+  "model_small": {
+    "message": "Alta precisión"
+  },
+  "model_turbo": {
+    "message": "Máxima precisión"
+  },
+  "persona_lale_name": {
+    "message": "Alba"
+  },
+  "persona_lale_desc": {
+    "message": "Clara y natural"
+  },
+  "persona_ayla_name": {
+    "message": "Carmen"
+  },
+  "persona_ayla_desc": {
+    "message": "Alegre y cálida"
+  },
+  "persona_deniz_name": {
+    "message": "Bruno"
+  },
+  "persona_deniz_desc": {
+    "message": "Tranquilo y sereno"
+  },
+  "persona_ates_name": {
+    "message": "Rodrigo"
+  },
+  "persona_ates_desc": {
+    "message": "Grave y de confianza"
+  },
+  "persona_bilge_name": {
+    "message": "Inés"
+  },
+  "persona_bilge_desc": {
+    "message": "Pausada y paciente, fácil de seguir"
+  },
+  "persona_ruzgar_name": {
+    "message": "Ariel"
+  },
+  "persona_ruzgar_desc": {
+    "message": "Ágil, a la altura de quien habla deprisa"
+  },
+  "persona_custom_name": {
+    "message": "Personalizada"
+  },
+  "persona_custom_desc": {
+    "message": "Tu propia voz y velocidad"
+  },
+  "options_title": {
+    "message": "Ajustes de Babil"
+  },
+  "options_intro": {
+    "message": "Los cambios se aplican al instante a los subtítulos del vídeo abierto. También puedes arrastrar los subtítulos hacia arriba o hacia abajo sobre el vídeo para moverlos."
+  },
+  "trans_track": {
+    "message": "Subtítulos traducidos"
+  },
+  "orig_track": {
+    "message": "Subtítulos originales"
+  },
+  "general": {
+    "message": "General"
+  },
+  "show_original": {
+    "message": "Mostrar subtítulos originales"
+  },
+  "original_first": {
+    "message": "Subtítulos originales arriba"
+  },
+  "edge": {
+    "message": "Estilo del borde"
+  },
+  "position": {
+    "message": "Posición (desde la parte inferior del vídeo, %)"
+  },
+  "instant": {
+    "message": "Traducción instantánea (traduce antes de que acabe la frase; más rápida, pero la traducción cambia constantemente)"
+  },
+  "hold": {
+    "message": "Tiempo en pantalla (s)"
+  },
+  "scale_with_video": {
+    "message": "Ajustar al tamaño del vídeo"
+  },
+  "reset": {
+    "message": "Restablecer valores predeterminados"
+  },
+  "read_aloud": {
+    "message": "Lectura en voz alta"
+  },
+  "rate": {
+    "message": "Velocidad de lectura"
+  },
+  "duck": {
+    "message": "Bajar el volumen del vídeo durante la lectura"
+  },
+  "font": {
+    "message": "Fuente"
+  },
+  "text_size": {
+    "message": "Tamaño del texto (px)"
+  },
+  "bold": {
+    "message": "Negrita"
+  },
+  "text_color": {
+    "message": "Color del texto"
+  },
+  "bg_color": {
+    "message": "Color de fondo"
+  },
+  "bg_opacity": {
+    "message": "Opacidad del fondo"
+  },
+  "voice_auto": {
+    "message": "Automática ($1)"
+  },
+  "listen": {
+    "message": "Escuchar"
+  },
+  "system_voice": {
+    "message": "Voz del sistema"
+  },
+  "percent": {
+    "message": "$1 %"
+  },
+  "font_sans": {
+    "message": "Sans (Arial)"
+  },
+  "font_system": {
+    "message": "Sistema"
+  },
+  "font_serif": {
+    "message": "Serif"
+  },
+  "font_mono": {
+    "message": "Monoespaciada"
+  },
+  "font_casual": {
+    "message": "Informal"
+  },
+  "font_condensed": {
+    "message": "Condensada"
+  },
+  "font_smallcaps": {
+    "message": "Versalitas"
+  },
+  "edge_none": {
+    "message": "Ninguno"
+  },
+  "edge_shadow": {
+    "message": "Sombra"
+  },
+  "edge_outline": {
+    "message": "Contorno"
+  },
+  "edge_raised": {
+    "message": "En relieve"
+  },
+  "edge_depressed": {
+    "message": "Hundido"
+  },
+  "status_starting": {
+    "message": "Iniciando..."
+  },
+  "status_stopped": {
+    "message": "Detenido"
+  },
+  "status_tab_closed": {
+    "message": "Pestaña cerrada"
+  },
+  "status_model_loading": {
+    "message": "Cargando modelo..."
+  },
+  "status_capture_failed": {
+    "message": "No se pudo capturar el audio: $1"
+  },
+  "status_tab_audio_ended": {
+    "message": "Se cortó el audio de la pestaña"
+  },
+  "status_lagging": {
+    "message": "Este equipo no da abasto, elige un modelo más pequeño"
+  },
+  "status_ff_translation_downloading": {
+    "message": "Descargando modelo de traducción $1 %"
+  },
+  "status_ff_translation_ready": {
+    "message": "Traducción sin conexión lista"
+  },
+  "status_ff_translation_error": {
+    "message": "Traducción sin conexión no disponible: $1"
+  },
+  "status_model_loading_pct": {
+    "message": "Cargando modelo $1 %"
+  },
+  "status_model_downloading_pct": {
+    "message": "Descargando modelo $1 %"
+  },
+  "status_running": {
+    "message": "En marcha: $1 ($2)"
+  },
+  "device_gpu": {
+    "message": "tarjeta gráfica"
+  },
+  "device_cpu": {
+    "message": "procesador, puede ir lento"
+  },
+  "status_model_failed": {
+    "message": "No se pudo cargar el modelo: $1"
+  },
+  "status_error": {
+    "message": "Error"
+  },
+  "status_no_translator": {
+    "message": "La API Translator de Chrome no está disponible (requiere Chrome 138+)"
+  },
+  "status_play_first": {
+    "message": "Reproduce un vídeo antes de iniciar los subtítulos."
+  },
+  "capture_unsupported": {
+    "message": "Esta versión de Firefox no puede capturar el contenido de esta página."
+  },
+  "capture_no_track": {
+    "message": "No hay ninguna pista de audio disponible. El DRM o un reproductor protegido pueden impedir la captura."
+  }
+}

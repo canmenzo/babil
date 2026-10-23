@@ -1,0 +1,359 @@
+{
+  "ext_name": {
+    "message": "Babil: लाइव कैप्शन और अनुवाद"
+  },
+  "ext_description": {
+    "message": "ब्राउज़र के किसी भी वीडियो को आपके कंप्यूटर पर ही टेक्स्ट में बदलता है और लाइव अनुवाद करता है। मूल और अनुवादित कैप्शन साथ-साथ।"
+  },
+  "cmd_toggle": {
+    "message": "कैप्शन शुरू या बंद करें"
+  },
+  "offscreen_justification": {
+    "message": "टैब का ऑडियो कैप्चर करके उसे लोकल रूप से टेक्स्ट में बदलने के लिए"
+  },
+  "status_ready": {
+    "message": "तैयार"
+  },
+  "start": {
+    "message": "कैप्शन शुरू करें"
+  },
+  "stop": {
+    "message": "रोकें"
+  },
+  "latency": {
+    "message": "पहचानने में लगा समय: $1 ms"
+  },
+  "update_hint": {
+    "message": "ज़िप डाउनलोड करें, उसे अपने मौजूदा Babil फ़ोल्डर के ऊपर एक्सट्रैक्ट करें, फिर नीचे दिया बटन दबाएँ। आपकी सेटिंग्स और डाउनलोड किए गए मॉडल सुरक्षित रहते हैं।"
+  },
+  "update_zip": {
+    "message": "ज़िप डाउनलोड करें"
+  },
+  "update_reload": {
+    "message": "एक्सट्रैक्ट कर लिया, Babil रीलोड करें"
+  },
+  "update_notes": {
+    "message": "नया क्या है?"
+  },
+  "update_title": {
+    "message": "नया वर्शन उपलब्ध है: v$1"
+  },
+  "source_label": {
+    "message": "वीडियो की भाषा"
+  },
+  "target_label": {
+    "message": "अनुवाद की भाषा"
+  },
+  "model_label": {
+    "message": "मॉडल"
+  },
+  "show_original_too": {
+    "message": "मूल कैप्शन भी दिखाएँ"
+  },
+  "tts": {
+    "message": "अनुवाद पढ़कर सुनाएँ"
+  },
+  "voice": {
+    "message": "आवाज़"
+  },
+  "cues_label": {
+    "message": "स्क्रीन पर कितने वाक्य दिखें"
+  },
+  "cues_last": {
+    "message": "सिर्फ़ आख़िरी वाक्य"
+  },
+  "cues_last_n": {
+    "message": "आख़िरी $1 वाक्य"
+  },
+  "settings": {
+    "message": "सेटिंग्स"
+  },
+  "shortcut": {
+    "message": "शॉर्टकट"
+  },
+  "check_update": {
+    "message": "अपडेट देखें"
+  },
+  "checking": {
+    "message": "देख रहे हैं..."
+  },
+  "update_available": {
+    "message": "अपडेट उपलब्ध है"
+  },
+  "up_to_date": {
+    "message": "आप नए वर्शन पर हैं"
+  },
+  "check_failed": {
+    "message": "जाँच नहीं हो सकी, फिर से कोशिश करें"
+  },
+  "ff_translation_hint": {
+    "message": "Firefox के लिए एक अतिरिक्त ऑफ़लाइन अनुवाद मॉडल चाहिए (लगभग 1 GB)। वीडियो का ऑडियो और कैप्शन इसी डिवाइस पर रहते हैं।"
+  },
+  "ff_translation_download": {
+    "message": "अनुवाद मॉडल डाउनलोड करें"
+  },
+  "pair_detected": {
+    "message": "पहचानी गई भाषा: $1। अनुवाद के लिए Chrome का अनुवाद मॉडल चाहिए।"
+  },
+  "pair_download": {
+    "message": "$1 → $2 मॉडल डाउनलोड करें"
+  },
+  "downloading_pct": {
+    "message": "डाउनलोड हो रहा है $1%"
+  },
+  "error_detail": {
+    "message": "त्रुटि: $1"
+  },
+  "start_failed": {
+    "message": "शुरू नहीं हो सका: $1"
+  },
+  "model_auto_pick": {
+    "message": "इस कंप्यूटर के लिए: $1।"
+  },
+  "model_cached": {
+    "message": "डाउनलोड हो चुका है, डिस्क से खुलेगा।"
+  },
+  "model_download_once": {
+    "message": "पहली बार शुरू करने पर एक ही बार डाउनलोड होगा ($1)।"
+  },
+  "model_speed_note": {
+    "message": "कैप्शन की रफ़्तार सभी में एक जैसी है; बड़ा मॉडल कम गलतियाँ करता है, पर कंप्यूटर पर ज़्यादा ज़ोर डालता है।"
+  },
+  "auto_detect": {
+    "message": "अपने-आप पहचानें"
+  },
+  "model_auto": {
+    "message": "ऑटोमैटिक (सुझाया गया)"
+  },
+  "model_tiny": {
+    "message": "सामान्य सटीकता"
+  },
+  "model_base": {
+    "message": "अच्छी सटीकता"
+  },
+  "model_small": {
+    "message": "ऊँची सटीकता"
+  },
+  "model_turbo": {
+    "message": "सबसे ऊँची सटीकता"
+  },
+  "persona_lale_name": {
+    "message": "जूही"
+  },
+  "persona_lale_desc": {
+    "message": "साफ़ और सहज"
+  },
+  "persona_ayla_name": {
+    "message": "मुस्कान"
+  },
+  "persona_ayla_desc": {
+    "message": "खुशमिज़ाज और आत्मीय"
+  },
+  "persona_deniz_name": {
+    "message": "सागर"
+  },
+  "persona_deniz_desc": {
+    "message": "शांत और संतुलित"
+  },
+  "persona_ates_name": {
+    "message": "विक्रम"
+  },
+  "persona_ates_desc": {
+    "message": "गहरी और भरोसेमंद"
+  },
+  "persona_bilge_name": {
+    "message": "मेधा"
+  },
+  "persona_bilge_desc": {
+    "message": "धीमी और धैर्य भरी, समझने में आसान"
+  },
+  "persona_ruzgar_name": {
+    "message": "किरण"
+  },
+  "persona_ruzgar_desc": {
+    "message": "तेज़ रफ़्तार, जल्दी बोलने वालों के साथ-साथ"
+  },
+  "persona_custom_name": {
+    "message": "कस्टम"
+  },
+  "persona_custom_desc": {
+    "message": "आपकी अपनी आवाज़ और रफ़्तार"
+  },
+  "options_title": {
+    "message": "Babil सेटिंग्स"
+  },
+  "options_intro": {
+    "message": "बदलाव खुले वीडियो के कैप्शन पर तुरंत लागू होते हैं। कैप्शन को वीडियो पर ऊपर-नीचे खींचकर भी उनकी जगह बदली जा सकती है।"
+  },
+  "trans_track": {
+    "message": "अनुवादित कैप्शन"
+  },
+  "orig_track": {
+    "message": "मूल भाषा के कैप्शन"
+  },
+  "general": {
+    "message": "सामान्य"
+  },
+  "show_original": {
+    "message": "मूल कैप्शन दिखाएँ"
+  },
+  "original_first": {
+    "message": "मूल कैप्शन ऊपर दिखाएँ"
+  },
+  "edge": {
+    "message": "किनारे की शैली"
+  },
+  "position": {
+    "message": "जगह (वीडियो के नीचे से, %)"
+  },
+  "instant": {
+    "message": "तुरंत अनुवाद (वाक्य पूरा होने से पहले ही अनुवाद; तेज़, पर अनुवाद बार-बार बदलता रहता है)"
+  },
+  "hold": {
+    "message": "स्क्रीन पर रहने का समय (सेकंड)"
+  },
+  "scale_with_video": {
+    "message": "वीडियो के आकार के साथ छोटा-बड़ा करें"
+  },
+  "reset": {
+    "message": "डिफ़ॉल्ट पर वापस जाएँ"
+  },
+  "read_aloud": {
+    "message": "पढ़कर सुनाना"
+  },
+  "rate": {
+    "message": "पढ़ने की रफ़्तार"
+  },
+  "duck": {
+    "message": "पढ़ते समय वीडियो की आवाज़ कम करें"
+  },
+  "font": {
+    "message": "फ़ॉन्ट"
+  },
+  "text_size": {
+    "message": "टेक्स्ट का आकार (px)"
+  },
+  "bold": {
+    "message": "बोल्ड"
+  },
+  "text_color": {
+    "message": "टेक्स्ट का रंग"
+  },
+  "bg_color": {
+    "message": "बैकग्राउंड का रंग"
+  },
+  "bg_opacity": {
+    "message": "बैकग्राउंड की अपारदर्शिता"
+  },
+  "voice_auto": {
+    "message": "ऑटोमैटिक ($1)"
+  },
+  "listen": {
+    "message": "सुनें"
+  },
+  "system_voice": {
+    "message": "सिस्टम की आवाज़"
+  },
+  "percent": {
+    "message": "$1%"
+  },
+  "font_sans": {
+    "message": "सैन्स (Arial)"
+  },
+  "font_system": {
+    "message": "सिस्टम"
+  },
+  "font_serif": {
+    "message": "सेरिफ़"
+  },
+  "font_mono": {
+    "message": "मोनोस्पेस"
+  },
+  "font_casual": {
+    "message": "कैज़ुअल"
+  },
+  "font_condensed": {
+    "message": "कंडेंस्ड"
+  },
+  "font_smallcaps": {
+    "message": "स्मॉल कैप्स"
+  },
+  "edge_none": {
+    "message": "कोई नहीं"
+  },
+  "edge_shadow": {
+    "message": "छाया"
+  },
+  "edge_outline": {
+    "message": "आउटलाइन"
+  },
+  "edge_raised": {
+    "message": "उभरा हुआ"
+  },
+  "edge_depressed": {
+    "message": "धँसा हुआ"
+  },
+  "status_starting": {
+    "message": "शुरू हो रहा है..."
+  },
+  "status_stopped": {
+    "message": "रोक दिया गया"
+  },
+  "status_tab_closed": {
+    "message": "टैब बंद हो गया"
+  },
+  "status_model_loading": {
+    "message": "मॉडल लोड हो रहा है..."
+  },
+  "status_capture_failed": {
+    "message": "ऑडियो कैप्चर नहीं हो सका: $1"
+  },
+  "status_tab_audio_ended": {
+    "message": "टैब का ऑडियो बंद हो गया"
+  },
+  "status_lagging": {
+    "message": "यह डिवाइस साथ नहीं दे पा रहा, छोटा मॉडल चुनें"
+  },
+  "status_ff_translation_downloading": {
+    "message": "अनुवाद मॉडल डाउनलोड हो रहा है $1%"
+  },
+  "status_ff_translation_ready": {
+    "message": "ऑफ़लाइन अनुवाद तैयार है"
+  },
+  "status_ff_translation_error": {
+    "message": "ऑफ़लाइन अनुवाद उपलब्ध नहीं: $1"
+  },
+  "status_model_loading_pct": {
+    "message": "मॉडल लोड हो रहा है $1%"
+  },
+  "status_model_downloading_pct": {
+    "message": "मॉडल डाउनलोड हो रहा है $1%"
+  },
+  "status_running": {
+    "message": "चल रहा है: $1 ($2)"
+  },
+  "device_gpu": {
+    "message": "ग्राफ़िक्स कार्ड"
+  },
+  "device_cpu": {
+    "message": "प्रोसेसर, धीमा हो सकता है"
+  },
+  "status_model_failed": {
+    "message": "मॉडल लोड नहीं हो सका: $1"
+  },
+  "status_error": {
+    "message": "त्रुटि"
+  },
+  "status_no_translator": {
+    "message": "Chrome Translator API उपलब्ध नहीं है (Chrome 138+ ज़रूरी)"
+  },
+  "status_play_first": {
+    "message": "कैप्शन शुरू करने से पहले कोई वीडियो चलाएँ।"
+  },
+  "capture_unsupported": {
+    "message": "Firefox का यह वर्शन इस पेज से मीडिया कैप्चर नहीं कर सकता।"
+  },
+  "capture_no_track": {
+    "message": "कोई ऑडियो ट्रैक उपलब्ध नहीं है। DRM या सुरक्षित प्लेयर कैप्चर रोक सकता है।"
+  }
+}

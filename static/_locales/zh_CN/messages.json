@@ -1,0 +1,359 @@
+{
+  "ext_name": {
+    "message": "Babil：实时字幕与翻译"
+  },
+  "ext_description": {
+    "message": "在你的电脑上本地转写浏览器中任意视频的语音并实时翻译，原文与译文字幕同时显示。"
+  },
+  "cmd_toggle": {
+    "message": "开始或停止字幕"
+  },
+  "offscreen_justification": {
+    "message": "捕获标签页音频并在本地转写"
+  },
+  "status_ready": {
+    "message": "就绪"
+  },
+  "start": {
+    "message": "开始字幕"
+  },
+  "stop": {
+    "message": "停止"
+  },
+  "latency": {
+    "message": "识别耗时：$1 毫秒"
+  },
+  "update_hint": {
+    "message": "下载 zip，解压并覆盖现有的 Babil 文件夹，然后点击下方按钮。你的设置和已下载的模型都会保留。"
+  },
+  "update_zip": {
+    "message": "下载 zip"
+  },
+  "update_reload": {
+    "message": "已解压，重新加载 Babil"
+  },
+  "update_notes": {
+    "message": "更新内容"
+  },
+  "update_title": {
+    "message": "新版本可用：v$1"
+  },
+  "source_label": {
+    "message": "原声语言"
+  },
+  "target_label": {
+    "message": "翻译成"
+  },
+  "model_label": {
+    "message": "模型"
+  },
+  "show_original_too": {
+    "message": "同时显示原文字幕"
+  },
+  "tts": {
+    "message": "朗读译文"
+  },
+  "voice": {
+    "message": "声音"
+  },
+  "cues_label": {
+    "message": "屏幕上显示的句数"
+  },
+  "cues_last": {
+    "message": "仅最后一句"
+  },
+  "cues_last_n": {
+    "message": "最近 $1 句"
+  },
+  "settings": {
+    "message": "设置"
+  },
+  "shortcut": {
+    "message": "快捷键"
+  },
+  "check_update": {
+    "message": "检查更新"
+  },
+  "checking": {
+    "message": "正在检查..."
+  },
+  "update_available": {
+    "message": "有可用更新"
+  },
+  "up_to_date": {
+    "message": "已是最新版本"
+  },
+  "check_failed": {
+    "message": "检查失败，请重试"
+  },
+  "ff_translation_hint": {
+    "message": "Firefox 需要额外下载一个离线翻译模型（约 1 GB）。视频音频和字幕都只保留在本设备上。"
+  },
+  "ff_translation_download": {
+    "message": "下载翻译模型"
+  },
+  "pair_detected": {
+    "message": "检测到$1语音。翻译需要 Chrome 的翻译模型。"
+  },
+  "pair_download": {
+    "message": "下载 $1 → $2 模型"
+  },
+  "downloading_pct": {
+    "message": "正在下载 $1%"
+  },
+  "error_detail": {
+    "message": "错误：$1"
+  },
+  "start_failed": {
+    "message": "无法启动：$1"
+  },
+  "model_auto_pick": {
+    "message": "适合这台电脑：$1。"
+  },
+  "model_cached": {
+    "message": "已下载，将从磁盘加载。"
+  },
+  "model_download_once": {
+    "message": "首次启动时下载一次（$1）。"
+  },
+  "model_speed_note": {
+    "message": "各模型的字幕速度相同；模型越大错误越少，但对电脑的负担也越重。"
+  },
+  "auto_detect": {
+    "message": "自动检测"
+  },
+  "model_auto": {
+    "message": "自动（推荐）"
+  },
+  "model_tiny": {
+    "message": "基础准确度"
+  },
+  "model_base": {
+    "message": "良好准确度"
+  },
+  "model_small": {
+    "message": "高准确度"
+  },
+  "model_turbo": {
+    "message": "最高准确度"
+  },
+  "persona_lale_name": {
+    "message": "若兰"
+  },
+  "persona_lale_desc": {
+    "message": "清晰自然"
+  },
+  "persona_ayla_name": {
+    "message": "暖暖"
+  },
+  "persona_ayla_desc": {
+    "message": "开朗温暖"
+  },
+  "persona_deniz_name": {
+    "message": "海川"
+  },
+  "persona_deniz_desc": {
+    "message": "沉稳平和"
+  },
+  "persona_ates_name": {
+    "message": "浩然"
+  },
+  "persona_ates_desc": {
+    "message": "浑厚可靠"
+  },
+  "persona_bilge_name": {
+    "message": "静怡"
+  },
+  "persona_bilge_desc": {
+    "message": "舒缓耐心，易于跟上"
+  },
+  "persona_ruzgar_name": {
+    "message": "飞扬"
+  },
+  "persona_ruzgar_desc": {
+    "message": "语速快，跟得上快节奏的讲话"
+  },
+  "persona_custom_name": {
+    "message": "自定义"
+  },
+  "persona_custom_desc": {
+    "message": "使用你自己的声音和语速"
+  },
+  "options_title": {
+    "message": "Babil 设置"
+  },
+  "options_intro": {
+    "message": "更改会立即应用到当前视频的字幕上。你也可以在视频上上下拖动字幕来调整位置。"
+  },
+  "trans_track": {
+    "message": "译文字幕"
+  },
+  "orig_track": {
+    "message": "原文字幕"
+  },
+  "general": {
+    "message": "常规"
+  },
+  "show_original": {
+    "message": "显示原文字幕"
+  },
+  "original_first": {
+    "message": "原文字幕显示在上方"
+  },
+  "edge": {
+    "message": "边缘样式"
+  },
+  "position": {
+    "message": "位置（距视频底部，%）"
+  },
+  "instant": {
+    "message": "即时翻译（句子说完前就开始翻译；更快，但译文会不断变化）"
+  },
+  "hold": {
+    "message": "停留时间（秒）"
+  },
+  "scale_with_video": {
+    "message": "随视频尺寸缩放"
+  },
+  "reset": {
+    "message": "恢复默认设置"
+  },
+  "read_aloud": {
+    "message": "朗读"
+  },
+  "rate": {
+    "message": "语速"
+  },
+  "duck": {
+    "message": "朗读时降低视频音量"
+  },
+  "font": {
+    "message": "字体"
+  },
+  "text_size": {
+    "message": "字号（px）"
+  },
+  "bold": {
+    "message": "粗体"
+  },
+  "text_color": {
+    "message": "文字颜色"
+  },
+  "bg_color": {
+    "message": "背景颜色"
+  },
+  "bg_opacity": {
+    "message": "背景不透明度"
+  },
+  "voice_auto": {
+    "message": "自动（$1）"
+  },
+  "listen": {
+    "message": "试听"
+  },
+  "system_voice": {
+    "message": "系统语音"
+  },
+  "percent": {
+    "message": "$1%"
+  },
+  "font_sans": {
+    "message": "无衬线（Arial）"
+  },
+  "font_system": {
+    "message": "系统"
+  },
+  "font_serif": {
+    "message": "衬线"
+  },
+  "font_mono": {
+    "message": "等宽"
+  },
+  "font_casual": {
+    "message": "休闲"
+  },
+  "font_condensed": {
+    "message": "窄体"
+  },
+  "font_smallcaps": {
+    "message": "小型大写"
+  },
+  "edge_none": {
+    "message": "无"
+  },
+  "edge_shadow": {
+    "message": "阴影"
+  },
+  "edge_outline": {
+    "message": "描边"
+  },
+  "edge_raised": {
+    "message": "凸起"
+  },
+  "edge_depressed": {
+    "message": "凹陷"
+  },
+  "status_starting": {
+    "message": "正在启动..."
+  },
+  "status_stopped": {
+    "message": "已停止"
+  },
+  "status_tab_closed": {
+    "message": "标签页已关闭"
+  },
+  "status_model_loading": {
+    "message": "正在加载模型..."
+  },
+  "status_capture_failed": {
+    "message": "无法捕获音频：$1"
+  },
+  "status_tab_audio_ended": {
+    "message": "标签页音频已中断"
+  },
+  "status_lagging": {
+    "message": "设备跟不上，请选择更小的模型"
+  },
+  "status_ff_translation_downloading": {
+    "message": "正在下载翻译模型 $1%"
+  },
+  "status_ff_translation_ready": {
+    "message": "离线翻译已就绪"
+  },
+  "status_ff_translation_error": {
+    "message": "离线翻译不可用：$1"
+  },
+  "status_model_loading_pct": {
+    "message": "正在加载模型 $1%"
+  },
+  "status_model_downloading_pct": {
+    "message": "正在下载模型 $1%"
+  },
+  "status_running": {
+    "message": "运行中：$1（$2）"
+  },
+  "device_gpu": {
+    "message": "显卡"
+  },
+  "device_cpu": {
+    "message": "处理器，可能较慢"
+  },
+  "status_model_failed": {
+    "message": "模型加载失败：$1"
+  },
+  "status_error": {
+    "message": "错误"
+  },
+  "status_no_translator": {
+    "message": "Chrome Translator API 不可用（需要 Chrome 138+）"
+  },
+  "status_play_first": {
+    "message": "请先播放视频，再开始字幕。"
+  },
+  "capture_unsupported": {
+    "message": "此版本的 Firefox 无法捕获该页面的媒体。"
+  },
+  "capture_no_track": {
+    "message": "没有可用的音轨。DRM 或受保护的播放器可能会阻止捕获。"
+  }
+}

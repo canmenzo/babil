@@ -1,0 +1,359 @@
+{
+  "ext_name": {
+    "message": "Babil: Canlı Altyazı ve Çeviri"
+  },
+  "ext_description": {
+    "message": "Tarayıcıdaki herhangi bir videonun sesini lokal olarak yazıya döker ve canlı çevirir. Orijinal ve çeviri altyazı aynı anda."
+  },
+  "cmd_toggle": {
+    "message": "Altyazıyı başlat / durdur"
+  },
+  "offscreen_justification": {
+    "message": "Sekme sesini yakalayıp lokal olarak yazıya dökmek için"
+  },
+  "status_ready": {
+    "message": "Hazır"
+  },
+  "start": {
+    "message": "Altyazıyı başlat"
+  },
+  "stop": {
+    "message": "Durdur"
+  },
+  "latency": {
+    "message": "Tanıma süresi: $1 ms"
+  },
+  "update_hint": {
+    "message": "Zip'i indir, mevcut Babil klasörünün üstüne çıkar, sonra aşağıdaki butona bas. Ayarlar ve indirilmiş modeller korunur."
+  },
+  "update_zip": {
+    "message": "Zip'i indir"
+  },
+  "update_reload": {
+    "message": "Çıkardım, Babil'i yenile"
+  },
+  "update_notes": {
+    "message": "Neler yeni?"
+  },
+  "update_title": {
+    "message": "Yeni sürüm çıktı: v$1"
+  },
+  "source_label": {
+    "message": "Konuşulan dil"
+  },
+  "target_label": {
+    "message": "Çeviri dili"
+  },
+  "model_label": {
+    "message": "Model"
+  },
+  "show_original_too": {
+    "message": "Orijinal altyazıyı da göster"
+  },
+  "tts": {
+    "message": "Çeviriyi sesli oku"
+  },
+  "voice": {
+    "message": "Ses"
+  },
+  "cues_label": {
+    "message": "Ekranda kaç cümle görünsün"
+  },
+  "cues_last": {
+    "message": "Sadece son cümle"
+  },
+  "cues_last_n": {
+    "message": "Son $1 cümle"
+  },
+  "settings": {
+    "message": "Ayarlar"
+  },
+  "shortcut": {
+    "message": "Kısayol"
+  },
+  "check_update": {
+    "message": "Güncellemeleri denetle"
+  },
+  "checking": {
+    "message": "Denetleniyor..."
+  },
+  "update_available": {
+    "message": "Güncelleme var"
+  },
+  "up_to_date": {
+    "message": "Güncelsin"
+  },
+  "check_failed": {
+    "message": "Denetlenemedi, tekrar dene"
+  },
+  "ff_translation_hint": {
+    "message": "Firefox için ek bir çevrimdışı çeviri modeli gerekiyor (yaklaşık 1 GB). Video sesi ve altyazılar bu cihazda kalır."
+  },
+  "ff_translation_download": {
+    "message": "Çeviri modelini indir"
+  },
+  "pair_detected": {
+    "message": "$1 konuşma algılandı. Çeviri için Chrome'un çeviri modeli gerekiyor."
+  },
+  "pair_download": {
+    "message": "$1 → $2 modelini indir"
+  },
+  "downloading_pct": {
+    "message": "İndiriliyor %$1"
+  },
+  "error_detail": {
+    "message": "Hata: $1"
+  },
+  "start_failed": {
+    "message": "Başlatılamadı: $1"
+  },
+  "model_auto_pick": {
+    "message": "Bu bilgisayar için: $1."
+  },
+  "model_cached": {
+    "message": "İndirildi, diskten açılır."
+  },
+  "model_download_once": {
+    "message": "İlk başlatmada bir kez indirilir ($1)."
+  },
+  "model_speed_note": {
+    "message": "Altyazı hızı hepsinde aynı; büyük model daha az hata yapar ama bilgisayarı daha çok yorar."
+  },
+  "auto_detect": {
+    "message": "Otomatik algıla"
+  },
+  "model_auto": {
+    "message": "Otomatik (önerilen)"
+  },
+  "model_tiny": {
+    "message": "Temel doğruluk"
+  },
+  "model_base": {
+    "message": "İyi doğruluk"
+  },
+  "model_small": {
+    "message": "Yüksek doğruluk"
+  },
+  "model_turbo": {
+    "message": "En yüksek doğruluk"
+  },
+  "persona_lale_name": {
+    "message": "Lale"
+  },
+  "persona_lale_desc": {
+    "message": "Net ve doğal"
+  },
+  "persona_ayla_name": {
+    "message": "Ayla"
+  },
+  "persona_ayla_desc": {
+    "message": "Neşeli ve sıcak"
+  },
+  "persona_deniz_name": {
+    "message": "Deniz"
+  },
+  "persona_deniz_desc": {
+    "message": "Sakin ve dengeli"
+  },
+  "persona_ates_name": {
+    "message": "Ateş"
+  },
+  "persona_ates_desc": {
+    "message": "Tok ve güven veren"
+  },
+  "persona_bilge_name": {
+    "message": "Bilge"
+  },
+  "persona_bilge_desc": {
+    "message": "Yavaş ve sabırlı, takibi kolay"
+  },
+  "persona_ruzgar_name": {
+    "message": "Rüzgar"
+  },
+  "persona_ruzgar_desc": {
+    "message": "Hızlı, çabuk konuşanlara yetişir"
+  },
+  "persona_custom_name": {
+    "message": "Özel"
+  },
+  "persona_custom_desc": {
+    "message": "Kendi sesin ve hızın"
+  },
+  "options_title": {
+    "message": "Babil Ayarları"
+  },
+  "options_intro": {
+    "message": "Değişiklikler açık videodaki altyazıya anında uygulanır. Altyazıyı videonun üstünde yukarı aşağı sürükleyerek de taşıyabilirsiniz."
+  },
+  "trans_track": {
+    "message": "Çeviri altyazısı"
+  },
+  "orig_track": {
+    "message": "Orijinal dil altyazısı"
+  },
+  "general": {
+    "message": "Genel"
+  },
+  "show_original": {
+    "message": "Orijinal altyazıyı göster"
+  },
+  "original_first": {
+    "message": "Orijinal altyazı üstte olsun"
+  },
+  "edge": {
+    "message": "Kenar stili"
+  },
+  "position": {
+    "message": "Konum (videonun altından, %)"
+  },
+  "instant": {
+    "message": "Anlık çeviri (cümle bitmeden çevir; daha hızlı ama çeviri sürekli değişir)"
+  },
+  "hold": {
+    "message": "Ekranda kalma süresi (sn)"
+  },
+  "scale_with_video": {
+    "message": "Boyutu video boyutuna göre ölçekle"
+  },
+  "reset": {
+    "message": "Varsayılanlara dön"
+  },
+  "read_aloud": {
+    "message": "Sesli okuma"
+  },
+  "rate": {
+    "message": "Okuma hızı"
+  },
+  "duck": {
+    "message": "Okurken video sesini kıs"
+  },
+  "font": {
+    "message": "Font"
+  },
+  "text_size": {
+    "message": "Yazı boyutu (px)"
+  },
+  "bold": {
+    "message": "Kalın"
+  },
+  "text_color": {
+    "message": "Yazı rengi"
+  },
+  "bg_color": {
+    "message": "Arka plan rengi"
+  },
+  "bg_opacity": {
+    "message": "Arka plan opaklığı"
+  },
+  "voice_auto": {
+    "message": "Otomatik ($1)"
+  },
+  "listen": {
+    "message": "Dinle"
+  },
+  "system_voice": {
+    "message": "Sistem sesi"
+  },
+  "percent": {
+    "message": "%$1"
+  },
+  "font_sans": {
+    "message": "Sans (Arial)"
+  },
+  "font_system": {
+    "message": "Sistem"
+  },
+  "font_serif": {
+    "message": "Serif"
+  },
+  "font_mono": {
+    "message": "Eş aralıklı"
+  },
+  "font_casual": {
+    "message": "Gündelik"
+  },
+  "font_condensed": {
+    "message": "Dar"
+  },
+  "font_smallcaps": {
+    "message": "Küçük büyük harf"
+  },
+  "edge_none": {
+    "message": "Yok"
+  },
+  "edge_shadow": {
+    "message": "Gölge"
+  },
+  "edge_outline": {
+    "message": "Kontur"
+  },
+  "edge_raised": {
+    "message": "Kabartma"
+  },
+  "edge_depressed": {
+    "message": "Gömme"
+  },
+  "status_starting": {
+    "message": "Başlatılıyor..."
+  },
+  "status_stopped": {
+    "message": "Durduruldu"
+  },
+  "status_tab_closed": {
+    "message": "Sekme kapatıldı"
+  },
+  "status_model_loading": {
+    "message": "Model yükleniyor..."
+  },
+  "status_capture_failed": {
+    "message": "Ses yakalanamadı: $1"
+  },
+  "status_tab_audio_ended": {
+    "message": "Sekme sesi kesildi"
+  },
+  "status_lagging": {
+    "message": "Cihaz yetişemiyor, daha küçük model seçin"
+  },
+  "status_ff_translation_downloading": {
+    "message": "Çeviri modeli indiriliyor %$1"
+  },
+  "status_ff_translation_ready": {
+    "message": "Çevrimdışı çeviri hazır"
+  },
+  "status_ff_translation_error": {
+    "message": "Çevrimdışı çeviri kullanılamıyor: $1"
+  },
+  "status_model_loading_pct": {
+    "message": "Model yükleniyor %$1"
+  },
+  "status_model_downloading_pct": {
+    "message": "Model indiriliyor %$1"
+  },
+  "status_running": {
+    "message": "Çalışıyor: $1 ($2)"
+  },
+  "device_gpu": {
+    "message": "ekran kartı"
+  },
+  "device_cpu": {
+    "message": "işlemci, yavaş olabilir"
+  },
+  "status_model_failed": {
+    "message": "Model yüklenemedi: $1"
+  },
+  "status_error": {
+    "message": "Hata"
+  },
+  "status_no_translator": {
+    "message": "Chrome Translator API yok (Chrome 138+ gerekli)"
+  },
+  "status_play_first": {
+    "message": "Altyazıyı başlatmadan önce bir video oynatın."
+  },
+  "capture_unsupported": {
+    "message": "Bu Firefox sürümü bu sayfadaki medyayı yakalayamıyor."
+  },
+  "capture_no_track": {
+    "message": "Ses kanalı bulunamadı. DRM veya korumalı bir oynatıcı yakalamayı engelleyebilir."
+  }
+}

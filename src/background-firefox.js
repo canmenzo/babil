@@ -1,4 +1,4 @@
-import { loadSettings } from './settings.js';
+import { loadSettings, i18n } from './settings.js';
 import { createSpeaker, resolveVoice, listVoices } from './speech.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
@@ -48,12 +48,12 @@ async function start(tabId) {
   const { firefoxTranslationEnabled = false } = await browser.storage.local.get('firefoxTranslationEnabled');
   await inject(tabId, 'content.js');
   await inject(tabId, 'capture-firefox.js');
-  await save({ running: true, tabId, target, status: { state: 'loading', text: 'Starting…' }, asrMs: null, needPairs: [] });
+  await save({ running: true, tabId, target, status: { state: 'loading', text: i18n('status_starting') }, asrMs: null, needPairs: [] });
   await sendToEngine({ type: 'start-frames', settings: { model, source, target, instant, translationEnabled: firefoxTranslationEnabled } });
   await browser.tabs.sendMessage(tabId, { type: 'capture-start' });
 }
 
-async function stop(text = 'Stopped') {
+async function stop(text = i18n('status_stopped')) {
   await restored;
   speaker.stop();
   if (state.tabId != null) browser.tabs.sendMessage(state.tabId, { type: 'capture-stop' }).catch(() => {});
@@ -79,14 +79,16 @@ async function handleBgMessage(msg) {
       await speechLoaded;
       if (speech.tts) speaker.caption(msg, speech.target);
       break;
-    case 'status':
+    case 'status': {
+      const text = i18n(msg.text);
       if (msg.state === 'stopped' || msg.state === 'error') {
-        await stop(msg.text);
+        await stop(text);
         break;
       }
-      await save({ status: { state: msg.state, text: msg.text, progress: msg.progress } });
-      browser.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text: msg.text }).catch(() => {});
+      await save({ status: { state: msg.state, text, progress: msg.progress } });
+      browser.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text }).catch(() => {});
       break;
+    }
     case 'stats':
       await save({ asrMs: msg.asrMs });
       break;
@@ -124,7 +126,7 @@ browser.commands.onCommand.addListener(async (command, tab) => {
 
 browser.tabs.onRemoved.addListener(async (tabId) => {
   await restored;
-  if (state.running && tabId === state.tabId) stop('Tab closed');
+  if (state.running && tabId === state.tabId) stop(i18n('status_tab_closed'));
 });
 
 browser.tabs.onUpdated.addListener(async (tabId, info) => {

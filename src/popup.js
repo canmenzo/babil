@@ -1,7 +1,8 @@
-import { loadSettings, langName, isCached, MODELS, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
+import { loadSettings, langName, isCached, i18n, localize, MODELS, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
 import { PERSONAS } from './speech.js';
 
 const $ = (id) => document.getElementById(id);
+localize();
 let state = {};
 const firefox = FIREFOX_BUILD;
 let translationEnabled = false;
@@ -12,13 +13,13 @@ function bg(msg) {
 
 function render() {
   const st = state.status;
-  $('status').textContent = st?.text ?? 'Hazır';
+  $('status').textContent = st?.text ?? i18n('status_ready');
   $('status').className = `status ${st?.state ?? ''}`;
   const showBar = st?.state === 'loading' && st.progress != null;
   $('bar').hidden = !showBar;
   if (showBar) $('bar').firstElementChild.style.width = `${st.progress}%`;
-  $('latency').textContent = state.running && state.asrMs ? `Tanıma süresi: ${state.asrMs} ms` : '';
-  $('toggle').textContent = state.running ? 'Durdur' : 'Altyazıyı başlat';
+  $('latency').textContent = state.running && state.asrMs ? i18n('latency', state.asrMs) : '';
+  $('toggle').textContent = i18n(state.running ? 'stop' : 'start');
   $('toggle').classList.toggle('stop', !!state.running);
 
   $('pairs').replaceChildren(
@@ -27,9 +28,9 @@ function render() {
       div.className = 'pair';
       const text = document.createElement('span');
       text.className = 'small';
-      text.textContent = 'Firefox needs an additional offline translation model (about 1 GB). Video audio and captions stay on this device.';
+      text.textContent = i18n('ff_translation_hint');
       const button = document.createElement('button');
-      button.textContent = 'Download translation model';
+      button.textContent = i18n('ff_translation_download');
       button.onclick = async () => {
         translationEnabled = true;
         render();
@@ -42,8 +43,8 @@ function render() {
       const div = document.createElement('div');
       div.className = 'pair';
       div.innerHTML = `<span class="small"></span><button></button>`;
-      div.firstChild.textContent = `${langName(src)} konuşma algılandı. Çeviri için Chrome'un çeviri modeli gerekiyor.`;
-      div.lastChild.textContent = `${langName(src)} → ${langName(state.target)} modelini indir`;
+      div.firstChild.textContent = i18n('pair_detected', langName(src));
+      div.lastChild.textContent = i18n('pair_download', langName(src), langName(state.target));
       div.lastChild.onclick = () => ensurePair(src, state.target, div.lastChild);
       return div;
     }),
@@ -61,14 +62,14 @@ async function ensurePair(src, target, button) {
       targetLanguage: target,
       monitor(m) {
         m.addEventListener('downloadprogress', (e) => {
-          if (button) button.textContent = `İndiriliyor %${Math.round(e.loaded * 100)}`;
+          if (button) button.textContent = i18n('downloading_pct', Math.round(e.loaded * 100));
         });
       },
     });
     t.destroy();
     bg({ type: 'pair-ready', source: src });
   } catch (e) {
-    if (button) button.textContent = `Hata: ${e.message}`;
+    if (button) button.textContent = i18n('error_detail', e.message);
   }
 }
 
@@ -91,7 +92,7 @@ $('toggle').onclick = async () => {
       await bg({ type: 'start', tabId: tab.id, streamId });
     }
   } catch (e) {
-    $('status').textContent = `Başlatılamadı: ${e.message}`;
+    $('status').textContent = i18n('start_failed', e.message);
     $('status').className = 'status error';
   }
 };
@@ -115,9 +116,9 @@ const autoModel = navigator.gpu?.requestAdapter().then((a) => (a ? 'small' : 'ba
 async function modelHint() {
   const choice = $('model').value;
   const model = choice === 'auto' ? await autoModel : choice;
-  const which = choice === 'auto' ? `Bu bilgisayar için: ${MODELS[model].name}. ` : '';
-  const disk = (await isCached(model)) ? 'İndirildi, diskten açılır.' : `İlk başlatmada bir kez indirilir (${MODELS[model].size}).`;
-  $('modelHint').textContent = `${which}${disk} Altyazı hızı hepsinde aynı; büyük model daha az hata yapar ama bilgisayarı daha çok yorar.`;
+  const which = choice === 'auto' ? i18n('model_auto_pick', i18n(`model_${model}`)) : '';
+  const disk = (await isCached(model)) ? i18n('model_cached') : i18n('model_download_once', MODELS[model].size);
+  $('modelHint').textContent = [which, disk, i18n('model_speed_note')].filter(Boolean).join(' ');
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
 $('tts').onchange = () => {
@@ -161,7 +162,7 @@ async function checkUpdate(force) {
   const available = newer(update.version, version);
   $('update').hidden = !available;
   if (available) {
-    $('updateTitle').textContent = `Yeni sürüm çıktı: v${update.version}`;
+    $('updateTitle').textContent = i18n('update_title', update.version);
     const safe = (url) => (typeof url === 'string' && url.startsWith('https://github.com/') ? url : 'https://github.com/canmenzo/babil/releases');
     $('updateZip').href = safe(update.zip);
     $('updateNotes').href = safe(update.notes);
@@ -174,11 +175,11 @@ $('updateReload').onclick = () => chrome.runtime.reload();
 $('checkUpdate').onclick = async (e) => {
   e.preventDefault();
   const link = e.target;
-  link.textContent = 'Denetleniyor...';
+  link.textContent = i18n('checking');
   try {
-    link.textContent = (await checkUpdate(true)) ? 'Güncelleme var' : 'Güncelsin';
+    link.textContent = i18n((await checkUpdate(true)) ? 'update_available' : 'up_to_date');
   } catch {
-    link.textContent = 'Denetlenemedi, tekrar dene';
+    link.textContent = i18n('check_failed');
   }
 };
 checkUpdate(false).catch(() => {});
@@ -186,14 +187,15 @@ checkUpdate(false).catch(() => {});
 function fillLangs(select, codes) {
   select.append(...codes.map((c) => new Option(langName(c), c)));
 }
-$('source').append(new Option('Otomatik algıla', 'auto'));
+$('source').append(new Option(i18n('auto_detect'), 'auto'));
 fillLangs($('source'), SOURCE_LANGS);
 fillLangs($('target'), TARGET_LANGS);
 $('model').append(
-  new Option('Otomatik (önerilen)', 'auto'),
-  ...Object.entries(MODELS).map(([k, m]) => new Option(`${m.name} (${m.size})`, k)),
+  new Option(i18n('model_auto'), 'auto'),
+  ...Object.entries(MODELS).map(([k, m]) => new Option(`${i18n(`model_${k}`)} (${m.size})`, k)),
 );
-$('ttsPersona').append(...Object.entries(PERSONAS).map(([k, p]) => new Option(`${p.name} · ${p.desc}`, k)));
+$('ttsPersona').append(...Object.keys(PERSONAS).map((k) => new Option(`${i18n(`persona_${k}_name`)} · ${i18n(`persona_${k}_desc`)}`, k)));
+$('cues').append(...[1, 2, 3, 4, 5, 6].map((n) => new Option(n === 1 ? i18n('cues_last') : i18n('cues_last_n', n), n)));
 
 const s = await loadSettings();
 $('source').value = s.source;

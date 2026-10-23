@@ -1,16 +1,27 @@
-import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss, langName } from './settings.js';
+import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss, langName, i18n, localize } from './settings.js';
 import { listVoices, resolveVoice, sampleText, PERSONAS } from './speech.js';
 
+localize();
 let s = await loadSettings();
 
-const SAMPLE = [
-  { trans: 'Bunu gerçekten yapacağımı düşünmedin, değil mi?', orig: "You didn't really think I'd do that, did you?" },
-  { trans: 'Tamam, bir sonraki tura geçiyoruz.', orig: "Alright, we're moving on to the next round." },
-];
+// Preview lines in the target language when there is a sample for it, else English.
+const SAMPLES = {
+  en: ["You didn't really think I'd do that, did you?", "Alright, we're moving on to the next round."],
+  tr: ['Bunu gerçekten yapacağımı düşünmedin, değil mi?', 'Tamam, bir sonraki tura geçiyoruz.'],
+  es: ['No pensaste de verdad que lo haría, ¿o sí?', 'Muy bien, pasamos a la siguiente ronda.'],
+  hi: ['तुम्हें सच में नहीं लगा था कि मैं ऐसा करूँगा, है ना?', 'ठीक है, अब अगले राउंड पर चलते हैं।'],
+  zh: ['你不会真以为我会那么做吧？', '好了，我们进入下一轮。'],
+};
 
-function options(select, map) {
+function sample() {
+  const lang = s.target.split('-')[0];
+  const orig = lang === 'en' ? SAMPLES.es : SAMPLES.en;
+  return (SAMPLES[lang] ?? SAMPLES.en).map((trans, i) => ({ trans, orig: orig[i] }));
+}
+
+function options(select, map, prefix) {
   select.replaceChildren(
-    ...Object.entries(map).map(([value, { label }]) => Object.assign(document.createElement('option'), { value, textContent: label })),
+    ...Object.keys(map).map((value) => Object.assign(document.createElement('option'), { value, textContent: i18n(prefix + value) })),
   );
 }
 
@@ -18,27 +29,27 @@ function trackControls(track) {
   const card = document.querySelector(`[data-track="${track}"]`);
   card.insertAdjacentHTML(
     'beforeend',
-    `<label class="field">Font <select data-key="${track}.font"></select></label>
-     <label class="field">Yazı boyutu (px) <span class="range"><input type="range" min="12" max="64" step="1" data-key="${track}.size"><output></output></span></label>
-     <label class="check"><input type="checkbox" data-key="${track}.bold"> Kalın</label>
+    `<label class="field">${i18n('font')} <select data-key="${track}.font"></select></label>
+     <label class="field">${i18n('text_size')} <span class="range"><input type="range" min="12" max="64" step="1" data-key="${track}.size"><output></output></span></label>
+     <label class="check"><input type="checkbox" data-key="${track}.bold"> ${i18n('bold')}</label>
      <div class="colors">
-       <label class="field">Yazı rengi <input type="color" data-key="${track}.color"></label>
-       <label class="field">Arka plan rengi <input type="color" data-key="${track}.bg"></label>
+       <label class="field">${i18n('text_color')} <input type="color" data-key="${track}.color"></label>
+       <label class="field">${i18n('bg_color')} <input type="color" data-key="${track}.bg"></label>
      </div>
-     <label class="field">Arka plan opaklığı <span class="range"><input type="range" min="0" max="1" step="0.05" data-key="${track}.bgOpacity"><output></output></span></label>`,
+     <label class="field">${i18n('bg_opacity')} <span class="range"><input type="range" min="0" max="1" step="0.05" data-key="${track}.bgOpacity"><output></output></span></label>`,
   );
-  options(card.querySelector('select'), FONTS);
+  options(card.querySelector('select'), FONTS, 'font_');
 }
 
 trackControls('trans');
 trackControls('orig');
-options(document.querySelector('[data-key="edge"]'), EDGES);
+options(document.querySelector('[data-key="edge"]'), EDGES, 'edge_');
 
 let voices = await listVoices();
 function voiceOptions() {
   const base = s.target.split('-')[0];
   document.querySelector('[data-key="ttsVoice"]').replaceChildren(
-    new Option(`Otomatik (${langName(s.target)})`, ''),
+    new Option(i18n('voice_auto', langName(s.target)), ''),
     ...voices.filter((v) => v.lang?.split(/[-_]/)[0].toLowerCase() === base).map((v) => new Option(v.name, v.name)),
   );
 }
@@ -61,12 +72,13 @@ function listen(ttsPersona) {
   speechSynthesis.speak(u);
 }
 
-const personaCards = Object.entries(PERSONAS).map(([id, p]) => {
+const personaCards = Object.keys(PERSONAS).map((id) => {
   const card = document.createElement('label');
   card.className = 'persona';
-  card.innerHTML = '<input type="radio" name="ttsPersona"><strong></strong><span class="small"></span><span class="small muted voice"></span><button type="button">Dinle</button>';
-  card.querySelector('strong').textContent = p.name;
-  card.querySelector('.small').textContent = p.desc;
+  card.innerHTML = '<input type="radio" name="ttsPersona"><strong></strong><span class="small"></span><span class="small muted voice"></span><button type="button"></button>';
+  card.querySelector('strong').textContent = i18n(`persona_${id}_name`);
+  card.querySelector('.small').textContent = i18n(`persona_${id}_desc`);
+  card.querySelector('button').textContent = i18n('listen');
   card.querySelector('input').onchange = () => {
     s.ttsPersona = id;
     fill();
@@ -93,13 +105,13 @@ function fill() {
     if (el.type === 'checkbox') el.checked = v;
     else el.value = v;
     const out = el.parentElement.querySelector('output');
-    if (out) out.textContent = el.dataset.key.endsWith('bgOpacity') ? `%${Math.round(v * 100)}` : v;
+    if (out) out.textContent = el.dataset.key.endsWith('bgOpacity') ? i18n('percent', Math.round(v * 100)) : v;
   }
   for (const card of personaCards) {
     const on = card.personaId === s.ttsPersona;
     card.classList.toggle('selected', on);
     card.querySelector('input').checked = on;
-    const name = resolveVoice(voices, s.target, { ...s, ttsPersona: card.personaId }).voice?.name ?? 'Sistem sesi';
+    const name = resolveVoice(voices, s.target, { ...s, ttsPersona: card.personaId }).voice?.name ?? i18n('system_voice');
     Object.assign(card.querySelector('.voice'), { textContent: name, title: name });
   }
   for (const el of customOnly) el.hidden = s.ttsPersona !== 'custom';
@@ -119,7 +131,7 @@ function preview() {
   }
   style.textContent = captionCss(s);
   box.replaceChildren(
-    ...SAMPLE.slice(-s.cues).map(({ trans, orig }) => {
+    ...sample().slice(-s.cues).map(({ trans, orig }) => {
       const cue = document.createElement('div');
       cue.className = 'cue';
       for (const [cls, text] of [['trans', trans], ['orig', orig]]) {
@@ -154,10 +166,12 @@ document.getElementById('reset').onclick = async () => {
   preview();
 };
 
-// Dragging the captions on a video changes the position from another context, the popup the persona.
+// Dragging the captions on a video changes the position from another context, the popup the persona
+// and the target language.
 chrome.storage.onChanged.addListener(async (changes, area) => {
-  if (area === 'local' && (changes.position || changes.ttsPersona)) {
+  if (area === 'local' && (changes.position || changes.ttsPersona || changes.target)) {
     s = await loadSettings();
+    voiceOptions();
     fill();
     preview();
   }

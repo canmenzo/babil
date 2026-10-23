@@ -49,14 +49,15 @@ export async function listVoices() {
 }
 
 // Shared with the Hammurabi desktop app; keep ids and values in sync. Rate and pitch: 1 is normal.
+// Names and descriptions are the messages persona_<id>_name and persona_<id>_desc.
 export const PERSONAS = {
-  lale: { name: 'Lale', desc: 'Net ve doğal', gender: 'female', rate: 1, pitch: 1 },
-  ayla: { name: 'Ayla', desc: 'Neşeli ve sıcak', gender: 'female', rate: 1.05, pitch: 1.15 },
-  deniz: { name: 'Deniz', desc: 'Sakin ve dengeli', gender: 'male', rate: 0.95, pitch: 0.95 },
-  ates: { name: 'Ateş', desc: 'Tok ve güven veren', gender: 'male', rate: 1, pitch: 0.8 },
-  bilge: { name: 'Bilge', desc: 'Yavaş ve sabırlı, takibi kolay', gender: 'female', rate: 0.8, pitch: 1 },
-  ruzgar: { name: 'Rüzgar', desc: 'Hızlı, çabuk konuşanlara yetişir', gender: 'any', rate: 1.35, pitch: 1.05 },
-  custom: { name: 'Özel', desc: 'Kendi sesin ve hızın' },
+  lale: { gender: 'female', rate: 1, pitch: 1 },
+  ayla: { gender: 'female', rate: 1.05, pitch: 1.15 },
+  deniz: { gender: 'male', rate: 0.95, pitch: 0.95 },
+  ates: { gender: 'male', rate: 1, pitch: 0.8 },
+  bilge: { gender: 'female', rate: 0.8, pitch: 1 },
+  ruzgar: { gender: 'any', rate: 1.35, pitch: 1.05 },
+  custom: {},
 };
 
 // Neither chrome.tts nor speechSynthesis reports gender, so guess it from well-known Windows,
@@ -72,7 +73,7 @@ export function voiceGender(name) {
 }
 
 // A voice of the persona's gender if the language has one, else the usual pick. Local voices come
-// first, even of the other gender: an online voice would send the captions off the computer. Özel
+// first, even of the other gender: an online voice would send the captions off the computer. Custom
 // keeps the user's own voice and rate.
 export function resolveVoice(voices, lang, s) {
   const p = PERSONAS[s.ttsPersona] ?? PERSONAS.lale;
@@ -96,6 +97,7 @@ const SAMPLES = {
   ja: 'こんにちは、この声で翻訳を読み上げます。',
   zh: '你好，我会用这个声音朗读翻译。',
   ko: '안녕하세요, 이 목소리로 번역을 읽어 드릴게요.',
+  hi: 'नमस्ते, अनुवाद इसी आवाज़ में पढ़े जाएँगे।',
 };
 
 export function sampleText(lang) {

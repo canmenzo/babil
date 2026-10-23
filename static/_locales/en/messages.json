@@ -1,0 +1,359 @@
+{
+  "ext_name": {
+    "message": "Babil: Live Captions and Translation"
+  },
+  "ext_description": {
+    "message": "Transcribes any video in your browser on your computer and translates it live, with original and translated captions together."
+  },
+  "cmd_toggle": {
+    "message": "Start or stop captions"
+  },
+  "offscreen_justification": {
+    "message": "Captures tab audio to transcribe it locally"
+  },
+  "status_ready": {
+    "message": "Ready"
+  },
+  "start": {
+    "message": "Start captions"
+  },
+  "stop": {
+    "message": "Stop"
+  },
+  "latency": {
+    "message": "Recognition time: $1 ms"
+  },
+  "update_hint": {
+    "message": "Download the zip, unzip it over your current Babil folder, then press the button below. Your settings and downloaded models are kept."
+  },
+  "update_zip": {
+    "message": "Download zip"
+  },
+  "update_reload": {
+    "message": "I've unzipped it, reload Babil"
+  },
+  "update_notes": {
+    "message": "What's new?"
+  },
+  "update_title": {
+    "message": "New version available: v$1"
+  },
+  "source_label": {
+    "message": "Spoken language"
+  },
+  "target_label": {
+    "message": "Translate into"
+  },
+  "model_label": {
+    "message": "Model"
+  },
+  "show_original_too": {
+    "message": "Also show original captions"
+  },
+  "tts": {
+    "message": "Read translation aloud"
+  },
+  "voice": {
+    "message": "Voice"
+  },
+  "cues_label": {
+    "message": "Sentences on screen"
+  },
+  "cues_last": {
+    "message": "Last sentence only"
+  },
+  "cues_last_n": {
+    "message": "Last $1 sentences"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "shortcut": {
+    "message": "Shortcut"
+  },
+  "check_update": {
+    "message": "Check for updates"
+  },
+  "checking": {
+    "message": "Checking..."
+  },
+  "update_available": {
+    "message": "Update available"
+  },
+  "up_to_date": {
+    "message": "You're up to date"
+  },
+  "check_failed": {
+    "message": "Couldn't check, try again"
+  },
+  "ff_translation_hint": {
+    "message": "Firefox needs an additional offline translation model (about 1 GB). Video audio and captions stay on this device."
+  },
+  "ff_translation_download": {
+    "message": "Download translation model"
+  },
+  "pair_detected": {
+    "message": "$1 speech detected. Translating it needs Chrome's translation model."
+  },
+  "pair_download": {
+    "message": "Download $1 → $2 model"
+  },
+  "downloading_pct": {
+    "message": "Downloading $1%"
+  },
+  "error_detail": {
+    "message": "Error: $1"
+  },
+  "start_failed": {
+    "message": "Couldn't start: $1"
+  },
+  "model_auto_pick": {
+    "message": "For this computer: $1."
+  },
+  "model_cached": {
+    "message": "Downloaded, loads from disk."
+  },
+  "model_download_once": {
+    "message": "Downloads once on first start ($1)."
+  },
+  "model_speed_note": {
+    "message": "Captions are just as fast with every model; a bigger one makes fewer mistakes but works the computer harder."
+  },
+  "auto_detect": {
+    "message": "Detect automatically"
+  },
+  "model_auto": {
+    "message": "Automatic (recommended)"
+  },
+  "model_tiny": {
+    "message": "Basic accuracy"
+  },
+  "model_base": {
+    "message": "Good accuracy"
+  },
+  "model_small": {
+    "message": "High accuracy"
+  },
+  "model_turbo": {
+    "message": "Highest accuracy"
+  },
+  "persona_lale_name": {
+    "message": "Iris"
+  },
+  "persona_lale_desc": {
+    "message": "Clear and natural"
+  },
+  "persona_ayla_name": {
+    "message": "Ruby"
+  },
+  "persona_ayla_desc": {
+    "message": "Cheerful and warm"
+  },
+  "persona_deniz_name": {
+    "message": "Owen"
+  },
+  "persona_deniz_desc": {
+    "message": "Calm and steady"
+  },
+  "persona_ates_name": {
+    "message": "Miles"
+  },
+  "persona_ates_desc": {
+    "message": "Deep and reassuring"
+  },
+  "persona_bilge_name": {
+    "message": "Grace"
+  },
+  "persona_bilge_desc": {
+    "message": "Slow and patient, easy to follow"
+  },
+  "persona_ruzgar_name": {
+    "message": "Skye"
+  },
+  "persona_ruzgar_desc": {
+    "message": "Fast, keeps up with quick talkers"
+  },
+  "persona_custom_name": {
+    "message": "Custom"
+  },
+  "persona_custom_desc": {
+    "message": "Your own voice and speed"
+  },
+  "options_title": {
+    "message": "Babil Settings"
+  },
+  "options_intro": {
+    "message": "Changes apply right away to the captions on the open video. You can also drag the captions up or down over the video to move them."
+  },
+  "trans_track": {
+    "message": "Translated captions"
+  },
+  "orig_track": {
+    "message": "Original captions"
+  },
+  "general": {
+    "message": "General"
+  },
+  "show_original": {
+    "message": "Show original captions"
+  },
+  "original_first": {
+    "message": "Show original captions on top"
+  },
+  "edge": {
+    "message": "Edge style"
+  },
+  "position": {
+    "message": "Position (from the bottom of the video, %)"
+  },
+  "instant": {
+    "message": "Instant translation (translates before the sentence ends; faster, but the translation keeps changing)"
+  },
+  "hold": {
+    "message": "Time on screen (s)"
+  },
+  "scale_with_video": {
+    "message": "Scale with video size"
+  },
+  "reset": {
+    "message": "Restore defaults"
+  },
+  "read_aloud": {
+    "message": "Read aloud"
+  },
+  "rate": {
+    "message": "Speaking speed"
+  },
+  "duck": {
+    "message": "Lower video volume while reading"
+  },
+  "font": {
+    "message": "Font"
+  },
+  "text_size": {
+    "message": "Text size (px)"
+  },
+  "bold": {
+    "message": "Bold"
+  },
+  "text_color": {
+    "message": "Text color"
+  },
+  "bg_color": {
+    "message": "Background color"
+  },
+  "bg_opacity": {
+    "message": "Background opacity"
+  },
+  "voice_auto": {
+    "message": "Automatic ($1)"
+  },
+  "listen": {
+    "message": "Listen"
+  },
+  "system_voice": {
+    "message": "System voice"
+  },
+  "percent": {
+    "message": "$1%"
+  },
+  "font_sans": {
+    "message": "Sans (Arial)"
+  },
+  "font_system": {
+    "message": "System"
+  },
+  "font_serif": {
+    "message": "Serif"
+  },
+  "font_mono": {
+    "message": "Monospace"
+  },
+  "font_casual": {
+    "message": "Casual"
+  },
+  "font_condensed": {
+    "message": "Condensed"
+  },
+  "font_smallcaps": {
+    "message": "Small caps"
+  },
+  "edge_none": {
+    "message": "None"
+  },
+  "edge_shadow": {
+    "message": "Shadow"
+  },
+  "edge_outline": {
+    "message": "Outline"
+  },
+  "edge_raised": {
+    "message": "Raised"
+  },
+  "edge_depressed": {
+    "message": "Depressed"
+  },
+  "status_starting": {
+    "message": "Starting..."
+  },
+  "status_stopped": {
+    "message": "Stopped"
+  },
+  "status_tab_closed": {
+    "message": "Tab closed"
+  },
+  "status_model_loading": {
+    "message": "Loading model..."
+  },
+  "status_capture_failed": {
+    "message": "Couldn't capture audio: $1"
+  },
+  "status_tab_audio_ended": {
+    "message": "Tab audio ended"
+  },
+  "status_lagging": {
+    "message": "This device can't keep up, choose a smaller model"
+  },
+  "status_ff_translation_downloading": {
+    "message": "Downloading translation model $1%"
+  },
+  "status_ff_translation_ready": {
+    "message": "Offline translation ready"
+  },
+  "status_ff_translation_error": {
+    "message": "Offline translation unavailable: $1"
+  },
+  "status_model_loading_pct": {
+    "message": "Loading model $1%"
+  },
+  "status_model_downloading_pct": {
+    "message": "Downloading model $1%"
+  },
+  "status_running": {
+    "message": "Running: $1 ($2)"
+  },
+  "device_gpu": {
+    "message": "graphics card"
+  },
+  "device_cpu": {
+    "message": "processor, may be slow"
+  },
+  "status_model_failed": {
+    "message": "Couldn't load model: $1"
+  },
+  "status_error": {
+    "message": "Error"
+  },
+  "status_no_translator": {
+    "message": "Chrome Translator API not available (requires Chrome 138+)"
+  },
+  "status_play_first": {
+    "message": "Play a video before starting captions."
+  },
+  "capture_unsupported": {
+    "message": "This Firefox version can't capture media from this page."
+  },
+  "capture_no_track": {
+    "message": "No audio track is available. DRM or a protected player can block capture."
+  }
+}

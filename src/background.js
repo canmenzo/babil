@@ -1,4 +1,4 @@
-import { loadSettings } from './settings.js';
+import { loadSettings, i18n } from './settings.js';
 import { createSpeaker, resolveVoice, listVoices } from './speech.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
@@ -50,14 +50,14 @@ async function start(tabId, streamId) {
     await chrome.offscreen.createDocument({
       url: 'offscreen.html',
       reasons: ['USER_MEDIA'],
-      justification: 'Sekme sesini yakalayıp lokal olarak yazıya dökmek için',
+      justification: i18n('offscreen_justification'),
     });
   }
-  await save({ running: true, tabId, target, status: { state: 'loading', text: 'Başlatılıyor...' }, asrMs: null, needPairs: [] });
+  await save({ running: true, tabId, target, status: { state: 'loading', text: i18n('status_starting') }, asrMs: null, needPairs: [] });
   chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source, target, instant } });
 }
 
-async function stop(text = 'Durduruldu') {
+async function stop(text = i18n('status_stopped')) {
   await restored;
   speaker.stop();
   if (await hasOffscreen()) await chrome.offscreen.closeDocument();
@@ -81,14 +81,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         await speechLoaded;
         if (speech.tts) speaker.caption(msg, speech.target);
         break;
-      case 'status':
+      case 'status': {
+        const text = i18n(msg.text);
         if (msg.state === 'stopped' || msg.state === 'error') {
-          await stop(msg.text);
+          await stop(text);
           break;
         }
-        await save({ status: { state: msg.state, text: msg.text, progress: msg.progress } });
-        chrome.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text: msg.text }).catch(() => {});
+        await save({ status: { state: msg.state, text, progress: msg.progress } });
+        chrome.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text }).catch(() => {});
         break;
+      }
       case 'stats':
         await save({ asrMs: msg.asrMs });
         break;
@@ -130,7 +132,7 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   await restored;
-  if (state.running && tabId === state.tabId) stop('Sekme kapatıldı');
+  if (state.running && tabId === state.tabId) stop(i18n('status_tab_closed'));
 });
 
 // Full page loads wipe the overlay; the capture itself survives, so put the overlay back.

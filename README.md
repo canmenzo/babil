@@ -9,7 +9,8 @@
 - 🌍 Translate videos into 26 languages on YouTube, Twitch, Kick, and more
 - 💬 See original and translated captions together, including in fullscreen
 - 🔊 Hear translations read aloud, with the video turned down while each sentence is spoken (Chrome)
-- 🎙️ Choose a voice persona (Lale, Ayla, Deniz, Ateş, Bilge, Rüzgar) and press **Dinle** to hear a sample
+- 🎙️ Choose a voice persona and press **Listen** to hear a sample
+- 🗣️ Babil's own screens are in English, Turkish, Spanish, Hindi, and Simplified Chinese, following your browser's language
 - 🎨 Drag captions to move them; customize their font, size, and colors
 - 🔒 Audio stays on your computer. Free, with no account or API key needed
 
@@ -38,9 +39,9 @@ Firefox captures audio from the playing page's video element. Protected media an
 
 The first start downloads a speech model (about **600 MB** on automatic). Wait for it to finish; future starts use the saved copy.
 
-🔊 To hear the translation, tick **Çeviriyi sesli oku** (read the translation aloud) in Babil's panel. Pick a voice persona under **Ses** in the panel, or on the settings page, where **Dinle** plays a sample of each. Personas use voices already on your computer, and a voice on your computer is chosen over an online one, so captions are not sent to an online voice when a local one exists. Add more voices in your system's speech settings (Windows: **Settings > Time & language > Speech**; macOS: **System Settings > Accessibility > Spoken Content**). **Özel** keeps your own voice and speed.
+🔊 To hear the translation, tick **Read translation aloud** in Babil's panel. Pick a voice persona under **Voice** in the panel, or on the settings page, where **Listen** plays a sample of each. Persona names differ per language (in English: Iris, Ruby, Owen, Miles, Grace, Skye). Personas use voices already on your computer, and a voice on your computer is chosen over an online one, so captions are not sent to an online voice when a local one exists. Add more voices in your system's speech settings (Windows: **Settings > Time & language > Speech**; macOS: **System Settings > Accessibility > Spoken Content**). **Custom** keeps your own voice and speed.
 
-💡 For better accuracy, select the video's spoken language. Use the link at the bottom of Babil's panel to change how captions look.
+💡 For better accuracy, select the video's spoken language. Use the **Settings** button at the bottom of Babil's panel to change how captions look.
 
 ## 🔄 Update
 

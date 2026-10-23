@@ -1,7 +1,16 @@
+// Subset of Chrome Translator API targets, most spoken first.
+export const TARGET_LANGS = [
+  'tr', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi', 'bn', 'zh', 'zh-Hant', 'ja', 'ko',
+  'id', 'vi', 'th', 'nl', 'pl', 'uk', 'el', 'sv', 'ro', 'cs', 'hu',
+];
+
+// Captions are translated into the browser's language by default, when it is a target.
+const browserLang = /^zh-(TW|HK|MO|Hant)/i.test(navigator.language) ? 'zh-Hant' : navigator.language.split('-')[0];
+
 export const DEFAULTS = {
   model: 'auto',
   source: 'auto',
-  target: 'tr',
+  target: TARGET_LANGS.includes(browserLang) ? browserLang : 'en',
   instant: false, // translate the sentence while it is still being spoken
   showOriginal: true,
   originalFirst: false,
@@ -25,19 +34,14 @@ export const SOURCE_LANGS = [
   'id', 'vi', 'th', 'ja', 'ko', 'zh', 'el', 'sv', 'ro', 'cs', 'hu', 'he',
 ];
 
-// Subset of Chrome Translator API targets, most spoken first.
-export const TARGET_LANGS = [
-  'tr', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ar', 'hi', 'bn', 'zh', 'zh-Hant', 'ja', 'ko',
-  'id', 'vi', 'th', 'nl', 'pl', 'uk', 'el', 'sv', 'ro', 'cs', 'hu',
-];
-
 // Sizes are the GPU downloads. Bigger models make fewer mistakes; captions come just as fast with
 // any of them, since they wait for the sentence to end, so the choice is about the computer.
+// Names, font and edge labels are the messages model_<key>, font_<key> and edge_<key>.
 export const MODELS = {
-  tiny: { id: 'onnx-community/whisper-tiny', name: 'Temel doğruluk', size: '120 MB' },
-  base: { id: 'onnx-community/whisper-base', name: 'İyi doğruluk', size: '200 MB' },
-  small: { id: 'onnx-community/whisper-small', name: 'Yüksek doğruluk', size: '600 MB' },
-  turbo: { id: 'onnx-community/whisper-large-v3-turbo', name: 'En yüksek doğruluk', size: '1.6 GB' },
+  tiny: { id: 'onnx-community/whisper-tiny', size: '120 MB' },
+  base: { id: 'onnx-community/whisper-base', size: '200 MB' },
+  small: { id: 'onnx-community/whisper-small', size: '600 MB' },
+  turbo: { id: 'onnx-community/whisper-large-v3-turbo', size: '1.6 GB' },
 };
 
 // Models are stored in OPFS by asr-worker.js, one file per download URL.
@@ -48,30 +52,42 @@ export async function isCached(model) {
   return false;
 }
 
+// [key, ...subs] works as a key too, so the offscreen document, which has no chrome.i18n, can
+// send messages for the background to put into words. Subs may be such messages themselves.
+export function i18n(key, ...subs) {
+  if (Array.isArray(key)) return i18n(...key);
+  return chrome.i18n.getMessage(key, subs.map((s) => (Array.isArray(s) ? i18n(...s) : String(s))));
+}
+
+export function localize() {
+  document.documentElement.lang = chrome.i18n.getUILanguage();
+  for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = i18n(el.dataset.i18n);
+}
+
 export function langName(code) {
-  const name = new Intl.DisplayNames(['tr'], { type: 'language' }).of(code);
-  return name.charAt(0).toLocaleUpperCase('tr') + name.slice(1);
+  const ui = chrome.i18n.getUILanguage();
+  const name = new Intl.DisplayNames([ui], { type: 'language' }).of(code);
+  return name.charAt(0).toLocaleUpperCase(ui) + name.slice(1);
 }
 
 export const FONTS = {
-  sans: { label: 'Sans (Arial)', css: 'Roboto, Arial, Helvetica, sans-serif' },
-  system: { label: 'Sistem', css: 'system-ui, "Segoe UI", sans-serif' },
-  serif: { label: 'Serif', css: 'Georgia, "Times New Roman", serif' },
-  mono: { label: 'Eş aralıklı', css: 'Consolas, "Courier New", monospace' },
-  casual: { label: 'Gündelik', css: '"Comic Sans MS", "Comic Neue", cursive' },
-  condensed: { label: 'Dar', css: '"Arial Narrow", "Roboto Condensed", sans-serif-condensed, sans-serif' },
-  smallcaps: { label: 'Küçük büyük harf', css: 'Roboto, Arial, sans-serif', smallCaps: true },
+  sans: { css: 'Roboto, Arial, Helvetica, sans-serif' },
+  system: { css: 'system-ui, "Segoe UI", sans-serif' },
+  serif: { css: 'Georgia, "Times New Roman", serif' },
+  mono: { css: 'Consolas, "Courier New", monospace' },
+  casual: { css: '"Comic Sans MS", "Comic Neue", cursive' },
+  condensed: { css: '"Arial Narrow", "Roboto Condensed", sans-serif-condensed, sans-serif' },
+  smallcaps: { css: 'Roboto, Arial, sans-serif', smallCaps: true },
 };
 
 export const EDGES = {
-  none: { label: 'Yok', css: 'none' },
-  shadow: { label: 'Gölge', css: '2px 2px 4px rgba(0,0,0,.95)' },
+  none: { css: 'none' },
+  shadow: { css: '2px 2px 4px rgba(0,0,0,.95)' },
   outline: {
-    label: 'Kontur',
     css: '-1.5px -1.5px 0 #000, 1.5px -1.5px 0 #000, -1.5px 1.5px 0 #000, 1.5px 1.5px 0 #000, 0 0 3px #000',
   },
-  raised: { label: 'Kabartma', css: '1px 1px 0 #000, 2px 2px 0 #000' },
-  depressed: { label: 'Gömme', css: '-1px -1px 0 #000, 1px 1px 0 rgba(255,255,255,.4)' },
+  raised: { css: '1px 1px 0 #000, 2px 2px 0 #000' },
+  depressed: { css: '-1px -1px 0 #000, 1px 1px 0 rgba(255,255,255,.4)' },
 };
 
 export async function loadSettings() {

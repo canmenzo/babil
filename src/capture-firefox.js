@@ -20,15 +20,15 @@ if (!window.__babilCaptureController) {
     const videos = [...document.querySelectorAll('video')].filter((v) => !v.paused && v.readyState >= 2);
     const video = videos.sort((a, b) => b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight)[0];
     if (!video) {
-      browser.runtime.sendMessage({ target: 'bg', type: 'status', state: 'error', text: 'Play a video before starting captions.' });
+      browser.runtime.sendMessage({ target: 'bg', type: 'status', state: 'error', text: ['status_play_first'] });
       return;
     }
 
     try {
       const capture = video.captureStream ?? video.mozCaptureStream;
-      if (!capture) throw new Error('This Firefox version cannot capture media from this page.');
+      if (!capture) throw new Error(browser.i18n.getMessage('capture_unsupported'));
       stream = capture.call(video);
-      if (!stream.getAudioTracks().length) throw new Error('No audio track is available. DRM or a protected player can block capture.');
+      if (!stream.getAudioTracks().length) throw new Error(browser.i18n.getMessage('capture_no_track'));
       context = new AudioContext({ sampleRate: 16000 });
       await context.resume();
       await context.audioWorklet.addModule(browser.runtime.getURL('worklet.js'));
@@ -40,7 +40,7 @@ if (!window.__babilCaptureController) {
       stream.getAudioTracks()[0].addEventListener('ended', () => stopCapture());
     } catch (error) {
       stopCapture();
-      browser.runtime.sendMessage({ target: 'bg', type: 'status', state: 'error', text: `Audio capture failed: ${error.message}` });
+      browser.runtime.sendMessage({ target: 'bg', type: 'status', state: 'error', text: ['status_capture_failed', error.message] });
     }
   }
 }

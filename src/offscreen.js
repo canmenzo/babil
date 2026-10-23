@@ -1,5 +1,5 @@
 // Audio capture, segmentation, ASR scheduling and translation. One instance per extension.
-import { MODELS } from './settings.js';
+// Status texts are [message key, ...subs]; the background puts them into words (see i18n in settings.js).
 
 const FRAME = 1600; // 100 ms at 16 kHz, matches worklet.js
 
@@ -107,7 +107,7 @@ function receiveEngineMessage(msg) {
   }
   else if (msg.type === 'settings') reconfigure(msg.settings);
   else if (msg.type === 'duck') playGain?.gain.setTargetAtTime(msg.gain, playCtx.currentTime, 0.15);
-  else if (msg.type === 'stop') stop('Durduruldu');
+  else if (msg.type === 'stop') stop(['status_stopped']);
 }
 
 if (FIREFOX_BUILD) window.__babilEngineMessage = receiveEngineMessage;
@@ -138,7 +138,7 @@ function loadModel() {
   busy = true; // released on 'ready'
   worker = new Worker('asr-worker.js', { type: 'module' });
   worker.onmessage = ({ data }) => onWorker(data);
-  status('loading', 'Model yükleniyor...', { progress: 0 });
+  status('loading', ['status_model_loading'], { progress: 0 });
   worker.postMessage({ type: 'load', model: settings.model });
 }
 
@@ -151,11 +151,11 @@ async function start(streamId, s) {
       video: false,
     });
   } catch (e) {
-    status('error', `Ses yakalanamadı: ${e.message}`);
+    status('error', ['status_capture_failed', e.message]);
     return;
   }
   running = true;
-  stream.getAudioTracks()[0].addEventListener('ended', () => stop('Sekme sesi kesildi'));
+  stream.getAudioTracks()[0].addEventListener('ended', () => stop(['status_tab_audio_ended']));
 
   // Capturing mutes the tab, so play it back at the native rate. The gain only ducks this
   // playback under spoken translations; the ASR path below never hears it.
@@ -279,7 +279,7 @@ function closeSegment(end) {
     if (dropped.words) finishSegment(dropped, dropped.words, dropped.language);
     if (ready && Date.now() - lagReported > 10000) {
       lagReported = Date.now();
-      status('lagging', 'Cihaz yetişemiyor, daha küçük model seçin');
+      status('lagging', ['status_lagging']);
     }
   }
 }
@@ -314,23 +314,21 @@ function onWorker(m) {
     translations.get(m.id)?.(m.text);
     translations.delete(m.id);
   } else if (m.type === 'translation-progress') {
-    status('loading', `Translation model downloading ${Math.round(m.progress)}%`, { progress: m.progress });
+    status('loading', ['status_ff_translation_downloading', Math.round(m.progress)], { progress: m.progress });
   } else if (m.type === 'translation-ready') {
-    status('running', 'Offline translation ready');
+    status('running', ['status_ff_translation_ready']);
   } else if (m.type === 'translation-error') {
-    status('warning', `Offline translation unavailable: ${m.message}`);
+    status('warning', ['status_ff_translation_error', m.message]);
   } else if (m.type === 'progress') {
-    const verb = m.fromDisk ? 'yükleniyor' : 'indiriliyor';
-    status('loading', `Model ${verb} %${Math.round(m.progress)}`, { progress: m.progress });
+    status('loading', [m.fromDisk ? 'status_model_loading_pct' : 'status_model_downloading_pct', Math.round(m.progress)], { progress: m.progress });
   } else if (m.type === 'ready') {
     busy = false;
     ready = true;
-    const where = m.device === 'webgpu' ? 'ekran kartı' : 'işlemci, yavaş olabilir';
-    status('running', `Çalışıyor: ${MODELS[m.model].name} (${where})`, { device: m.device });
+    status('running', ['status_running', [`model_${m.model}`], [m.device === 'webgpu' ? 'device_gpu' : 'device_cpu']], { device: m.device });
     pump();
   } else if (m.type === 'error') {
-    status('error', `Model yüklenemedi: ${m.message}`);
-    stop('Hata');
+    status('error', ['status_model_failed', m.message]);
+    stop(['status_error']);
   } else if (m.type === 'result') {
     busy = false;
     const job = jobs.get(m.id);
@@ -469,7 +467,7 @@ function getTranslator(src) {
       src,
       (async () => {
         if (!('Translator' in self)) {
-          if (!reported.has('none')) status('warning', 'Chrome Translator API yok (Chrome 138+ gerekli)');
+          if (!reported.has('none')) status('warning', ['status_no_translator']);
           reported.add('none');
           return null;
         }
