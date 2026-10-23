@@ -1,6 +1,6 @@
 {
   "name": "babil",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "scripts": {
     "build": "node build.mjs",
     "build:firefox": "node build.mjs --firefox",
