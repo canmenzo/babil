@@ -24,15 +24,24 @@ button { font: inherit; border: 1px solid var(--line); background: var(--field);
 button.primary, a.button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; padding: 9px; }
 button.primary.stop { background: var(--field); color: var(--fg); border-color: var(--line); }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
-select, input[type=number] { font: inherit; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
-.check { display: flex; align-items: center; gap: 6px; }
-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
+select, input[type=number] { max-width: 100%; font: inherit; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 6px; }
+.check { display: flex; align-items: flex-start; gap: 6px; }
+.check input { margin: 3px 0 0; flex: none; }
+footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+button.subtle { flex: none; background: transparent; padding: 4px 12px; font-size: 12px; }
+button.subtle:hover { background: var(--field); }
+.shortcut { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.shortcut > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+kbd { flex: none; font: 11px/1 ui-monospace, Consolas, monospace; color: var(--fg); background: var(--field); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 3px 6px; }
 a { color: var(--accent); }
 .pair { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; }
 .row { display: flex; align-items: flex-end; gap: 6px; }
 .row .field { flex: 1; min-width: 0; }
+.row .field > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row select { width: 100%; }
 .arrow { padding-bottom: 7px; color: var(--muted); }
 .hint { margin: -6px 0 0; line-height: 1.4; }
 a.button { text-align: center; text-decoration: none; border-radius: 8px; }
 .version { margin-top: -4px; }
+.version a { color: inherit; text-decoration: none; }
+.version a:hover { color: var(--fg); text-decoration: underline; }
