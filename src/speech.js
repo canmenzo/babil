@@ -2,7 +2,7 @@
 // behind the one being spoken; older ones are dropped so speech stays close to the video.
 const MAX_QUEUE = 2;
 
-export function createSpeaker({ speak, cancel, onSpeaking = () => {} }) {
+export function createSpeaker({ speak, cancel, prepare = () => {}, onSpeaking = () => {} }) {
   const spoken = new Set();
   const queue = [];
   let turn = 0;
@@ -25,6 +25,7 @@ export function createSpeaker({ speak, cancel, onSpeaking = () => {} }) {
       queue.push(text);
       if (queue.length > MAX_QUEUE) queue.shift();
       if (!busy) next();
+      else prepare(text);
     },
     stop() {
       queue.length = 0;
@@ -33,6 +34,29 @@ export function createSpeaker({ speak, cancel, onSpeaking = () => {} }) {
       if (busy) onSpeaking((busy = false));
       cancel();
     },
+  };
+}
+
+// Speaks with a downloaded voice through the engine page's tts-player.js. done(false) means the
+// sentence still needs a system voice. Replies with an unknown id are from before a restart.
+export function neuralSpeaker(send) {
+  const pending = new Map();
+  let seq = 0;
+  const ended = ({ id, ok }) => {
+    const p = pending.get(id);
+    if (!p) return;
+    clearTimeout(p.timer);
+    pending.delete(id);
+    p.done(ok);
+  };
+  return {
+    speak(text, voice, done) {
+      const id = ++seq;
+      const timer = setTimeout(() => ended({ id, ok: false }), Math.max(10000, 150 * text.length));
+      pending.set(id, { done, timer });
+      send({ type: 'tts-speak', id, text, voice });
+    },
+    ended,
   };
 }
 

@@ -1,3 +1,5 @@
+import { createTtsPlayer } from './tts-player.js';
+
 // Audio capture, segmentation, ASR scheduling and translation. One instance per extension.
 // Status texts are [message key, ...subs]; the background puts them into words (see i18n in settings.js).
 
@@ -58,7 +60,8 @@ const EN_GLOSSARY = [
   [/\bguys\b/gi, 'friends'],
 ];
 
-let stream, playCtx, playGain, asrCtx, worker;
+let stream, playCtx, playGain, asrCtx, worker, tts;
+let device = 'wasm';
 let settings = {};
 let running = false;
 let ready = false;
@@ -108,6 +111,22 @@ function receiveEngineMessage(msg) {
   else if (msg.type === 'settings') reconfigure(msg.settings);
   else if (msg.type === 'duck') playGain?.gain.setTargetAtTime(msg.gain, playCtx.currentTime, 0.15);
   else if (msg.type === 'stop') stop(['status_stopped']);
+  else if (msg.type.startsWith('tts-')) speech(msg);
+}
+
+// Read-aloud with downloaded voices. Plays on its own AudioContext, so ducking the tab leaves it alone.
+function speech(msg) {
+  // Whisper on the CPU needs the cores more.
+  tts ??= createTtsPlayer({ threads: device === 'webgpu' ? 4 : 2 });
+  if (msg.type === 'tts-speak') {
+    tts.speak(msg.text, msg.voice).then(
+      () => send({ type: 'tts-ended', id: msg.id, ok: true, fallback: tts.fallback }),
+      () => send({ type: 'tts-ended', id: msg.id, ok: false, fallback: tts.fallback }),
+    );
+  } else if (msg.type === 'tts-prepare') tts.prepare(msg.text, msg.voice);
+  else if (msg.type === 'tts-stop') tts.stop();
+  else if (msg.type === 'tts-load') tts.load(msg.pack);
+  else if (msg.type === 'tts-ensure') tts.download(msg.pack);
 }
 
 if (FIREFOX_BUILD) window.__babilEngineMessage = receiveEngineMessage;
@@ -324,6 +343,7 @@ function onWorker(m) {
   } else if (m.type === 'ready') {
     busy = false;
     ready = true;
+    device = m.device;
     status('running', ['status_running', [`model_${m.model}`], [m.device === 'webgpu' ? 'device_gpu' : 'device_cpu']], { device: m.device });
     pump();
   } else if (m.type === 'error') {

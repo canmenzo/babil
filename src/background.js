@@ -1,29 +1,55 @@
 import { loadSettings, i18n } from './settings.js';
-import { createSpeaker, resolveVoice, listVoices } from './speech.js';
+import { createSpeaker, resolveVoice, listVoices, neuralSpeaker } from './speech.js';
+import { resolveNeural, packReady } from './tts/catalog.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = chrome.storage.session.get('state').then((r) => r.state && (state = r.state));
 
 let speech = {};
-let say;
+let say, neural;
+let neuralReady = false;
+let neuralOff = false; // too slow on this computer, or the engine page may not play audio
+let ensured = null;
 const speechLoaded = loadSpeech();
 
 async function loadSpeech() {
   speech = await loadSettings();
   say = resolveVoice(await listVoices(), speech.target, speech);
+  neural = resolveNeural(speech.ttsPersona, speech.target);
+  neuralReady = !!neural && (await packReady(neural.pack));
 }
+// A voice finished downloading or was deleted, here or in the options page.
+new BroadcastChannel('babil-tts').onmessage = ({ data }) => ['ready', 'deleted'].includes(data.type) && loadSpeech();
+
+const toEngine = (msg) => chrome.runtime.sendMessage({ target: 'offscreen', ...msg }).catch(() => {});
+const neuralTts = neuralSpeaker(toEngine);
 
 // chrome.tts works from the service worker without a user gesture, unlike speechSynthesis in a page.
+function systemSpeak(text, done) {
+  const onEvent = (e) => ['end', 'interrupted', 'cancelled', 'error'].includes(e.type) && done();
+  chrome.tts.speak(text, { lang: speech.target, voiceName: say.voice?.name, rate: say.rate, pitch: say.pitch, onEvent }).catch(done);
+}
+
+const useNeural = () => neural && neuralReady && !neuralOff;
+
+// Until the persona's voice is downloaded, which starts with the first sentence, a system voice reads.
 const speaker = createSpeaker({
   speak(text, done) {
-    const onEvent = (e) => ['end', 'interrupted', 'cancelled', 'error'].includes(e.type) && done();
-    chrome.tts.speak(text, { lang: speech.target, voiceName: say.voice?.name, rate: say.rate, pitch: say.pitch, onEvent }).catch(done);
+    if (!useNeural()) {
+      if (neural && !neuralReady && ensured !== neural.pack) toEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
+      return systemSpeak(text, done);
+    }
+    neuralTts.speak(text, neural, (ok) => (ok ? done() : systemSpeak(text, done)));
   },
-  cancel: () => chrome.tts.stop(),
+  prepare: (text) => useNeural() && toEngine({ type: 'tts-prepare', text, voice: neural }),
+  cancel() {
+    chrome.tts.stop();
+    toEngine({ type: 'tts-stop' });
+  },
   // Lower the replayed tab audio while a translation is read out.
   onSpeaking(on) {
     const gain = on && speech.ttsDuck ? 0.3 : 1;
-    chrome.runtime.sendMessage({ target: 'offscreen', type: 'duck', gain }).catch(() => {});
+    toEngine({ type: 'duck', gain });
   },
 });
 
@@ -54,6 +80,8 @@ async function start(tabId, streamId) {
     });
   }
   await save({ running: true, tabId, target, status: { state: 'loading', text: i18n('status_starting') }, asrMs: null, needPairs: [] });
+  neuralOff = false;
+  ensured = null;
   chrome.runtime.sendMessage({ target: 'offscreen', type: 'start', streamId, settings: { model, source, target, instant } });
 }
 
@@ -89,6 +117,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         }
         await save({ status: { state: msg.state, text, progress: msg.progress } });
         chrome.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text }).catch(() => {});
+        // Whisper is loaded; load the voice too so the first sentence does not wait for it.
+        if (msg.device && speech.tts && useNeural()) toEngine({ type: 'tts-load', pack: neural.pack });
         break;
       }
       case 'stats':
@@ -99,6 +129,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         break;
       case 'pair-ready':
         await save({ needPairs: state.needPairs.filter((s) => s !== msg.source) });
+        break;
+      case 'tts-ended':
+        if (msg.fallback) neuralOff = true;
+        neuralTts.ended(msg);
         break;
     }
     reply?.(true);

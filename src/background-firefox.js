@@ -1,5 +1,6 @@
 import { loadSettings, i18n } from './settings.js';
-import { createSpeaker, resolveVoice, listVoices } from './speech.js';
+import { createSpeaker, resolveVoice, listVoices, neuralSpeaker } from './speech.js';
+import { resolveNeural, packReady } from './tts/catalog.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = browser.storage.session.get('state').then((r) => r.state && (state = r.state));
@@ -10,27 +11,49 @@ function save(patch) {
 }
 
 let speech = {};
-let say;
+let say, neural;
+let neuralReady = false;
+let neuralOff = false;
+let ensured = null;
 const speechLoaded = loadSpeech();
 speechSynthesis.onvoiceschanged = loadSpeech;
 
 async function loadSpeech() {
   speech = await loadSettings();
   say = resolveVoice(await listVoices(), speech.target, speech);
+  neural = resolveNeural(speech.ttsPersona, speech.target);
+  neuralReady = !!neural && (await packReady(neural.pack));
 }
+new BroadcastChannel('babil-tts').onmessage = ({ data }) => ['ready', 'deleted'].includes(data.type) && loadSpeech();
 
 // No browser.tts in Firefox; the persistent background page can use speechSynthesis directly.
+function systemSpeak(text, done) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = speech.target;
+  u.rate = say.rate;
+  u.pitch = say.pitch;
+  u.voice = say.voice?.voice ?? null;
+  u.onend = u.onerror = done;
+  speechSynthesis.speak(u);
+}
+
+const neuralTts = neuralSpeaker(sendToEngine);
+const useNeural = () => neural && neuralReady && !neuralOff;
+
+// Downloaded voices play from offscreen.js, which runs in this same page.
 const speaker = createSpeaker({
   speak(text, done) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = speech.target;
-    u.rate = say.rate;
-    u.pitch = say.pitch;
-    u.voice = say.voice?.voice ?? null;
-    u.onend = u.onerror = done;
-    speechSynthesis.speak(u);
+    if (!useNeural()) {
+      if (neural && !neuralReady && ensured !== neural.pack) sendToEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
+      return systemSpeak(text, done);
+    }
+    neuralTts.speak(text, neural, (ok) => (ok ? done() : systemSpeak(text, done)));
   },
-  cancel: () => speechSynthesis.cancel(),
+  prepare: (text) => useNeural() && sendToEngine({ type: 'tts-prepare', text, voice: neural }),
+  cancel() {
+    speechSynthesis.cancel();
+    sendToEngine({ type: 'tts-stop' });
+  },
 });
 
 async function sendToEngine(message) {
@@ -49,6 +72,8 @@ async function start(tabId) {
   await inject(tabId, 'content.js');
   await inject(tabId, 'capture-firefox.js');
   await save({ running: true, tabId, target, status: { state: 'loading', text: i18n('status_starting') }, asrMs: null, needPairs: [] });
+  neuralOff = false;
+  ensured = null;
   await sendToEngine({ type: 'start-frames', settings: { model, source, target, instant, translationEnabled: firefoxTranslationEnabled } });
   await browser.tabs.sendMessage(tabId, { type: 'capture-start' });
 }
@@ -87,10 +112,15 @@ async function handleBgMessage(msg) {
       }
       await save({ status: { state: msg.state, text, progress: msg.progress } });
       browser.tabs.sendMessage(state.tabId, { type: 'status', state: msg.state, text }).catch(() => {});
+      if (msg.device && speech.tts && useNeural()) sendToEngine({ type: 'tts-load', pack: neural.pack });
       break;
     }
     case 'stats':
       await save({ asrMs: msg.asrMs });
+      break;
+    case 'tts-ended':
+      if (msg.fallback) neuralOff = true;
+      neuralTts.ended(msg);
       break;
   }
 }
