@@ -9,7 +9,7 @@
 - 🌍 Translate videos into 26 languages on YouTube, Twitch, Kick, and more
 - 💬 See original and translated captions together, including in fullscreen
 - 🔊 Hear translations read aloud, with the video turned down while each sentence is spoken (Chrome)
-- 🎙️ Choose a voice persona and press **Listen** to hear a sample
+- 🎙️ Choose a voice persona and press **Listen** to hear a sample; each persona is its own natural voice, downloaded once and played on your computer
 - 🗣️ Babil's own screens are in English, Turkish, Spanish, Hindi, and Simplified Chinese, following your browser's language
 - 🎨 Drag captions to move them; customize their font, size, and colors
 - 🔒 Audio stays on your computer. Free, with no account or API key needed
@@ -39,7 +39,9 @@ Firefox captures audio from the playing page's video element. Protected media an
 
 The first start downloads a speech model (about **600 MB** on automatic). Wait for it to finish; future starts use the saved copy.
 
-🔊 To hear the translation, tick **Read translation aloud** in Babil's panel. Pick a voice persona under **Voice** in the panel, or on the settings page, where **Listen** plays a sample of each. Persona names differ per language (in English: Iris, Ruby, Owen, Miles, Grace, Skye). Personas use voices already on your computer, and a voice on your computer is chosen over an online one, so captions are not sent to an online voice when a local one exists. Add more voices in your system's speech settings (Windows: **Settings > Time & language > Speech**; macOS: **System Settings > Accessibility > Spoken Content**). **Custom** keeps your own voice and speed.
+🔊 To hear the translation, tick **Read translation aloud** in Babil's panel. Pick a voice persona under **Voice** in the panel, or on the settings page, where **Listen** plays a sample of each. Persona names differ per language (in English: Iris, Ruby, Owen, Miles, Grace, Skye).
+
+Each persona has its own voice, which Babil downloads once and then plays on your computer, so the captions it reads stay on your computer. One download of about **210 MB** covers 22 languages, including English, Turkish, Spanish, Hindi, Arabic, Japanese and Korean; Chinese has two voices of **63 MB** each, shared by the personas at different speeds and pitches. The settings page shows for every persona which voice it uses and whether it is downloaded, with a progress bar while it downloads, and **Delete** frees the space again. Until a voice is downloaded, and for Bengali and Thai, a system voice reads aloud instead; Babil picks one on your computer over an online one when it can (add more in **Settings > Time & language > Speech** on Windows or **System Settings > Accessibility > Spoken Content** on macOS). **Custom** always uses your own system voice and speed.
 
 💡 For better accuracy, select the video's spoken language. Use the **Settings** button at the bottom of Babil's panel to change how captions look.
 
@@ -70,4 +72,8 @@ Build the Firefox package with `npm run build:firefox` (output: `dist-firefox/`)
 
 ## 📄 License
 
-MIT
+MIT. The downloadable voices have their own licenses:
+
+- [Supertonic 3](https://huggingface.co/supertone-oss-archive/supertonic-3) by Supertone (22 languages): OpenRAIL-M. Babil downloads a [copy with an 8-bit vector estimator](https://huggingface.co/payam1394/traxlate-supertonic-3-q8ve), or the original if that copy is gone. Babil's Supertonic code is ported from Supertone's MIT sample code.
+- [Xiao Ya](https://huggingface.co/rhasspy/piper-voices/tree/main/zh/zh_CN/xiao_ya/medium) (Piper, Chinese): trained on the Biaobei dataset, non-commercial use only.
+- [Chaowen](https://huggingface.co/rhasspy/piper-voices/tree/main/zh/zh_CN/chaowen/medium) (Piper, Chinese): CC0 dataset, fine-tuned from Xiao Ya.
