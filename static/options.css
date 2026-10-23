@@ -22,6 +22,7 @@ input[type=color] { width: 100%; height: 32px; border: 1px solid var(--line); bo
 .packs { display: flex; flex-direction: column; gap: 8px; }
 .packs:empty { display: none; }
 .pack { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
-.pack-head { display: flex; align-items: center; gap: 8px; }
+.pack-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pack-head > * { white-space: nowrap; }
 .pack-head button { margin-left: auto; padding: 4px 10px; font-size: 12px; }
 .persona button { align-self: flex-start; margin-top: 6px; padding: 4px 10px; font-size: 12px; }
