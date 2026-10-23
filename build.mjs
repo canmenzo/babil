@@ -34,8 +34,8 @@ const contexts = [
   await esbuild.context({
     ...common,
     entryPoints: firefox
-      ? ['src/background-firefox.js', 'src/offscreen.js', 'src/popup.js', 'src/options.js', 'src/asr-worker.js']
-      : ['src/background.js', 'src/offscreen.js', 'src/popup.js', 'src/options.js', 'src/asr-worker.js'],
+      ? ['src/background-firefox.js', 'src/offscreen.js', 'src/popup.js', 'src/options.js', 'src/asr-worker.js', 'src/tts-worker.js']
+      : ['src/background.js', 'src/offscreen.js', 'src/popup.js', 'src/options.js', 'src/asr-worker.js', 'src/tts-worker.js'],
     format: 'esm',
     // Use the ORT build that loads its wasm factory from wasmPaths instead of inlining it.
     conditions: ['onnxruntime-web-use-extern-wasm'],
