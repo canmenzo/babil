@@ -144,12 +144,17 @@ const personaCards = Object.keys(PERSONAS).map((id) => {
   card.querySelector('strong').textContent = i18n(`persona_${id}_name`);
   card.querySelector('.small').textContent = i18n(`persona_${id}_desc`);
   card.querySelector('button').textContent = i18n('listen');
-  card.querySelector('input').onchange = () => {
+  const choose = () => {
     s.ttsPersona = id;
     fill();
     chrome.storage.local.set({ ttsPersona: id });
   };
-  card.querySelector('button').onclick = () => listen(id);
+  card.querySelector('input').onchange = choose;
+  // A button inside a label does not check its radio, so Listen chooses the persona itself.
+  card.querySelector('button').onclick = () => {
+    choose();
+    listen(id);
+  };
   return Object.assign(card, { personaId: id });
 });
 document.getElementById('personas').append(...personaCards);
