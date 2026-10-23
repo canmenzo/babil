@@ -16,5 +16,12 @@ input[type=color] { width: 100%; height: 32px; border: 1px solid var(--line); bo
 .persona.selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .persona input { position: absolute; opacity: 0; pointer-events: none; }
 .persona:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-.persona .voice { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.persona .voice { overflow-wrap: anywhere; }
+.persona .state.ok { color: var(--ok); }
+.persona .bar { margin-top: 2px; }
+.packs { display: flex; flex-direction: column; gap: 8px; }
+.packs:empty { display: none; }
+.pack { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.pack-head { display: flex; align-items: center; gap: 8px; }
+.pack-head button { margin-left: auto; padding: 4px 10px; font-size: 12px; }
 .persona button { align-self: flex-start; margin-top: 6px; padding: 4px 10px; font-size: 12px; }

@@ -1,5 +1,6 @@
 import { loadSettings, langName, isCached, i18n, localize, MODELS, SOURCE_LANGS, TARGET_LANGS } from './settings.js';
-import { PERSONAS } from './speech.js';
+import { PERSONAS, listVoices, resolveVoice, voiceStatus } from './speech.js';
+import { resolveNeural, watchPacks } from './tts/catalog.js';
 
 const $ = (id) => document.getElementById(id);
 localize();
@@ -106,9 +107,10 @@ $('openOptions').onclick = (e) => {
 for (const id of ['source', 'target', 'model']) {
   $(id).onchange = () => {
     chrome.storage.local.set({ [id]: $(id).value });
-    if (id === 'model') modelHint();
+    if (id === 'model') return modelHint();
+    if (id === 'target') ttsHint();
     // This change event is a user click, so a missing translation model can start downloading now.
-    else if (state.running) ensurePair(likelySource(), $('target').value);
+    if (state.running) ensurePair(likelySource(), $('target').value);
   };
 }
 
@@ -122,10 +124,37 @@ async function modelHint() {
 }
 $('showOriginal').onchange = () => chrome.storage.local.set({ showOriginal: $('showOriginal').checked });
 $('tts').onchange = () => {
-  $('personaField').hidden = !$('tts').checked;
+  $('personaField').hidden = $('ttsHint').hidden = !$('tts').checked;
   chrome.storage.local.set({ tts: $('tts').checked });
 };
-$('ttsPersona').onchange = () => chrome.storage.local.set({ ttsPersona: $('ttsPersona').value });
+$('ttsPersona').onchange = () => {
+  chrome.storage.local.set({ ttsPersona: $('ttsPersona').value });
+  ttsHint();
+};
+
+// Whether the chosen persona's voice is downloaded, downloading or a system voice.
+let packs, voices, settings;
+function ttsHint() {
+  const persona = $('ttsPersona').value;
+  const target = $('target').value;
+  const system = resolveVoice(voices, target, { ...settings, ttsPersona: persona }).voice;
+  const st = voiceStatus(persona, target, packs, system);
+  const needs = st.voice && !st.ready && st.progress == null;
+  $('ttsHintText').textContent = `${st.label} · ${st.state}${needs ? ` ${i18n('tts_until_ready')}` : ''}`;
+  $('ttsBar').hidden = st.progress == null;
+  $('ttsBar').firstElementChild.style.width = `${st.progress ?? 0}%`;
+  $('ttsDownload').hidden = !needs;
+}
+
+// The popup closes on the first click elsewhere, so it never downloads itself: running captions
+// download in their own page, otherwise the settings page does.
+$('ttsDownload').onclick = () => {
+  const { pack } = resolveNeural($('ttsPersona').value, $('target').value);
+  if (!state.running) return chrome.tabs.create({ url: chrome.runtime.getURL('options.html?download=1') });
+  chrome.runtime.sendMessage({ target: 'offscreen', type: 'tts-ensure', pack }).catch(() => {});
+  packs[pack].progress = 0;
+  ttsHint();
+};
 $('cues').onchange = () => chrome.storage.local.set({ cues: Number($('cues').value) });
 
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -204,9 +233,13 @@ $('model').value = s.model;
 $('showOriginal').checked = s.showOriginal;
 $('tts').checked = s.tts;
 $('ttsPersona').value = s.ttsPersona;
-$('personaField').hidden = !s.tts;
+$('personaField').hidden = $('ttsHint').hidden = !s.tts;
 $('cues').value = s.cues;
 modelHint();
+settings = s;
+voices = await listVoices();
+packs = watchPacks(ttsHint);
+ttsHint();
 state = (await chrome.storage.session.get('state')).state ?? {};
 translationEnabled = (await chrome.storage.local.get('firefoxTranslationEnabled')).firefoxTranslationEnabled ?? false;
 render();

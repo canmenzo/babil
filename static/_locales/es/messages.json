@@ -355,5 +355,56 @@
   },
   "capture_no_track": {
     "message": "No hay ninguna pista de audio disponible. El DRM o un reproductor protegido pueden impedir la captura."
+  },
+  "tts_voice_supertonic": {
+    "message": "Voz Supertonic $1"
+  },
+  "tts_shared": {
+    "message": "$1, la misma voz que $2, $3"
+  },
+  "tts_tweak_higher": {
+    "message": "más aguda"
+  },
+  "tts_tweak_deeper": {
+    "message": "más grave"
+  },
+  "tts_tweak_slower": {
+    "message": "más lenta"
+  },
+  "tts_tweak_faster": {
+    "message": "más rápida"
+  },
+  "tts_no_neural": {
+    "message": "No hay voz descargable para $1"
+  },
+  "tts_downloaded": {
+    "message": "Descargada"
+  },
+  "tts_needs_download": {
+    "message": "Hay que descargarla ($1)"
+  },
+  "tts_failed": {
+    "message": "No se pudo descargar: $1"
+  },
+  "tts_download": {
+    "message": "Descargar"
+  },
+  "tts_delete": {
+    "message": "Eliminar"
+  },
+  "tts_download_voice": {
+    "message": "Descargar voz"
+  },
+  "tts_keep_open": {
+    "message": "Mantén esta pestaña abierta hasta que termine la descarga."
+  },
+  "tts_pack_note": {
+    "message": "Se descarga una vez y luego las voces suenan en este equipo."
+  },
+  "tts_license": {
+    "message": "Licencia"
+  },
+  "tts_until_ready": {
+    "message": "Mientras tanto, lee una voz del sistema."
   }
 }

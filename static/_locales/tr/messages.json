@@ -355,5 +355,56 @@
   },
   "capture_no_track": {
     "message": "Ses kanalı bulunamadı. DRM veya korumalı bir oynatıcı yakalamayı engelleyebilir."
+  },
+  "tts_voice_supertonic": {
+    "message": "Supertonic sesi $1"
+  },
+  "tts_shared": {
+    "message": "$1, $2 ile aynı ses, $3"
+  },
+  "tts_tweak_higher": {
+    "message": "daha ince"
+  },
+  "tts_tweak_deeper": {
+    "message": "daha kalın"
+  },
+  "tts_tweak_slower": {
+    "message": "daha yavaş"
+  },
+  "tts_tweak_faster": {
+    "message": "daha hızlı"
+  },
+  "tts_no_neural": {
+    "message": "$1 için indirilebilir ses yok"
+  },
+  "tts_downloaded": {
+    "message": "İndirildi"
+  },
+  "tts_needs_download": {
+    "message": "İndirilmesi gerekiyor ($1)"
+  },
+  "tts_failed": {
+    "message": "İndirilemedi: $1"
+  },
+  "tts_download": {
+    "message": "İndir"
+  },
+  "tts_delete": {
+    "message": "Sil"
+  },
+  "tts_download_voice": {
+    "message": "Sesi indir"
+  },
+  "tts_keep_open": {
+    "message": "İndirme bitene kadar bu sekmeyi açık tutun."
+  },
+  "tts_pack_note": {
+    "message": "Bir kez indirilir, sonra sesler bu bilgisayarda çalar."
+  },
+  "tts_license": {
+    "message": "Lisans"
+  },
+  "tts_until_ready": {
+    "message": "O zamana kadar bir sistem sesi okur."
   }
 }

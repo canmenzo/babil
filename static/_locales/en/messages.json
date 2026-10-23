@@ -355,5 +355,56 @@
   },
   "capture_no_track": {
     "message": "No audio track is available. DRM or a protected player can block capture."
+  },
+  "tts_voice_supertonic": {
+    "message": "Supertonic voice $1"
+  },
+  "tts_shared": {
+    "message": "$1, same voice as $2, $3"
+  },
+  "tts_tweak_higher": {
+    "message": "higher"
+  },
+  "tts_tweak_deeper": {
+    "message": "deeper"
+  },
+  "tts_tweak_slower": {
+    "message": "slower"
+  },
+  "tts_tweak_faster": {
+    "message": "faster"
+  },
+  "tts_no_neural": {
+    "message": "No downloadable voice for $1"
+  },
+  "tts_downloaded": {
+    "message": "Downloaded"
+  },
+  "tts_needs_download": {
+    "message": "Needs a download ($1)"
+  },
+  "tts_failed": {
+    "message": "Download failed: $1"
+  },
+  "tts_download": {
+    "message": "Download"
+  },
+  "tts_delete": {
+    "message": "Delete"
+  },
+  "tts_download_voice": {
+    "message": "Download voice"
+  },
+  "tts_keep_open": {
+    "message": "Keep this tab open until the download finishes."
+  },
+  "tts_pack_note": {
+    "message": "Downloads once, then the voices play on this computer."
+  },
+  "tts_license": {
+    "message": "License"
+  },
+  "tts_until_ready": {
+    "message": "Until then, a system voice reads aloud."
   }
 }

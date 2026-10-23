@@ -98,3 +98,17 @@ export async function packReady(pack) {
   }
 }
 
+// Pack states for the settings page and popup: { ready, progress, error } per pack, from OPFS and
+// the 'babil-tts' messages of whichever page is downloading.
+export function watchPacks(onChange) {
+  const packs = Object.fromEntries(Object.keys(PACKS).map((p) => [p, {}]));
+  new BroadcastChannel('babil-tts').onmessage = ({ data }) => {
+    const p = packs[data.pack];
+    if (data.type === 'progress') Object.assign(p, { progress: Math.min(99, Math.floor((100 * data.loaded) / data.total)), error: null });
+    else if (data.type === 'error') Object.assign(p, { progress: null, error: data.message });
+    else Object.assign(p, { ready: data.type === 'ready', progress: null, error: null });
+    onChange(data);
+  };
+  Promise.all(Object.keys(PACKS).map(async (p) => (packs[p].ready = await packReady(p)))).then(() => onChange({}));
+  return packs;
+}

@@ -40,6 +40,11 @@
   <label class="check"><input type="checkbox" id="showOriginal"> <span data-i18n="show_original_too"></span></label>
   <label class="check"><input type="checkbox" id="tts"> <span data-i18n="tts"></span></label>
   <label class="field" id="personaField"><span data-i18n="voice"></span> <select id="ttsPersona"></select></label>
+  <div id="ttsHint" class="hint tts-hint">
+    <span id="ttsHintText" class="muted small"></span>
+    <div id="ttsBar" class="bar" hidden><div></div></div>
+    <button id="ttsDownload" data-i18n="tts_download_voice" hidden></button>
+  </div>
 
   <label class="field"><span data-i18n="cues_label"></span>
     <select id="cues"></select>

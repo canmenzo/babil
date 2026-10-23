@@ -355,5 +355,56 @@
   },
   "capture_no_track": {
     "message": "कोई ऑडियो ट्रैक उपलब्ध नहीं है। DRM या सुरक्षित प्लेयर कैप्चर रोक सकता है।"
+  },
+  "tts_voice_supertonic": {
+    "message": "Supertonic आवाज़ $1"
+  },
+  "tts_shared": {
+    "message": "$1, $2 जैसी ही आवाज़, $3"
+  },
+  "tts_tweak_higher": {
+    "message": "ऊँची"
+  },
+  "tts_tweak_deeper": {
+    "message": "भारी"
+  },
+  "tts_tweak_slower": {
+    "message": "धीमी"
+  },
+  "tts_tweak_faster": {
+    "message": "तेज़"
+  },
+  "tts_no_neural": {
+    "message": "$1 के लिए डाउनलोड करने लायक कोई आवाज़ नहीं"
+  },
+  "tts_downloaded": {
+    "message": "डाउनलोड हो चुकी है"
+  },
+  "tts_needs_download": {
+    "message": "डाउनलोड करनी होगी ($1)"
+  },
+  "tts_failed": {
+    "message": "डाउनलोड नहीं हो सका: $1"
+  },
+  "tts_download": {
+    "message": "डाउनलोड करें"
+  },
+  "tts_delete": {
+    "message": "हटाएँ"
+  },
+  "tts_download_voice": {
+    "message": "आवाज़ डाउनलोड करें"
+  },
+  "tts_keep_open": {
+    "message": "डाउनलोड पूरा होने तक यह टैब खुला रखें।"
+  },
+  "tts_pack_note": {
+    "message": "एक बार डाउनलोड होती हैं, फिर आवाज़ें इसी कंप्यूटर पर चलती हैं।"
+  },
+  "tts_license": {
+    "message": "लाइसेंस"
+  },
+  "tts_until_ready": {
+    "message": "तब तक सिस्टम की आवाज़ पढ़कर सुनाएगी।"
   }
 }

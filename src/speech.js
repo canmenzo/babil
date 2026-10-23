@@ -1,3 +1,6 @@
+import { i18n, langName } from './settings.js';
+import { PACKS, packSize, resolveNeural } from './tts/catalog.js';
+
 // Reads final captions aloud, each once, in the target language. Only MAX_QUEUE sentences wait
 // behind the one being spoken; older ones are dropped so speech stays close to the video.
 const MAX_QUEUE = 2;
@@ -106,6 +109,25 @@ export function resolveVoice(voices, lang, s) {
   const gendered = (list) => list.filter((v) => voiceGender(v.name) === p.gender);
   const voice = pickVoice(gendered(local), lang, '') ?? pickVoice(local, lang, '') ?? pickVoice(gendered(voices), lang, '') ?? pickVoice(voices, lang, '');
   return { voice, rate: p.rate, pitch: p.pitch };
+}
+
+// What a persona card or the popup says about its voice: which one it is and whether it is
+// downloaded. packs is from watchPacks; system is the system voice resolveVoice picked.
+export function voiceStatus(persona, lang, packs, system) {
+  const v = resolveNeural(persona, lang);
+  if (!v) {
+    const label = system?.name ?? i18n('system_voice');
+    return { label, state: persona === 'custom' ? i18n('system_voice') : i18n('tts_no_neural', langName(lang)) };
+  }
+  const name = v.style ? i18n('tts_voice_supertonic', v.style) : PACKS[v.pack].name;
+  const label = v.like ? i18n('tts_shared', name, i18n(`persona_${v.like}_name`), i18n(`tts_tweak_${v.tweak}`)) : name;
+  const p = packs[v.pack];
+  let state;
+  if (p.ready) state = i18n('tts_downloaded');
+  else if (p.progress != null) state = i18n('downloading_pct', p.progress);
+  else if (p.error) state = i18n('tts_failed', p.error);
+  else state = i18n('tts_needs_download', packSize(v.pack));
+  return { label, state, voice: v, ready: !!p.ready, progress: p.ready ? null : p.progress };
 }
 
 const SAMPLES = {

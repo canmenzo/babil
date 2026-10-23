@@ -355,5 +355,56 @@
   },
   "capture_no_track": {
     "message": "没有可用的音轨。DRM 或受保护的播放器可能会阻止捕获。"
+  },
+  "tts_voice_supertonic": {
+    "message": "Supertonic 语音 $1"
+  },
+  "tts_shared": {
+    "message": "$1，与$2相同的声音，$3"
+  },
+  "tts_tweak_higher": {
+    "message": "音调更高"
+  },
+  "tts_tweak_deeper": {
+    "message": "更低沉"
+  },
+  "tts_tweak_slower": {
+    "message": "更慢"
+  },
+  "tts_tweak_faster": {
+    "message": "更快"
+  },
+  "tts_no_neural": {
+    "message": "$1没有可下载的语音"
+  },
+  "tts_downloaded": {
+    "message": "已下载"
+  },
+  "tts_needs_download": {
+    "message": "需要下载（$1）"
+  },
+  "tts_failed": {
+    "message": "下载失败：$1"
+  },
+  "tts_download": {
+    "message": "下载"
+  },
+  "tts_delete": {
+    "message": "删除"
+  },
+  "tts_download_voice": {
+    "message": "下载语音"
+  },
+  "tts_keep_open": {
+    "message": "下载完成前请不要关闭此标签页。"
+  },
+  "tts_pack_note": {
+    "message": "只需下载一次，之后语音在这台电脑上播放。"
+  },
+  "tts_license": {
+    "message": "许可证"
+  },
+  "tts_until_ready": {
+    "message": "在此之前由系统语音朗读。"
   }
 }

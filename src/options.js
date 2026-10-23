@@ -1,5 +1,7 @@
 import { DEFAULTS, FONTS, EDGES, loadSettings, captionCss, langName, i18n, localize } from './settings.js';
-import { listVoices, resolveVoice, sampleText, PERSONAS } from './speech.js';
+import { listVoices, resolveVoice, sampleText, voiceStatus, PERSONAS } from './speech.js';
+import { PACKS, packSize, resolveNeural, watchPacks } from './tts/catalog.js';
+import { createTtsPlayer } from './tts-player.js';
 
 localize();
 let s = await loadSettings();
@@ -62,7 +64,7 @@ if (FIREFOX_BUILD) speechSynthesis.onvoiceschanged = async () => {
 };
 
 // A new preview replaces the one playing (chrome.tts.speak interrupts by default).
-function listen(ttsPersona) {
+function systemListen(ttsPersona) {
   const { voice, rate, pitch } = resolveVoice(voices, s.target, { ...s, ttsPersona });
   const text = sampleText(s.target);
   if (!FIREFOX_BUILD) return chrome.tts.speak(text, { lang: s.target, voiceName: voice?.name, rate, pitch });
@@ -72,10 +74,73 @@ function listen(ttsPersona) {
   speechSynthesis.speak(u);
 }
 
+const tts = createTtsPlayer({ threads: Math.min(4, navigator.hardwareConcurrency || 2) });
+let listenAfterDownload = null;
+// The popup opens this page with ?download=1 to download the chosen persona's voice.
+let autoDownload = new URLSearchParams(location.search).has('download');
+const packs = watchPacks((msg) => {
+  const chosen = resolveNeural(s.ttsPersona, s.target);
+  if (autoDownload && !msg.type && chosen && !packs[chosen.pack].ready) download(chosen.pack);
+  autoDownload = false;
+  if (msg.type === 'ready' && listenAfterDownload && resolveNeural(listenAfterDownload, s.target)?.pack === msg.pack) listen(listenAfterDownload);
+  fill();
+});
+
+function download(pack) {
+  Object.assign(packs[pack], { progress: 0, error: null });
+  tts.download(pack);
+  fill();
+}
+
+// A persona whose voice is not downloaded yet downloads it first, then plays the sample.
+function listen(ttsPersona) {
+  const voice = resolveNeural(ttsPersona, s.target);
+  listenAfterDownload = null;
+  tts.stop();
+  if (FIREFOX_BUILD) speechSynthesis.cancel();
+  else chrome.tts.stop();
+  if (!voice) return systemListen(ttsPersona);
+  if (!packs[voice.pack].ready) {
+    listenAfterDownload = ttsPersona;
+    if (packs[voice.pack].progress == null) download(voice.pack);
+    return;
+  }
+  tts.speak(sampleText(s.target), voice).catch(() => systemListen(ttsPersona));
+}
+
+// One row per voice pack the target language uses, with its download state.
+function packRows() {
+  const used = [...new Set(Object.keys(PERSONAS).map((p) => resolveNeural(p, s.target)?.pack).filter(Boolean))];
+  document.getElementById('packs').replaceChildren(
+    ...used.map((pack) => {
+      const p = packs[pack];
+      const row = document.createElement('div');
+      row.className = 'pack';
+      row.innerHTML = '<div class="pack-head"><strong></strong><span class="small muted"></span><button type="button"></button></div><div class="bar"><div></div></div><span class="small muted"></span>';
+      const [name, state] = row.querySelectorAll('.pack-head > *');
+      const button = row.querySelector('button');
+      name.textContent = PACKS[pack].name;
+      if (p.ready) state.textContent = i18n('tts_downloaded');
+      else state.textContent = p.error ? i18n('tts_failed', p.error) : packSize(pack);
+      const busy = p.progress != null;
+      button.textContent = busy ? i18n('downloading_pct', p.progress) : i18n(p.ready ? 'tts_delete' : 'tts_download');
+      button.disabled = busy;
+      button.onclick = () => (p.ready ? tts.remove(pack) : download(pack));
+      row.querySelector('.bar').hidden = !busy;
+      row.querySelector('.bar > div').style.width = `${p.progress ?? 0}%`;
+      const note = row.lastElementChild;
+      note.textContent = `${i18n(busy ? 'tts_keep_open' : 'tts_pack_note')} `;
+      note.append(Object.assign(document.createElement('a'), { href: PACKS[pack].license, target: '_blank', textContent: i18n('tts_license') }));
+      return row;
+    }),
+  );
+}
+
 const personaCards = Object.keys(PERSONAS).map((id) => {
   const card = document.createElement('label');
   card.className = 'persona';
-  card.innerHTML = '<input type="radio" name="ttsPersona"><strong></strong><span class="small"></span><span class="small muted voice"></span><button type="button"></button>';
+  card.innerHTML =
+    '<input type="radio" name="ttsPersona"><strong></strong><span class="small"></span><span class="small muted voice"></span><span class="small state"></span><div class="bar"><div></div></div><button type="button"></button>';
   card.querySelector('strong').textContent = i18n(`persona_${id}_name`);
   card.querySelector('.small').textContent = i18n(`persona_${id}_desc`);
   card.querySelector('button').textContent = i18n('listen');
@@ -111,10 +176,17 @@ function fill() {
     const on = card.personaId === s.ttsPersona;
     card.classList.toggle('selected', on);
     card.querySelector('input').checked = on;
-    const name = resolveVoice(voices, s.target, { ...s, ttsPersona: card.personaId }).voice?.name ?? i18n('system_voice');
-    Object.assign(card.querySelector('.voice'), { textContent: name, title: name });
+    const system = resolveVoice(voices, s.target, { ...s, ttsPersona: card.personaId }).voice;
+    const st = voiceStatus(card.personaId, s.target, packs, system);
+    Object.assign(card.querySelector('.voice'), { textContent: st.label, title: st.label });
+    const state = card.querySelector('.state');
+    state.textContent = st.state;
+    state.classList.toggle('ok', st.ready);
+    card.querySelector('.bar').hidden = st.progress == null;
+    card.querySelector('.bar > div').style.width = `${st.progress ?? 0}%`;
   }
   for (const el of customOnly) el.hidden = s.ttsPersona !== 'custom';
+  packRows();
 }
 
 function preview() {
