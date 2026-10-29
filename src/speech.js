@@ -4,19 +4,25 @@ import { PACKS, packSize, resolveNeural } from './tts/catalog.js';
 // Reads final captions aloud, each once, in the target language. Only MAX_QUEUE sentences wait
 // behind the one being spoken; older ones are dropped so speech stays close to the video.
 const MAX_QUEUE = 2;
+// A translation is usually longer than what was said, so reading falls behind fast talk. Each
+// sentence already waiting makes the next one this much faster, up to MAX_HURRY.
+const HURRY_STEP = 0.12;
+const MAX_HURRY = 1.35;
+const REPEAT_MS = 8000; // the same sentence again within this is not read twice
 
 export function createSpeaker({ speak, cancel, prepare = () => {}, onSpeaking = () => {} }) {
   const spoken = new Set();
-  const queue = [];
+  const queue = []; // { text, hurry }
+  let last = { text: '', t: 0 };
   let turn = 0;
   let busy = false;
 
   function next() {
-    const text = queue.shift();
-    if (busy !== !!text) onSpeaking((busy = !!text));
-    if (!text) return;
+    const item = queue.shift();
+    if (busy !== !!item) onSpeaking((busy = !!item));
+    if (!item) return;
     const t = ++turn;
-    speak(text, () => t === turn && next());
+    speak(item.text, item.hurry, () => t === turn && next());
   }
 
   return {
@@ -25,14 +31,19 @@ export function createSpeaker({ speak, cancel, prepare = () => {}, onSpeaking = 
       const text = msg.translated ?? (msg.language === target ? msg.original : null);
       if (!text) return;
       spoken.add(msg.id);
-      queue.push(text);
+      if (text === last.text && Date.now() - last.t < REPEAT_MS) return;
+      last = { text, t: Date.now() };
+      // The speed is fixed when the sentence is queued, so what prepare() synthesizes is what plays.
+      const item = { text, hurry: Math.min(MAX_HURRY, 1 + HURRY_STEP * (queue.length + (busy ? 1 : 0))) };
+      queue.push(item);
       if (queue.length > MAX_QUEUE) queue.shift();
       if (!busy) next();
-      else prepare(text);
+      else prepare(item.text, item.hurry);
     },
     stop() {
       queue.length = 0;
       spoken.clear();
+      last = { text: '', t: 0 };
       turn++;
       if (busy) onSpeaking((busy = false));
       cancel();

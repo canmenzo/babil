@@ -46,6 +46,10 @@ const INTERJECTIONS = {
 const TERMINATOR = /[.!?…。！？]["'”’)\]]*$/;
 const FLUSH_MS = 1500; // an unfinished sentence is shown anyway after this much silence
 const MAX_CARRY = 30; // words; very long unpunctuated speech is shown in chunks
+// Whisper often leaves a sentence unpunctuated when the talk runs on ("some guys And honestly"),
+// and the next segment then got glued onto it, which translated as one garbled sentence. A pause
+// this long (in frames) between two segments ends the sentence instead.
+const GAP_SENTENCE = 7;
 
 // Chrome's translator sees one sentence without context, so English streaming slang gets literal
 // translations ("stream" -> "akış", "corriente"). Rewrite it into words that translate right.
@@ -72,6 +76,7 @@ const translations = new Map();
 
 let seg = null; // { id, frames, rms, speech, quiet, sinceProbe, words, language, emitted, lastEmitted }
 let preroll = []; // [frame, rms] while no segment is open
+let gap = 0; // quiet frames since the last segment closed
 let nextId = 1;
 let noise = 0.005;
 let langScore = {}; // language -> recent share of sentences, steers auto-detect
@@ -234,6 +239,7 @@ function onFrame(f) {
 
   if (!seg) {
     if (!loud) {
+      gap++;
       preroll.push([f, r]);
       if (preroll.length > PREROLL) preroll.shift();
       return;
@@ -243,6 +249,7 @@ function onFrame(f) {
       preroll.map(([, pr]) => pr),
       0,
     );
+    seg.gap = gap;
     preroll = [];
   }
   seg.frames.push(f);
@@ -270,7 +277,7 @@ function onFrame(f) {
 }
 
 function newSegment(frames, rms, speech) {
-  return { id: nextId++, frames, rms, speech, quiet: 0, sinceProbe: frames.length, words: null, emitted: 0 };
+  return { id: nextId++, frames, rms, speech, quiet: 0, sinceProbe: frames.length, words: null, emitted: 0, gap: 0 };
 }
 
 // Close the open segment at frame `end`; frames after it start the next segment.
@@ -283,6 +290,7 @@ function closeSegment(end) {
   closed.frames = closed.frames.slice(0, end);
   closed.rms = closed.rms.slice(0, end);
   seg = null;
+  gap = restRms.length;
   const threshold = Math.max(0.004, noise * 2.5);
   if (restRms.some((r) => r > threshold)) {
     seg = newSegment(rest, restRms, restRms.filter((r) => r > threshold).length);
@@ -398,6 +406,13 @@ function joinCarry(words) {
   return [...carry.words, ...words.slice(dup ? 1 : 0)];
 }
 
+// The pause before this segment was long enough to end the sentence left over from the last one.
+function endCarryBefore(s) {
+  if (s.gap < GAP_SENTENCE || !carry.words.length) return;
+  emit(carry.words, carry.language);
+  carry = { words: [], language: null };
+}
+
 // Words both of the last two partials agree on are stable; complete sentences inside them
 // are shown right away instead of waiting for the pause that closes the segment.
 function partial(s, words, language) {
@@ -405,15 +420,16 @@ function partial(s, words, language) {
   prevPartial = { segId: s.id, words };
   s.words = words;
   s.language = language;
+  endCarryBefore(s);
   let stable = 0;
   while (stable < words.length && stable < prev.length && words[stable] === prev[stable]) stable++;
-  let end = -1;
-  for (let i = s.emitted; i < stable; i++) if (TERMINATOR.test(words[i])) end = i;
-  if (end >= 0) {
-    emit(joinCarry(words.slice(s.emitted, end + 1)), language);
+  // One caption per sentence, so a line Whisper repeats ("We can go. We can go.") is caught by emit.
+  for (let i = s.emitted; i < stable; i++) {
+    if (!TERMINATOR.test(words[i])) continue;
+    emit(joinCarry(words.slice(s.emitted, i + 1)), language);
     carry.words = [];
-    s.lastEmitted = words[end];
-    s.emitted = end + 1;
+    s.lastEmitted = words[i];
+    s.emitted = i + 1;
   }
   clearTimeout(flushTimer);
   live(joinCarry(words.slice(s.emitted)), language);
@@ -421,6 +437,7 @@ function partial(s, words, language) {
 
 function finishSegment(s, words, language) {
   if (prevPartial?.segId === s.id) prevPartial = null;
+  endCarryBefore(s);
   // Skip what partials already emitted; the final may word it slightly differently, so look
   // for the last emitted word near where it should be.
   let skip = s.emitted;

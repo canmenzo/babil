@@ -83,6 +83,13 @@ export function resolveNeural(persona, lang) {
   return { engine: 'piper', pack, playbackRate: pitch, lengthScale: pitch / rate, noiseScale: noise, like, tweak };
 }
 
+// The same voice, `hurry` times faster: Supertonic predicts shorter durations, Piper scales its length.
+export function hurryVoice(voice, hurry) {
+  if (hurry === 1) return voice;
+  if (voice.engine === 'supertonic') return { ...voice, speed: voice.speed * hurry };
+  return { ...voice, lengthScale: voice.lengthScale / hurry };
+}
+
 export const packBytes = (pack) => PACKS[pack].files.reduce((n, f) => n + f.sources[0].bytes, 0);
 export const packSize = (pack) => `${Math.round(packBytes(pack) / 1e6)} MB`;
 

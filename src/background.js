@@ -1,6 +1,6 @@
 import { loadSettings, i18n } from './settings.js';
 import { createSpeaker, resolveVoice, listVoices, neuralSpeaker } from './speech.js';
-import { resolveNeural, packReady } from './tts/catalog.js';
+import { resolveNeural, packReady, hurryVoice } from './tts/catalog.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = chrome.storage.session.get('state').then((r) => r.state && (state = r.state));
@@ -25,23 +25,23 @@ const toEngine = (msg) => chrome.runtime.sendMessage({ target: 'offscreen', ...m
 const neuralTts = neuralSpeaker(toEngine);
 
 // chrome.tts works from the service worker without a user gesture, unlike speechSynthesis in a page.
-function systemSpeak(text, done) {
+function systemSpeak(text, hurry, done) {
   const onEvent = (e) => ['end', 'interrupted', 'cancelled', 'error'].includes(e.type) && done();
-  chrome.tts.speak(text, { lang: speech.target, voiceName: say.voice?.name, rate: say.rate, pitch: say.pitch, onEvent }).catch(done);
+  chrome.tts.speak(text, { lang: speech.target, voiceName: say.voice?.name, rate: say.rate * hurry, pitch: say.pitch, onEvent }).catch(done);
 }
 
 const useNeural = () => neural && neuralReady && !neuralOff;
 
 // Until the persona's voice is downloaded, which starts with the first sentence, a system voice reads.
 const speaker = createSpeaker({
-  speak(text, done) {
+  speak(text, hurry, done) {
     if (!useNeural()) {
       if (neural && !neuralReady && ensured !== neural.pack) toEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
-      return systemSpeak(text, done);
+      return systemSpeak(text, hurry, done);
     }
-    neuralTts.speak(text, neural, (ok) => (ok ? done() : systemSpeak(text, done)));
+    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done)));
   },
-  prepare: (text) => useNeural() && toEngine({ type: 'tts-prepare', text, voice: neural }),
+  prepare: (text, hurry) => useNeural() && toEngine({ type: 'tts-prepare', text, voice: hurryVoice(neural, hurry) }),
   cancel() {
     chrome.tts.stop();
     toEngine({ type: 'tts-stop' });

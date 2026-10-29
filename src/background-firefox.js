@@ -1,6 +1,6 @@
 import { loadSettings, i18n } from './settings.js';
 import { createSpeaker, resolveVoice, listVoices, neuralSpeaker } from './speech.js';
-import { resolveNeural, packReady } from './tts/catalog.js';
+import { resolveNeural, packReady, hurryVoice } from './tts/catalog.js';
 
 let state = { running: false, tabId: null, status: null, asrMs: null, needPairs: [] };
 const restored = browser.storage.session.get('state').then((r) => r.state && (state = r.state));
@@ -27,10 +27,10 @@ async function loadSpeech() {
 new BroadcastChannel('babil-tts').onmessage = ({ data }) => ['ready', 'deleted'].includes(data.type) && loadSpeech();
 
 // No browser.tts in Firefox; the persistent background page can use speechSynthesis directly.
-function systemSpeak(text, done) {
+function systemSpeak(text, hurry, done) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = speech.target;
-  u.rate = say.rate;
+  u.rate = say.rate * hurry;
   u.pitch = say.pitch;
   u.voice = say.voice?.voice ?? null;
   u.onend = u.onerror = done;
@@ -42,14 +42,14 @@ const useNeural = () => neural && neuralReady && !neuralOff;
 
 // Downloaded voices play from offscreen.js, which runs in this same page.
 const speaker = createSpeaker({
-  speak(text, done) {
+  speak(text, hurry, done) {
     if (!useNeural()) {
       if (neural && !neuralReady && ensured !== neural.pack) sendToEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
-      return systemSpeak(text, done);
+      return systemSpeak(text, hurry, done);
     }
-    neuralTts.speak(text, neural, (ok) => (ok ? done() : systemSpeak(text, done)));
+    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done)));
   },
-  prepare: (text) => useNeural() && sendToEngine({ type: 'tts-prepare', text, voice: neural }),
+  prepare: (text, hurry) => useNeural() && sendToEngine({ type: 'tts-prepare', text, voice: hurryVoice(neural, hurry) }),
   cancel() {
     speechSynthesis.cancel();
     sendToEngine({ type: 'tts-stop' });
