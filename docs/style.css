@@ -87,3 +87,14 @@ footer nav a:hover{border-color:var(--accent);color:var(--accent);transform:tran
 .js .rv.on{opacity:1;transform:none;filter:none}
 @media(max-width:640px){nav.pill .links{display:none}.hero{padding-top:48px}section.wrap{padding-top:64px;padding-bottom:64px}.tagline{padding:64px 0}.panel{padding:48px 16px}h2{font-size:24px;line-height:32px}.hero .cta .btn{width:100%;justify-content:center}.hero .cta{max-width:320px;margin:0 auto}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}.js .rv{opacity:1;transform:none;filter:none}.tagline .w{opacity:1}}
+.doc{max-width:720px;margin:0 auto;padding:72px 24px 48px}
+.doc h1{margin:0 0 12px;font-size:clamp(32px,6vw,44px);line-height:1.15;letter-spacing:-.03em;text-wrap:balance}
+.doc .meta{margin:0 0 40px;padding-bottom:32px;border-bottom:1px solid var(--border);color:var(--soft);font-size:14px;line-height:20px}
+.doc h2{margin:48px 0 12px;font-size:22px;line-height:30px}
+.doc p,.doc li{color:var(--soft)}
+.doc p{margin:0 0 16px}
+.doc ul{margin:0 0 16px;padding-left:20px;display:grid;gap:8px}
+.doc li::marker{color:var(--accent)}
+.doc strong{color:var(--text)}
+.doc a{overflow-wrap:anywhere}
+@media(max-width:640px){.doc{padding:48px 16px 32px}}

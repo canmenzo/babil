@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy policy: Babil</title>
+<meta name="description" content="Privacy policy for the Babil browser extension. Audio, captions and translations are processed on your computer. No servers, no analytics.">
+<link rel="canonical" href="https://babil.menzo.dev/privacy.html">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon-128.png">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Babil">
+<meta property="og:title" content="Privacy policy: Babil">
+<meta property="og:description" content="Audio, captions and translations are processed on your computer. No servers, no analytics.">
+<meta property="og:url" content="https://babil.menzo.dev/privacy.html">
+<meta property="og:image" content="https://babil.menzo.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://babil.menzo.dev/og.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="pill" aria-label="Main">
+<a class="brand" href="./"><img src="icon-128.png" alt="" width="24" height="24">Babil</a>
+<div class="links"><a href="./#features">Features</a><a href="./#install">Install</a><a href="./#privacy">Privacy</a><a href="./#faq">FAQ</a></div>
+<a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a>
+</nav>
+<main id="main" class="doc">
+<p class="eyebrow">Privacy</p>
+<h1>Privacy policy</h1>
+<p class="meta">Effective October 30, 2026. This policy covers the Babil browser extension.</p>
+
+<p>Babil has no servers of its own. It does not collect analytics, telemetry or usage data, and it does not sell or share your data with anyone.</p>
+
+<h2>Audio and captions stay on your computer</h2>
+<p>When you start captions, Babil captures the audio of the tab you are watching and transcribes it on your computer with a Whisper speech model. Translation also runs on your computer: Chrome's built-in Translator API in Chrome, a local Transformers.js model in Firefox. Read-aloud uses a voice downloaded to your computer or your system's own voices. No audio, transcript or translation ever leaves your browser.</p>
+
+<h2>What Babil downloads</h2>
+<p>Babil downloads model files once and keeps them in the browser's cache:</p>
+<ul>
+<li>a Whisper speech model (about 600 MB on automatic) from Hugging Face (<code>huggingface.co</code> and its download hosts);</li>
+<li>optional voices for read-aloud from Hugging Face;</li>
+<li>in Chrome, translation language packs through Chrome's own Translator API, served by Google;</li>
+<li>in Firefox, a translation model (up to about 1.1 GB) from Hugging Face.</li>
+</ul>
+<p>These are plain file downloads. They carry no information about you, what you watch or what was said.</p>
+
+<h2>Update checks</h2>
+<p>Copies installed from the GitHub zip, not from a browser store, ask GitHub (<code>api.github.com</code>) for the latest release when you open the panel. That request carries no page data. Store installs update through the store and never make it.</p>
+
+<h2>What Babil stores</h2>
+<p>Your caption settings (languages, model choice, voice, appearance) are kept in the browser's extension local storage on this device and are deleted when you remove Babil. Downloaded models and voices are kept in the browser cache; the settings page can delete voices, and removing Babil removes everything.</p>
+
+<h2>Permissions</h2>
+<ul>
+<li><code>tabCapture</code> (Chrome) and <code>&lt;all_urls&gt;</code> (Firefox): capture the audio of the tab you start captions on, after you click Start.</li>
+<li><code>activeTab</code> and <code>scripting</code>: draw the captions over the video on that tab only.</li>
+<li><code>offscreen</code> (Chrome): run speech recognition in a background document so the popup can close.</li>
+<li><code>storage</code> and <code>unlimitedStorage</code>: keep your settings and the downloaded models.</li>
+<li><code>tts</code> (Chrome): read translations aloud with a system voice when no downloaded voice is available.</li>
+</ul>
+
+<h2>Contact</h2>
+<p>Questions or concerns: open an issue at <a href="https://github.com/canmenzo/babil/issues">github.com/canmenzo/babil/issues</a>.</p>
+</main>
+<footer><div class="wrap"><div class="fb"><a class="brand" href="./"><img src="icon-128.png" alt="" width="24" height="24">Babil</a><p>Live translated captions for any video. MIT licensed. Made by <a href="https://menzo.dev">menzo</a>.</p></div><nav aria-label="Footer"><a href="https://github.com/canmenzo/babil">GitHub</a><a href="https://github.com/canmenzo/babil/releases/latest">Releases</a><a href="privacy.html" aria-current="page">Privacy</a><a href="https://menzo.dev">menzo.dev</a><a href="https://hammurabi.menzo.dev">Hammurabi</a></nav></div></footer>
+</body>
+</html>
