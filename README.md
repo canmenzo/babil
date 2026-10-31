@@ -1,4 +1,4 @@
-# 🗼 Babil
+# <img src="docs/icon-128.png" alt="" width="32" height="32"> Babil
 
 **Watch videos in your language. Live captions, translated on your computer.**
 
