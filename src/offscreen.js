@@ -43,6 +43,7 @@ const INTERJECTIONS = {
   tr: /^(hı+|şey|yani)[.!?,…]*$/i,
 };
 
+const MUSIC = /[♪♫]|[\[(]\s*(?:music|singing|song|applause)\s*[\])]/i;
 const TERMINATOR = /[.!?…。！？]["'”’)\]]*$/;
 const FLUSH_MS = 1500; // an unfinished sentence is shown anyway after this much silence
 const MAX_CARRY = 30; // words; very long unpunctuated speech is shown in chunks
@@ -62,6 +63,20 @@ const EN_GLOSSARY = [
   [/\bsubs\b/gi, 'subscribers'],
   [/\bsubbed\b/gi, 'subscribed'],
   [/\bguys\b/gi, 'friends'],
+  [/\bmerch\b/gi, 'merchandise'],
+  [/\bmods\b/gi, 'moderators'],
+  [/\bvods\b/gi, 'recordings'],
+  [/\bvod\b/gi, 'recording'],
+  [/\bemotes\b/gi, 'emojis'],
+  [/\bno cap\b/gi, 'no lie'],
+  [/\bsus\b/gi, 'suspicious'],
+  [/\bsons of bitches\b/gi, 'bastards'],
+  [/\bson of a bitch\b/gi, 'bastard'],
+  // Quotative "like" ("I'm like, hey") and filler "like" / "you know" set between commas make
+  // run-on sentences the translator cannot parse; say it plainly or drop it.
+  [/\b(I'm|I was|he's|he was|she's|she was|they're|they were|we're|we were|you're) like,/gi, '$1 saying,'],
+  [/,\s*(?:like|you know|I mean),\s*/gi, ' '],
+  [/^(?:like|you know|I mean),\s*/i, ''],
 ];
 
 let stream, playCtx, playGain, asrCtx, worker, tts;
@@ -369,6 +384,8 @@ function onWorker(m) {
 
 function clean(text, language, noSpeech, langConf) {
   if (noSpeech > NO_SPEECH || langConf < LANG_MIN) return '';
+  // Whisper marks singing it hears under the stream; those are lyrics, not the talk.
+  if (MUSIC.test(text)) return '';
   const t = text
     .replace(/\[[^\]]*\]|\([^)]*\)|\*[^*]*\*|[♪♫]/g, ' ')
     .replace(/(\S+)(?:\s+\1){3,}/gi, '$1 $1 $1')
@@ -546,7 +563,10 @@ async function translate(text, src) {
   }
   const t = await getTranslator(src);
   if (!t) return null;
-  if (src === 'en') for (const [re, to] of EN_GLOSSARY) text = text.replace(re, to);
+  if (src === 'en') {
+    for (const [re, to] of EN_GLOSSARY) text = text.replace(re, to);
+    text = text.trim();
+  }
   try {
     return await t.translate(text);
   } catch {
