@@ -23,21 +23,6 @@
   "latency": {
     "message": "识别耗时：$1 毫秒"
   },
-  "update_hint": {
-    "message": "下载 zip，解压并覆盖现有的 Babil 文件夹，然后点击下方按钮。你的设置和已下载的模型都会保留。"
-  },
-  "update_zip": {
-    "message": "下载 zip"
-  },
-  "update_reload": {
-    "message": "已解压，重新加载 Babil"
-  },
-  "update_notes": {
-    "message": "更新内容"
-  },
-  "update_title": {
-    "message": "新版本可用：v$1"
-  },
   "source_label": {
     "message": "原声语言"
   },
@@ -70,21 +55,6 @@
   },
   "shortcut": {
     "message": "快捷键"
-  },
-  "check_update": {
-    "message": "检查更新"
-  },
-  "checking": {
-    "message": "正在检查..."
-  },
-  "update_available": {
-    "message": "有可用更新"
-  },
-  "up_to_date": {
-    "message": "已是最新版本"
-  },
-  "check_failed": {
-    "message": "检查失败，请重试"
   },
   "ff_translation_hint": {
     "message": "Firefox 需要额外下载一个离线翻译模型（约 1 GB）。视频音频和字幕都只保留在本设备上。"

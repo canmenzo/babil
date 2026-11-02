@@ -95,7 +95,7 @@ Read the translated captions aloud with a system voice when the user ticks "Read
 Answer: **No, I am not using remote code.**
 
 ```
-All JavaScript and the ONNX Runtime WebAssembly are bundled in the package. The 'wasm-unsafe-eval' CSP keyword exists only so the bundled ONNX Runtime can run. The speech and voice model files downloaded from Hugging Face are data (weights), not code; they are loaded by the bundled runtime. The CSP also allows api.github.com: copies loaded unpacked from the GitHub release zip check it for a newer version. Store installs never make that request.
+All JavaScript and the ONNX Runtime WebAssembly are bundled in the package. The 'wasm-unsafe-eval' CSP keyword exists only so the bundled ONNX Runtime can run. The speech and voice model files downloaded from Hugging Face are data (weights), not code; they are loaded by the bundled runtime. Extension updates are handled by the browser through the Chrome Web Store or Firefox Add-ons; the extension does not check GitHub for updates.
 ```
 
 ### Data usage

@@ -23,21 +23,6 @@
   "latency": {
     "message": "Recognition time: $1 ms"
   },
-  "update_hint": {
-    "message": "Download the zip, unzip it over your current Babil folder, then press the button below. Your settings and downloaded models are kept."
-  },
-  "update_zip": {
-    "message": "Download zip"
-  },
-  "update_reload": {
-    "message": "I've unzipped it, reload Babil"
-  },
-  "update_notes": {
-    "message": "What's new?"
-  },
-  "update_title": {
-    "message": "New version available: v$1"
-  },
   "source_label": {
     "message": "Spoken language"
   },
@@ -70,21 +55,6 @@
   },
   "shortcut": {
     "message": "Shortcut"
-  },
-  "check_update": {
-    "message": "Check for updates"
-  },
-  "checking": {
-    "message": "Checking..."
-  },
-  "update_available": {
-    "message": "Update available"
-  },
-  "up_to_date": {
-    "message": "You're up to date"
-  },
-  "check_failed": {
-    "message": "Couldn't check, try again"
   },
   "ff_translation_hint": {
     "message": "Firefox needs an additional offline translation model (about 1 GB). Video audio and captions stay on this device."

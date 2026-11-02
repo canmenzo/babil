@@ -23,21 +23,6 @@
   "latency": {
     "message": "पहचानने में लगा समय: $1 ms"
   },
-  "update_hint": {
-    "message": "ज़िप डाउनलोड करें, उसे अपने मौजूदा Babil फ़ोल्डर के ऊपर एक्सट्रैक्ट करें, फिर नीचे दिया बटन दबाएँ। आपकी सेटिंग्स और डाउनलोड किए गए मॉडल सुरक्षित रहते हैं।"
-  },
-  "update_zip": {
-    "message": "ज़िप डाउनलोड करें"
-  },
-  "update_reload": {
-    "message": "एक्सट्रैक्ट कर लिया, Babil रीलोड करें"
-  },
-  "update_notes": {
-    "message": "नया क्या है?"
-  },
-  "update_title": {
-    "message": "नया वर्शन उपलब्ध है: v$1"
-  },
   "source_label": {
     "message": "वीडियो की भाषा"
   },
@@ -70,21 +55,6 @@
   },
   "shortcut": {
     "message": "शॉर्टकट"
-  },
-  "check_update": {
-    "message": "अपडेट देखें"
-  },
-  "checking": {
-    "message": "देख रहे हैं..."
-  },
-  "update_available": {
-    "message": "अपडेट उपलब्ध है"
-  },
-  "up_to_date": {
-    "message": "आप नए वर्शन पर हैं"
-  },
-  "check_failed": {
-    "message": "जाँच नहीं हो सकी, फिर से कोशिश करें"
   },
   "ff_translation_hint": {
     "message": "Firefox के लिए एक अतिरिक्त ऑफ़लाइन अनुवाद मॉडल चाहिए (लगभग 1 GB)। वीडियो का ऑडियो और कैप्शन इसी डिवाइस पर रहते हैं।"

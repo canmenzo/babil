@@ -23,21 +23,6 @@
   "latency": {
     "message": "Tanıma süresi: $1 ms"
   },
-  "update_hint": {
-    "message": "Zip'i indir, mevcut Babil klasörünün üstüne çıkar, sonra aşağıdaki butona bas. Ayarlar ve indirilmiş modeller korunur."
-  },
-  "update_zip": {
-    "message": "Zip'i indir"
-  },
-  "update_reload": {
-    "message": "Çıkardım, Babil'i yenile"
-  },
-  "update_notes": {
-    "message": "Neler yeni?"
-  },
-  "update_title": {
-    "message": "Yeni sürüm çıktı: v$1"
-  },
   "source_label": {
     "message": "Konuşulan dil"
   },
@@ -70,21 +55,6 @@
   },
   "shortcut": {
     "message": "Kısayol"
-  },
-  "check_update": {
-    "message": "Güncellemeleri denetle"
-  },
-  "checking": {
-    "message": "Denetleniyor..."
-  },
-  "update_available": {
-    "message": "Güncelleme var"
-  },
-  "up_to_date": {
-    "message": "Güncelsin"
-  },
-  "check_failed": {
-    "message": "Denetlenemedi, tekrar dene"
   },
   "ff_translation_hint": {
     "message": "Firefox için ek bir çevrimdışı çeviri modeli gerekiyor (yaklaşık 1 GB). Video sesi ve altyazılar bu cihazda kalır."

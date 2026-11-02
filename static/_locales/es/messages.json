@@ -23,21 +23,6 @@
   "latency": {
     "message": "Tiempo de reconocimiento: $1 ms"
   },
-  "update_hint": {
-    "message": "Descarga el zip, descomprímelo sobre tu carpeta actual de Babil y pulsa el botón de abajo. Tus ajustes y los modelos descargados se conservan."
-  },
-  "update_zip": {
-    "message": "Descargar zip"
-  },
-  "update_reload": {
-    "message": "Ya lo descomprimí, recargar Babil"
-  },
-  "update_notes": {
-    "message": "¿Qué hay de nuevo?"
-  },
-  "update_title": {
-    "message": "Nueva versión disponible: v$1"
-  },
   "source_label": {
     "message": "Idioma hablado"
   },
@@ -70,21 +55,6 @@
   },
   "shortcut": {
     "message": "Atajo"
-  },
-  "check_update": {
-    "message": "Buscar actualizaciones"
-  },
-  "checking": {
-    "message": "Buscando..."
-  },
-  "update_available": {
-    "message": "Hay una actualización"
-  },
-  "up_to_date": {
-    "message": "Ya tienes la última versión"
-  },
-  "check_failed": {
-    "message": "No se pudo comprobar, inténtalo de nuevo"
   },
   "ff_translation_hint": {
     "message": "Firefox necesita un modelo de traducción sin conexión adicional (alrededor de 1 GB). El audio del vídeo y los subtítulos no salen de este dispositivo."

@@ -166,52 +166,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
-// Unpacked installs never update on their own, so the popup checks GitHub releases.
-const version = chrome.runtime.getManifest().version;
-const newer = (a, b) => {
-  const [x, y] = [a, b].map((v) => v.split('.').map(Number));
-  for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
-  return false;
-};
-
-async function checkUpdate(force) {
-  let { update } = await chrome.storage.local.get('update');
-  if (force || !update || Date.now() - update.checked > 6 * 3600e3) {
-    const r = await fetch('https://api.github.com/repos/canmenzo/babil/releases/latest');
-    if (!r.ok) throw new Error(`GitHub ${r.status}`);
-    const rel = await r.json();
-    update = {
-      checked: Date.now(),
-      version: rel.tag_name.replace(/^v/, ''),
-      zip: rel.assets.find((a) => a.name.endsWith('.zip'))?.browser_download_url ?? rel.html_url,
-      notes: rel.html_url,
-    };
-    await chrome.storage.local.set({ update });
-  }
-  const available = newer(update.version, version);
-  $('update').hidden = !available;
-  if (available) {
-    $('updateTitle').textContent = i18n('update_title', update.version);
-    const safe = (url) => (typeof url === 'string' && url.startsWith('https://github.com/') ? url : 'https://github.com/canmenzo/babil/releases');
-    $('updateZip').href = safe(update.zip);
-    $('updateNotes').href = safe(update.notes);
-  }
-  return available;
-}
-
-$('version').textContent = `v${version}`;
-$('updateReload').onclick = () => chrome.runtime.reload();
-$('checkUpdate').onclick = async (e) => {
-  e.preventDefault();
-  const link = e.target;
-  link.textContent = i18n('checking');
-  try {
-    link.textContent = i18n((await checkUpdate(true)) ? 'update_available' : 'up_to_date');
-  } catch {
-    link.textContent = i18n('check_failed');
-  }
-};
-checkUpdate(false).catch(() => {});
+$('version').textContent = `v${chrome.runtime.getManifest().version}`;
 
 function fillLangs(select, codes) {
   select.append(...codes.map((c) => new Option(langName(c), c)));

@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Effective October 30, 2026. This policy covers the Babil browser extension.
+Effective November 1, 2026. This policy covers the Babil browser extension.
 
 Babil has no servers of its own. It does not collect analytics, telemetry, or usage data, and it does not sell or share your data with anyone.
 
@@ -21,7 +21,7 @@ These are plain file downloads. They carry no information about you, what you wa
 
 ## Update checks
 
-Copies installed from the GitHub zip, not from a browser store, ask GitHub (`api.github.com`) for the latest release when you open the panel. That request carries no page data. Store installs update through the store and never make it.
+Chrome Web Store and Firefox Add-ons installations update through the browser automatically. Babil does not contact GitHub or run its own update checks.
 
 ## What Babil stores
 
