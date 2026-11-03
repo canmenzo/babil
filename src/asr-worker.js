@@ -1,5 +1,6 @@
 import {
   env,
+  AutoModel,
   AutoProcessor,
   AutoTokenizer,
   WhisperForConditionalGeneration,
@@ -8,8 +9,9 @@ import {
   LogitsProcessorList,
   pipeline,
   ModelRegistry,
+  Tensor,
 } from '@huggingface/transformers';
-import { MODELS, isCached, modelDevice, modelDtype, autoModel } from './settings.js';
+import { MODELS, VAD_ID, isCached, modelDevice, modelDtype, autoModel } from './settings.js';
 
 env.allowLocalModels = false;
 // The cache path turns the ORT factory into a blob: URL, which extension CSP refuses to import.
@@ -41,6 +43,10 @@ env.useCustomCache = true;
 env.customCache = opfsCache;
 
 const PRIOR_FLOOR = 0.01;
+const VAD_WINDOW = 512;
+const VAD_CONTEXT = 64;
+const VAD_PROB = 0.5;
+const VAD_MIN_SHARE = 0.1; // of a segment, below this Moonshine would be guessing at noise or music
 
 // Decoding starts at <|startoftranscript|>. At the first step this records Whisper's no-speech
 // probability and how sure it is of the language, then picks the language token, and forces
@@ -94,7 +100,7 @@ class PromptProcessor extends LogitsProcessor {
   }
 }
 
-let arch, model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
+let vad, arch, model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
 let device = 'wasm';
 let f16 = false;
 let translator;
@@ -114,6 +120,7 @@ async function load(name, source) {
   const { id } = MODELS[name];
   arch = MODELS[name].arch;
   const Model = arch === 'moonshine' ? MoonshineForConditionalGeneration : WhisperForConditionalGeneration;
+  vad = arch === 'moonshine' ? await AutoModel.from_pretrained(VAD_ID, { config: { model_type: 'custom' }, dtype: 'fp32', device: 'wasm' }) : null;
   const fromDisk = await isCached(name);
   const progress_callback = (p) => {
     if (p.status === 'progress_total') postMessage({ type: 'progress', progress: p.progress, fromDisk });
@@ -142,10 +149,12 @@ async function download(name) {
   const { id } = MODELS[name];
   ({ device, f16 } = await modelDevice());
   const files = await ModelRegistry.get_files(id, { dtype: modelDtype(name, device, f16), device });
-  const url = (file) => `https://huggingface.co/${id}/resolve/main/${file}`;
+  const url = ([repo, file]) => `https://huggingface.co/${repo}/resolve/main/${file}`;
+  const wanted = files.map((file) => [id, file]);
+  if (MODELS[name].arch === 'moonshine') wanted.push([VAD_ID, 'onnx/model.onnx']);
   const missing = [];
-  for (const file of files) if (!(await opfsCache.match(url(file)))) missing.push(file);
-  const sizes = await Promise.all(missing.map((file) => ModelRegistry.get_file_metadata(id, file)));
+  for (const f of wanted) if (!(await opfsCache.match(url(f)))) missing.push(f);
+  const sizes = await Promise.all(missing.map(([repo, file]) => ModelRegistry.get_file_metadata(repo, file)));
   const total = sizes.reduce((n, m) => n + (m.size ?? 0), 0);
   let loaded = 0;
   let shown = -1;
@@ -162,6 +171,25 @@ async function download(name) {
     });
     await opfsCache.put(url(file), new Response(res.body.pipeThrough(count)));
   }
+}
+
+// The share of the audio the voice detector calls speech.
+async function speechShare(audio) {
+  const sr = new Tensor('int64', [16000n], []);
+  let state = new Tensor('float32', new Float32Array(2 * 128), [2, 1, 128]);
+  let voiced = 0;
+  let total = 0;
+  // Silero v5 reads each window with the 64 samples before it.
+  const window = new Float32Array(VAD_CONTEXT + VAD_WINDOW);
+  for (let i = 0; i + VAD_WINDOW <= audio.length; i += VAD_WINDOW, total++) {
+    window.copyWithin(0, VAD_WINDOW);
+    window.set(audio.subarray(i, i + VAD_WINDOW), VAD_CONTEXT);
+    const input = new Tensor('float32', window.slice(), [1, window.length]);
+    const { output, stateN } = await vad({ input, sr, state });
+    state = stateN;
+    if (output.data[0] > VAD_PROB) voiced++;
+  }
+  return total ? voiced / total : 0;
 }
 
 async function loadTranslator() {
@@ -182,10 +210,12 @@ async function transcribe(audio, language, prior) {
   // Cap output by audio length so a hallucination loop cannot run for hundreds of tokens.
   const max_new_tokens = Math.min(128, Math.ceil((audio.length / 16000) * 7) + 8);
   if (arch === 'moonshine') {
+    const share = await speechShare(audio);
+    if (share < VAD_MIN_SHARE) return { text: '', language: 'en', noSpeech: 1, langConf: 1, speechShare: share };
     const { input_values } = await processor(audio);
     const out = await model.generate({ input_values, max_new_tokens });
     const ids = (out.sequences ?? out).tolist()[0].map(Number);
-    return { text: tokenizer.decode(ids, { skip_special_tokens: true }).trim(), language: 'en', noSpeech: 0, langConf: 1 };
+    return { text: tokenizer.decode(ids, { skip_special_tokens: true }).trim(), language: 'en', noSpeech: 0, langConf: 1, speechShare: share };
   }
   const { input_features } = await processor(audio);
   prompter.fixed = language ? gen.lang_to_id[`<|${language}|>`] : null;

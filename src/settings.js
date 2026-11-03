@@ -59,6 +59,9 @@ export function modelDevice() {
 // Moonshine beat whisper-base on English on the CPU in both accuracy and speed, but hears nothing else.
 export const autoModel = (device, source) => (device === 'webgpu' ? 'small' : source === 'en' ? 'moonshine' : 'base');
 
+// Moonshine has no no-speech score, so a small voice detector decides whether it should listen at all.
+export const VAD_ID = 'onnx-community/silero-vad';
+
 export const modelSize = (name, device) => (device === 'webgpu' ? MODELS[name].size : MODELS[name].cpuSize);
 
 export function modelDtype(name, device, f16) {
@@ -85,9 +88,10 @@ export async function isCached(model) {
 
 export async function deleteModel(model) {
   const root = await navigator.storage.getDirectory();
-  const prefix = encodeURIComponent(`/${MODELS[model].id}/`);
+  const ids = [MODELS[model].id, ...(MODELS[model].arch === 'moonshine' ? [VAD_ID] : [])];
+  const prefixes = ids.map((id) => encodeURIComponent(`/${id}/`));
   const names = [];
-  for await (const name of root.keys()) if (name.includes(prefix)) names.push(name);
+  for await (const name of root.keys()) if (prefixes.some((p) => name.includes(p))) names.push(name);
   await Promise.all(names.map((name) => root.removeEntry(name).catch(() => {})));
 }
 
