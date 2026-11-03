@@ -64,7 +64,6 @@ const EN_GLOSSARY = [
   [/\bsubbed\b/gi, 'subscribed'],
   [/\bguys\b/gi, 'friends'],
   [/\bmerch\b/gi, 'merchandise'],
-  [/\bmods\b/gi, 'moderators'],
   [/\bvods\b/gi, 'recordings'],
   [/\bvod\b/gi, 'recording'],
   [/\bemotes\b/gi, 'emojis'],
