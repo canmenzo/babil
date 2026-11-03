@@ -37,7 +37,7 @@ export function createTtsPlayer({ threads }) {
     // Synthesis ran slower than real time twice in a row, or this page may not play audio: the
     // caller should use system voices instead.
     fallback: false,
-    async speak(text, voice) {
+    async speak(text, voice, started = () => {}) {
       const t = ++turn;
       const [key, pending] = synth(text, voice);
       const audio = await pending;
@@ -61,6 +61,7 @@ export function createTtsPlayer({ threads }) {
       source.connect(ctx.destination);
       await new Promise((resolve) => {
         source.onended = resolve;
+        started();
         source.start();
       });
     },

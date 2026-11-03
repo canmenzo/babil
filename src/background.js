@@ -25,8 +25,11 @@ const toEngine = (msg) => chrome.runtime.sendMessage({ target: 'offscreen', ...m
 const neuralTts = neuralSpeaker(toEngine);
 
 // chrome.tts works from the service worker without a user gesture, unlike speechSynthesis in a page.
-function systemSpeak(text, hurry, done) {
-  const onEvent = (e) => ['end', 'interrupted', 'cancelled', 'error'].includes(e.type) && done();
+function systemSpeak(text, hurry, done, started) {
+  const onEvent = (e) => {
+    if (e.type === 'start') started();
+    else if (['end', 'interrupted', 'cancelled', 'error'].includes(e.type)) done();
+  };
   chrome.tts.speak(text, { lang: speech.target, voiceName: say.voice?.name, rate: say.rate * hurry, pitch: say.pitch, onEvent }).catch(done);
 }
 
@@ -34,12 +37,12 @@ const useNeural = () => neural && neuralReady && !neuralOff;
 
 // Until the persona's voice is downloaded, which starts with the first sentence, a system voice reads.
 const speaker = createSpeaker({
-  speak(text, hurry, done) {
+  speak(text, hurry, done, started) {
     if (!useNeural()) {
       if (neural && !neuralReady && ensured !== neural.pack) toEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
-      return systemSpeak(text, hurry, done);
+      return systemSpeak(text, hurry, done, started);
     }
-    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done)));
+    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done, started)), started);
   },
   prepare: (text, hurry) => useNeural() && toEngine({ type: 'tts-prepare', text, voice: hurryVoice(neural, hurry) }),
   cancel() {
@@ -67,18 +70,27 @@ function inject(tabId) {
   return chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] }).catch(() => {});
 }
 
+let creating;
+async function ensureOffscreen() {
+  if (await hasOffscreen()) return;
+  creating ??= chrome.offscreen
+    .createDocument({
+      url: 'offscreen.html',
+      reasons: ['USER_MEDIA', 'WORKERS'],
+      justification: i18n('offscreen_justification'),
+    })
+    .finally(() => (creating = null));
+  await creating;
+}
+
+const downloading = () => Object.keys(state.downloads ?? {}).length > 0;
+
 async function start(tabId, streamId) {
   await restored;
   if (state.running) await stop();
   const { model, source, target, instant } = await loadSettings();
   await inject(tabId);
-  if (!(await hasOffscreen())) {
-    await chrome.offscreen.createDocument({
-      url: 'offscreen.html',
-      reasons: ['USER_MEDIA'],
-      justification: i18n('offscreen_justification'),
-    });
-  }
+  await ensureOffscreen();
   await save({ running: true, tabId, target, status: { state: 'loading', text: i18n('status_starting') }, asrMs: null, needPairs: [] });
   neuralOff = false;
   ensured = null;
@@ -88,7 +100,9 @@ async function start(tabId, streamId) {
 async function stop(text = i18n('status_stopped')) {
   await restored;
   speaker.stop();
-  if (await hasOffscreen()) await chrome.offscreen.closeDocument();
+  // Model downloads live in the offscreen page, so it stays until they finish.
+  if (downloading()) await toEngine({ type: 'stop' });
+  else if (await hasOffscreen()) await chrome.offscreen.closeDocument();
   if (state.tabId != null) chrome.tabs.sendMessage(state.tabId, { type: 'clear' }).catch(() => {});
   await save({ running: false, status: { state: 'stopped', text } });
 }
@@ -129,6 +143,26 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
         break;
       case 'pair-ready':
         await save({ needPairs: state.needPairs.filter((s) => s !== msg.source) });
+        break;
+      case 'model-download':
+        await ensureOffscreen();
+        await save({ downloads: { ...state.downloads, [msg.model]: 0 }, modelError: null });
+        await toEngine({ type: 'model-download', model: msg.model });
+        break;
+      case 'model-cancel':
+        await toEngine({ type: 'model-cancel', model: msg.model });
+        break;
+      case 'model-progress':
+        if (state.downloads?.[msg.model] != null) await save({ downloads: { ...state.downloads, [msg.model]: msg.progress } });
+        break;
+      case 'model-done': {
+        const { [msg.model]: _, ...rest } = state.downloads ?? {};
+        await save({ downloads: rest, modelError: msg.error ? { model: msg.model, message: msg.error } : null });
+        if (!state.running && !downloading() && (await hasOffscreen())) await chrome.offscreen.closeDocument();
+        break;
+      }
+      case 'tts-started':
+        neuralTts.started(msg);
         break;
       case 'tts-ended':
         if (msg.fallback) neuralOff = true;

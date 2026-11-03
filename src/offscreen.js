@@ -1,4 +1,5 @@
 import { createTtsPlayer } from './tts-player.js';
+import { deleteModel } from './settings.js';
 
 // Audio capture, segmentation, ASR scheduling and translation. One instance per extension.
 // Status texts are [message key, ...subs]; the background puts them into words (see i18n in settings.js).
@@ -10,7 +11,11 @@ const MIN_FINAL = 8; // a segment needs at least 0.8 s before a pause can close 
 const PAUSE = 3; // 0.3 s of quiet closes the segment
 const MAX_SEG = 50; // hard cut at 5 s so continuous talk (streams) still finalizes
 const CUT_SEARCH = 15; // on a hard cut, split at the quietest frame within the last 1.5 s
-const PARTIAL_EVERY = 6; // re-run the open segment every 0.6 s of new audio
+const PARTIAL_EVERY = 6; // re-run the open segment every 0.6 s of new audio, or twice the last ASR time on slow machines
+// On the CPU every Whisper call costs the same whatever the length, so longer segments mean fewer
+// calls and more context, which measured far fewer errors than 5 s pieces.
+const PAUSE_CPU = 5;
+const MAX_SEG_CPU = 80;
 const MIN_SPEECH = 3; // segments with fewer loud frames are dropped (Whisper hallucinates on silence)
 const MAX_BACKLOG = 2; // finals waiting beyond this are skipped, keeping their last partial text
 const PREROLL = 3; // quiet frames kept before speech onset so the first syllable is not clipped
@@ -85,6 +90,7 @@ let running = false;
 let ready = false;
 let frameMode = false;
 let lagReported = 0;
+let asrMs = 0; // the last ASR call, so partials never ask for more than the computer can give
 let translationSeq = 0;
 const translations = new Map();
 
@@ -128,9 +134,34 @@ function receiveEngineMessage(msg) {
     worker?.postMessage({ type: 'translation-load' });
   }
   else if (msg.type === 'settings') reconfigure(msg.settings);
-  else if (msg.type === 'duck') playGain?.gain.setTargetAtTime(msg.gain, playCtx.currentTime, 0.15);
+  else if (msg.type === 'duck') playGain?.gain.setTargetAtTime(msg.gain, playCtx.currentTime, msg.gain < 1 ? 0.05 : 0.3);
   else if (msg.type === 'stop') stop(['status_stopped']);
+  else if (msg.type === 'model-download') downloadModel(msg.model);
+  else if (msg.type === 'model-cancel') cancelDownload(msg.model);
   else if (msg.type.startsWith('tts-')) speech(msg);
+}
+
+// Downloads from the picker run here because the popup closes on the first click elsewhere.
+const downloads = new Map(); // model -> its worker
+function downloadModel(model) {
+  if (downloads.has(model)) return;
+  const w = new Worker('asr-worker.js', { type: 'module' });
+  downloads.set(model, w);
+  w.onmessage = ({ data }) => {
+    if (data.type === 'download-progress') return send({ type: 'model-progress', model, progress: data.progress });
+    if (data.type !== 'download-done') return;
+    w.terminate();
+    downloads.delete(model);
+    send({ type: 'model-done', model, error: data.error });
+  };
+  w.postMessage({ type: 'download', model });
+}
+
+async function cancelDownload(model) {
+  downloads.get(model)?.terminate();
+  downloads.delete(model);
+  await deleteModel(model);
+  send({ type: 'model-done', model });
 }
 
 // Read-aloud with downloaded voices. Plays on its own AudioContext, so ducking the tab leaves it alone.
@@ -138,7 +169,7 @@ function speech(msg) {
   // Whisper on the CPU needs the cores more.
   tts ??= createTtsPlayer({ threads: device === 'webgpu' ? 4 : 2 });
   if (msg.type === 'tts-speak') {
-    tts.speak(msg.text, msg.voice).then(
+    tts.speak(msg.text, msg.voice, () => send({ type: 'tts-started', id: msg.id })).then(
       () => send({ type: 'tts-ended', id: msg.id, ok: true, fallback: tts.fallback }),
       () => send({ type: 'tts-ended', id: msg.id, ok: false, fallback: tts.fallback }),
     );
@@ -163,7 +194,8 @@ function reconfigure(s) {
     reported.clear();
     if (s.source !== 'auto' && s.source !== s.target) getTranslator(s.source);
   }
-  if (s.model !== prev.model) {
+  // Automatic picks another model when English becomes, or stops being, the fixed language.
+  if (s.model !== prev.model || (s.model === 'auto' && (s.source === 'en') !== (prev.source === 'en'))) {
     worker.terminate();
     jobs.clear();
     finals.length = 0;
@@ -177,7 +209,7 @@ function loadModel() {
   worker = new Worker('asr-worker.js', { type: 'module' });
   worker.onmessage = ({ data }) => onWorker(data);
   status('loading', ['status_model_loading'], { progress: 0 });
-  worker.postMessage({ type: 'load', model: settings.model });
+  worker.postMessage({ type: 'load', model: settings.model, source: settings.source });
 }
 
 async function start(streamId, s) {
@@ -235,6 +267,11 @@ function stop(text) {
   translators.clear();
   translations.forEach((resolve) => resolve(null));
   translations.clear();
+  // A download can keep this page alive past the session, so the next one must start clean.
+  seg = null;
+  carry = { words: [], language: null };
+  finals.length = 0;
+  jobs.clear();
   status('stopped', text);
 }
 
@@ -277,12 +314,13 @@ function onFrame(f) {
   }
 
   const n = seg.frames.length;
-  if (seg.quiet >= PAUSE && n >= MIN_FINAL) {
+  const pause = device === 'webgpu' ? PAUSE : PAUSE_CPU;
+  if (seg.quiet >= pause && n >= MIN_FINAL) {
     closeSegment(n - seg.quiet + 1);
-  } else if (seg.quiet >= PAUSE * 4) {
+  } else if (seg.quiet >= pause * 4) {
     // never got long enough to matter; a short blip followed by silence
     closeSegment(n - seg.quiet + 1);
-  } else if (n >= MAX_SEG) {
+  } else if (n >= (device === 'webgpu' ? MAX_SEG : MAX_SEG_CPU)) {
     let cut = n - 1;
     for (let i = n - CUT_SEARCH; i < n; i++) if (seg.rms[i] < seg.rms[cut]) cut = i;
     closeSegment(cut + 1);
@@ -337,7 +375,7 @@ function pump() {
   if (finals.length) {
     const s = finals.shift();
     job = { segId: s.id, final: true, seg: s, audio: concat(s.frames) };
-  } else if (seg && seg.speech >= MIN_SPEECH && seg.sinceProbe >= PARTIAL_EVERY) {
+  } else if (seg && seg.speech >= MIN_SPEECH && seg.sinceProbe * 100 >= Math.max(PARTIAL_EVERY * 100, 2 * asrMs)) {
     seg.sinceProbe = 0;
     job = { segId: seg.id, final: false, seg, audio: concat(seg.frames) };
   } else {
@@ -376,6 +414,7 @@ function onWorker(m) {
     const job = jobs.get(m.id);
     jobs.delete(m.id);
     if (job && !m.error) handleResult(job, m);
+    asrMs = m.ms ?? asrMs;
     send({ type: 'stats', asrMs: m.ms });
     pump();
   }

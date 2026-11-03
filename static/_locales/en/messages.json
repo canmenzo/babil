@@ -92,6 +92,33 @@
   "auto_detect": {
     "message": "Detect automatically"
   },
+  "model_download": {
+    "message": "Download"
+  },
+  "model_downloaded": {
+    "message": "Downloaded"
+  },
+  "model_delete": {
+    "message": "Delete"
+  },
+  "model_keep": {
+    "message": "Keep"
+  },
+  "model_delete_confirm": {
+    "message": "Are you sure you want to delete this model? You can download it again later."
+  },
+  "model_cancel_download": {
+    "message": "Cancel download"
+  },
+  "model_download_failed": {
+    "message": "Download failed: $1"
+  },
+  "model_in_use": {
+    "message": "In use right now"
+  },
+  "model_moonshine": {
+    "message": "Good accuracy, English only"
+  },
   "model_auto": {
     "message": "Automatic (recommended)"
   },

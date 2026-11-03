@@ -1,8 +1,9 @@
 import * as esbuild from 'esbuild';
-import { cpSync, mkdirSync, rmSync, copyFileSync, unlinkSync } from 'node:fs';
+import { cpSync, mkdirSync, rmSync, copyFileSync, unlinkSync, readFileSync, writeFileSync } from 'node:fs';
 
 const watch = process.argv.includes('--watch');
 const firefox = process.argv.includes('--firefox');
+const store = process.argv.includes('--store');
 const outdir = firefox ? 'dist-firefox' : 'dist';
 const ort = 'node_modules/onnxruntime-web/dist';
 
@@ -10,12 +11,18 @@ rmSync(outdir, { recursive: true, force: true });
 mkdirSync(`${outdir}/ort`, { recursive: true });
 cpSync('static', outdir, { recursive: true });
 cpSync('src/worklet.js', `${outdir}/worklet.js`);
-for (const f of ['ort-wasm-simd-threaded.asyncify.mjs', 'ort-wasm-simd-threaded.asyncify.wasm']) {
+for (const f of ['ort-wasm-simd-threaded.asyncify.mjs', 'ort-wasm-simd-threaded.asyncify.wasm', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm']) {
   cpSync(`${ort}/${f}`, `${outdir}/ort/${f}`);
 }
 if (firefox) {
   copyFileSync('static/manifest.firefox.json', `${outdir}/manifest.json`);
   cpSync('static/background.firefox.html', `${outdir}/background.html`);
+}
+// The key gives ZIP installs one extension ID whatever folder they are unzipped to, which is what
+// keeps downloaded models across updates. The Chrome Web Store refuses it and has its own ID.
+if (store) {
+  const { key, ...manifest } = JSON.parse(readFileSync(`${outdir}/manifest.json`, 'utf8'));
+  writeFileSync(`${outdir}/manifest.json`, JSON.stringify(manifest, null, 2));
 }
 unlinkSync(`${outdir}/manifest.firefox.json`);
 unlinkSync(`${outdir}/background.firefox.html`);

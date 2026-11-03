@@ -92,6 +92,33 @@
   "auto_detect": {
     "message": "Otomatik algıla"
   },
+  "model_download": {
+    "message": "İndir"
+  },
+  "model_downloaded": {
+    "message": "İndirildi"
+  },
+  "model_delete": {
+    "message": "Sil"
+  },
+  "model_keep": {
+    "message": "Vazgeç"
+  },
+  "model_delete_confirm": {
+    "message": "Bu modeli silmek istediğine emin misin? Sonra yeniden indirebilirsin."
+  },
+  "model_cancel_download": {
+    "message": "İndirmeyi iptal et"
+  },
+  "model_download_failed": {
+    "message": "İndirilemedi: $1"
+  },
+  "model_in_use": {
+    "message": "Şu anda kullanılıyor"
+  },
+  "model_moonshine": {
+    "message": "İyi doğruluk, yalnızca İngilizce"
+  },
   "model_auto": {
     "message": "Otomatik (önerilen)"
   },

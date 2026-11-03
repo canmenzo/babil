@@ -27,12 +27,13 @@ async function loadSpeech() {
 new BroadcastChannel('babil-tts').onmessage = ({ data }) => ['ready', 'deleted'].includes(data.type) && loadSpeech();
 
 // No browser.tts in Firefox; the persistent background page can use speechSynthesis directly.
-function systemSpeak(text, hurry, done) {
+function systemSpeak(text, hurry, done, started) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = speech.target;
   u.rate = say.rate * hurry;
   u.pitch = say.pitch;
   u.voice = say.voice?.voice ?? null;
+  u.onstart = started;
   u.onend = u.onerror = done;
   speechSynthesis.speak(u);
 }
@@ -42,12 +43,12 @@ const useNeural = () => neural && neuralReady && !neuralOff;
 
 // Downloaded voices play from offscreen.js, which runs in this same page.
 const speaker = createSpeaker({
-  speak(text, hurry, done) {
+  speak(text, hurry, done, started) {
     if (!useNeural()) {
       if (neural && !neuralReady && ensured !== neural.pack) sendToEngine({ type: 'tts-ensure', pack: (ensured = neural.pack) });
-      return systemSpeak(text, hurry, done);
+      return systemSpeak(text, hurry, done, started);
     }
-    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done)));
+    neuralTts.speak(text, hurryVoice(neural, hurry), (ok) => (ok ? done() : systemSpeak(text, hurry, done, started)), started);
   },
   prepare: (text, hurry) => useNeural() && sendToEngine({ type: 'tts-prepare', text, voice: hurryVoice(neural, hurry) }),
   cancel() {
@@ -117,6 +118,24 @@ async function handleBgMessage(msg) {
     }
     case 'stats':
       await save({ asrMs: msg.asrMs });
+      break;
+    case 'model-download':
+      await save({ downloads: { ...state.downloads, [msg.model]: 0 }, modelError: null });
+      await sendToEngine({ type: 'model-download', model: msg.model });
+      break;
+    case 'model-cancel':
+      await sendToEngine({ type: 'model-cancel', model: msg.model });
+      break;
+    case 'model-progress':
+      if (state.downloads?.[msg.model] != null) await save({ downloads: { ...state.downloads, [msg.model]: msg.progress } });
+      break;
+    case 'model-done': {
+      const { [msg.model]: _, ...rest } = state.downloads ?? {};
+      await save({ downloads: rest, modelError: msg.error ? { model: msg.model, message: msg.error } : null });
+      break;
+    }
+    case 'tts-started':
+      neuralTts.started(msg);
       break;
     case 'tts-ended':
       if (msg.fallback) neuralOff = true;

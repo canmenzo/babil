@@ -34,22 +34,61 @@ export const SOURCE_LANGS = [
   'id', 'vi', 'th', 'ja', 'ko', 'zh', 'el', 'sv', 'ro', 'cs', 'hu', 'he',
 ];
 
-// Sizes are the GPU downloads. Bigger models make fewer mistakes; captions come just as fast with
+// Sizes are the downloads on a GPU and, smaller because quantized, on the CPU. Bigger models make fewer mistakes; captions come just as fast with
 // any of them, since they wait for the sentence to end, so the choice is about the computer.
 // Names, font and edge labels are the messages model_<key>, font_<key> and edge_<key>.
 export const MODELS = {
-  tiny: { id: 'onnx-community/whisper-tiny', size: '120 MB' },
-  base: { id: 'onnx-community/whisper-base', size: '200 MB' },
-  small: { id: 'onnx-community/whisper-small', size: '600 MB' },
-  turbo: { id: 'onnx-community/whisper-large-v3-turbo', size: '1.6 GB' },
+  tiny: { id: 'onnx-community/whisper-tiny', size: '120 MB', cpuSize: '41 MB' },
+  base: { id: 'onnx-community/whisper-base', size: '200 MB', cpuSize: '77 MB' },
+  // English only. Unlike Whisper, its cost grows with the audio, so short segments stay cheap on a CPU.
+  moonshine: { id: 'onnx-community/moonshine-base-ONNX', size: '154 MB', cpuSize: '63 MB', arch: 'moonshine' },
+  small: { id: 'onnx-community/whisper-small', size: '600 MB', cpuSize: '249 MB' },
+  turbo: { id: 'onnx-community/whisper-large-v3-turbo', size: '1.6 GB', cpuSize: '1.1 GB' },
 };
 
-// Models are stored in OPFS by asr-worker.js, one file per download URL.
+let gpu;
+export function modelDevice() {
+  gpu ??= Promise.resolve(navigator.gpu?.requestAdapter()).catch(() => null).then((adapter) => ({
+    device: adapter ? 'webgpu' : 'wasm',
+    f16: adapter?.features.has('shader-f16') ?? false,
+  }));
+  return gpu;
+}
+
+// small costs ~50 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
+// Moonshine beat whisper-base on English on the CPU in both accuracy and speed, but hears nothing else.
+export const autoModel = (device, source) => (device === 'webgpu' ? 'small' : source === 'en' ? 'moonshine' : 'base');
+
+export const modelSize = (name, device) => (device === 'webgpu' ? MODELS[name].size : MODELS[name].cpuSize);
+
+export function modelDtype(name, device, f16) {
+  if (device === 'wasm') return 'q8';
+  if (name === 'turbo') return { encoder_model: f16 ? 'fp16' : 'q4', decoder_model_merged: 'q4' };
+  return { encoder_model: 'fp32', decoder_model_merged: 'q4' };
+}
+
+const DTYPE_SUFFIX = { fp32: '', fp16: '_fp16', q8: '_quantized', q4: '_q4' };
+
+// Models are stored in OPFS by asr-worker.js, one file per download URL. Which weights a model
+// needs depends on the device, so another device's weights do not count as downloaded.
 export async function isCached(model) {
-  const dir = await navigator.storage.getDirectory();
-  const prefix = encodeURIComponent(`${MODELS[model].id}/`);
-  for await (const name of dir.keys()) if (name.includes(prefix) && name.includes('encoder_model') && !name.endsWith('.part')) return true;
-  return false;
+  const { device, f16 } = await modelDevice();
+  const dtype = modelDtype(model, device, f16);
+  const root = await navigator.storage.getDirectory();
+  const names = new Set();
+  for await (const name of root.keys()) names.add(name);
+  return ['encoder_model', 'decoder_model_merged'].every((part) => {
+    const suffix = DTYPE_SUFFIX[typeof dtype === 'string' ? dtype : dtype[part]];
+    return names.has(encodeURIComponent(`https://huggingface.co/${MODELS[model].id}/resolve/main/onnx/${part}${suffix}.onnx`));
+  });
+}
+
+export async function deleteModel(model) {
+  const root = await navigator.storage.getDirectory();
+  const prefix = encodeURIComponent(`/${MODELS[model].id}/`);
+  const names = [];
+  for await (const name of root.keys()) if (name.includes(prefix)) names.push(name);
+  await Promise.all(names.map((name) => root.removeEntry(name).catch(() => {})));
 }
 
 // [key, ...subs] works as a key too, so the offscreen document, which has no chrome.i18n, can

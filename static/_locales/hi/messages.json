@@ -92,6 +92,33 @@
   "auto_detect": {
     "message": "अपने-आप पहचानें"
   },
+  "model_download": {
+    "message": "डाउनलोड करें"
+  },
+  "model_downloaded": {
+    "message": "डाउनलोड हो गया"
+  },
+  "model_delete": {
+    "message": "हटाएं"
+  },
+  "model_keep": {
+    "message": "रखें"
+  },
+  "model_delete_confirm": {
+    "message": "क्या आप वाकई यह मॉडल हटाना चाहते हैं? आप इसे बाद में फिर से डाउनलोड कर सकते हैं।"
+  },
+  "model_cancel_download": {
+    "message": "डाउनलोड रद्द करें"
+  },
+  "model_download_failed": {
+    "message": "डाउनलोड नहीं हो सका: $1"
+  },
+  "model_in_use": {
+    "message": "अभी उपयोग में है"
+  },
+  "model_moonshine": {
+    "message": "अच्छी सटीकता, केवल अंग्रेज़ी"
+  },
   "model_auto": {
     "message": "ऑटोमैटिक (सुझाया गया)"
   },

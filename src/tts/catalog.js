@@ -86,7 +86,8 @@ export function resolveNeural(persona, lang) {
 // The same voice, `hurry` times faster: Supertonic predicts shorter durations, Piper scales its length.
 export function hurryVoice(voice, hurry) {
   if (hurry === 1) return voice;
-  if (voice.engine === 'supertonic') return { ...voice, speed: voice.speed * hurry };
+  // Past about 1.8 Supertonic is assumed to stop being clear, so the fastest persona hurries less.
+  if (voice.engine === 'supertonic') return { ...voice, speed: Math.max(voice.speed, Math.min(1.8, voice.speed * hurry)) };
   return { ...voice, lengthScale: voice.lengthScale / hurry };
 }
 

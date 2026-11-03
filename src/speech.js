@@ -1,28 +1,67 @@
 import { i18n, langName } from './settings.js';
 import { PACKS, packSize, resolveNeural } from './tts/catalog.js';
 
-// Reads final captions aloud, each once, in the target language. Only MAX_QUEUE sentences wait
-// behind the one being spoken; older ones are dropped so speech stays close to the video.
-const MAX_QUEUE = 2;
-// A translation is usually longer than what was said, so reading falls behind fast talk. Each
-// sentence already waiting makes the next one this much faster, up to MAX_HURRY.
-const HURRY_STEP = 0.12;
-const MAX_HURRY = 1.35;
+// Reads final captions aloud, each once, in the target language. Speech is paced by how much is
+// waiting, in seconds: a little backlog speeds the voice up, more than MAX_WAIT drops the oldest
+// waiting sentences. The newest sentence is always read, and the one playing is never cut.
+const MAX_WAIT = 4; // seconds of speech that may wait, at MAX_HURRY
+const MAX_AGE_MS = 6000; // a waiting sentence older than this is stale when a newer one exists
+const EASY = 2; // seconds of backlog read at normal speed
+const HURRY_PER_S = 0.15; // each second of backlog beyond EASY adds this to the speed
+const MAX_HURRY = 1.5;
+const CPS = 15; // characters a voice reads per second at normal speed
+const CPS_CJK = 5;
 const REPEAT_MS = 8000; // the same sentence again within this is not read twice
 
 export function createSpeaker({ speak, cancel, prepare = () => {}, onSpeaking = () => {} }) {
   const spoken = new Set();
-  const queue = []; // { text, hurry }
+  const queue = []; // { text, t, hurry? } hurry is fixed once the sentence is next
   let last = { text: '', t: 0 };
   let turn = 0;
-  let busy = false;
+  let busy = false; // a sentence is being synthesized or spoken
+  let heard = false; // its audio is playing, so the video is ducked
+  let current = null; // { secs, t } of the sentence being spoken
+
+  const secs = (text) => text.length / (/[぀-ヿ㐀-鿿가-힯]/.test(text) ? CPS_CJK : CPS);
+
+  // Seconds of speech waiting, including the rest of the sentence being spoken, at normal speed.
+  function backlog() {
+    const left = current ? Math.max(0, current.secs - (Date.now() - current.t) / 1000) : 0;
+    return left + queue.reduce((n, i) => n + secs(i.text), 0);
+  }
+
+  // Drops what cannot be caught up with, then fixes the speed of the next sentence and synthesizes
+  // it ahead. The speed is fixed here so what prepare() makes is what plays.
+  function trim() {
+    while (queue.length > 1 && (backlog() / MAX_HURRY > MAX_WAIT || Date.now() - queue[0].t > MAX_AGE_MS)) queue.shift();
+    const head = queue[0];
+    if (head && !head.hurry) {
+      // With nothing ahead there is no backlog, however long this sentence is.
+      const behind = current || queue.length > 1;
+      head.hurry = behind ? Math.min(MAX_HURRY, 1 + HURRY_PER_S * Math.max(0, backlog() - EASY)) : 1;
+      prepare(head.text, head.hurry);
+    }
+  }
 
   function next() {
+    trim();
     const item = queue.shift();
-    if (busy !== !!item) onSpeaking((busy = !!item));
-    if (!item) return;
+    if (!item) {
+      busy = false;
+      current = null;
+      if (heard) onSpeaking((heard = false));
+      return;
+    }
+    busy = true;
     const t = ++turn;
-    speak(item.text, item.hurry, () => t === turn && next());
+    current = { secs: secs(item.text) / item.hurry, t: Date.now() };
+    speak(
+      item.text,
+      item.hurry,
+      () => t === turn && next(),
+      () => t === turn && !heard && onSpeaking((heard = true)),
+    );
+    trim(); // the one after this is prepared while this plays
   }
 
   return {
@@ -33,19 +72,18 @@ export function createSpeaker({ speak, cancel, prepare = () => {}, onSpeaking = 
       spoken.add(msg.id);
       if (text === last.text && Date.now() - last.t < REPEAT_MS) return;
       last = { text, t: Date.now() };
-      // The speed is fixed when the sentence is queued, so what prepare() synthesizes is what plays.
-      const item = { text, hurry: Math.min(MAX_HURRY, 1 + HURRY_STEP * (queue.length + (busy ? 1 : 0))) };
-      queue.push(item);
-      if (queue.length > MAX_QUEUE) queue.shift();
-      if (!busy) next();
-      else prepare(item.text, item.hurry);
+      queue.push({ text, t: Date.now() });
+      if (busy) trim();
+      else next();
     },
     stop() {
       queue.length = 0;
       spoken.clear();
       last = { text: '', t: 0 };
       turn++;
-      if (busy) onSpeaking((busy = false));
+      busy = false;
+      current = null;
+      if (heard) onSpeaking((heard = false));
       cancel();
     },
   };
@@ -64,13 +102,14 @@ export function neuralSpeaker(send) {
     p.done(ok);
   };
   return {
-    speak(text, voice, done) {
+    speak(text, voice, done, started) {
       const id = ++seq;
       const timer = setTimeout(() => ended({ id, ok: false }), Math.max(10000, 150 * text.length));
-      pending.set(id, { done, timer });
+      pending.set(id, { done, timer, started });
       send({ type: 'tts-speak', id, text, voice });
     },
     ended,
+    started: ({ id }) => pending.get(id)?.started?.(),
   };
 }
 

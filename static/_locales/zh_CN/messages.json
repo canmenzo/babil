@@ -92,6 +92,33 @@
   "auto_detect": {
     "message": "自动检测"
   },
+  "model_download": {
+    "message": "下载"
+  },
+  "model_downloaded": {
+    "message": "已下载"
+  },
+  "model_delete": {
+    "message": "删除"
+  },
+  "model_keep": {
+    "message": "保留"
+  },
+  "model_delete_confirm": {
+    "message": "确定要删除此模型吗?之后可以重新下载。"
+  },
+  "model_cancel_download": {
+    "message": "取消下载"
+  },
+  "model_download_failed": {
+    "message": "下载失败:$1"
+  },
+  "model_in_use": {
+    "message": "正在使用"
+  },
+  "model_moonshine": {
+    "message": "准确度良好,仅限英语"
+  },
   "model_auto": {
     "message": "自动（推荐）"
   },

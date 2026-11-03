@@ -3,19 +3,17 @@ import {
   AutoProcessor,
   AutoTokenizer,
   WhisperForConditionalGeneration,
+  MoonshineForConditionalGeneration,
   LogitsProcessor,
   LogitsProcessorList,
   pipeline,
+  ModelRegistry,
 } from '@huggingface/transformers';
-import { MODELS, isCached } from './settings.js';
+import { MODELS, isCached, modelDevice, modelDtype, autoModel } from './settings.js';
 
 env.allowLocalModels = false;
 // The cache path turns the ORT factory into a blob: URL, which extension CSP refuses to import.
 env.useWasmCache = false;
-env.backends.onnx.wasm.wasmPaths = {
-  mjs: new URL('ort/ort-wasm-simd-threaded.asyncify.mjs', self.location.href).href,
-  wasm: new URL('ort/ort-wasm-simd-threaded.asyncify.wasm', self.location.href).href,
-};
 
 // CacheStorage throws "Unexpected internal error" on chrome-extension:// origins and transformers.js
 // swallows it, so every start re-downloaded the model. Keep the files in OPFS instead.
@@ -96,43 +94,74 @@ class PromptProcessor extends LogitsProcessor {
   }
 }
 
-let model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
+let arch, model, processor, tokenizer, gen, idToLang, langIds, prompter, suppress_tokens;
 let device = 'wasm';
 let f16 = false;
 let translator;
 
-async function load(name) {
-  const adapter = await navigator.gpu?.requestAdapter();
-  device = adapter ? 'webgpu' : 'wasm';
-  f16 = adapter?.features.has('shader-f16') ?? false;
-  // small costs ~50 ms more than base on a GPU and fixes most short-phrase mistakes; on CPU it is too slow.
-  if (name === 'auto') name = device === 'webgpu' ? 'small' : 'base';
-  let dtype;
-  if (device === 'wasm') dtype = 'q8';
-  else if (name === 'turbo') dtype = { encoder_model: f16 ? 'fp16' : 'q4', decoder_model_merged: 'q4' };
-  else dtype = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
-
+async function load(name, source) {
+  ({ device, f16 } = await modelDevice());
+  // WebGPU needs the asyncify build; on the CPU the plain one is 10-14% faster.
+  const build = device === 'webgpu' ? '.asyncify' : '';
+  env.backends.onnx.wasm.wasmPaths = {
+    mjs: new URL(`ort/ort-wasm-simd-threaded${build}.mjs`, self.location.href).href,
+    wasm: new URL(`ort/ort-wasm-simd-threaded${build}.wasm`, self.location.href).href,
+  };
+  if (device === 'wasm') env.backends.onnx.wasm.numThreads = Math.min(4, Math.max(1, (navigator.hardwareConcurrency || 2) - 1));
+  if (name === 'auto') name = autoModel(device, source);
   if (!MODELS[name]) name = 'base';
+  const dtype = modelDtype(name, device, f16);
   const { id } = MODELS[name];
+  arch = MODELS[name].arch;
+  const Model = arch === 'moonshine' ? MoonshineForConditionalGeneration : WhisperForConditionalGeneration;
   const fromDisk = await isCached(name);
   const progress_callback = (p) => {
     if (p.status === 'progress_total') postMessage({ type: 'progress', progress: p.progress, fromDisk });
   };
   [model, processor, tokenizer] = await Promise.all([
-    WhisperForConditionalGeneration.from_pretrained(id, { dtype, device, progress_callback }),
+    Model.from_pretrained(id, { dtype, device, progress_callback }),
     AutoProcessor.from_pretrained(id),
     AutoTokenizer.from_pretrained(id),
   ]);
 
-  gen = model.generation_config;
-  idToLang = new Map(Object.entries(gen.lang_to_id).map(([tok, tid]) => [tid, tok.slice(2, -2)]));
-  langIds = [...idToLang.keys()];
-  prompter = new PromptProcessor(gen);
-  suppress_tokens = gen.suppress_tokens.filter((t) => t !== prompter.noSpeechId);
+  if (arch !== 'moonshine') {
+    gen = model.generation_config;
+    idToLang = new Map(Object.entries(gen.lang_to_id).map(([tok, tid]) => [tid, tok.slice(2, -2)]));
+    langIds = [...idToLang.keys()];
+    prompter = new PromptProcessor(gen);
+    suppress_tokens = gen.suppress_tokens.filter((t) => t !== prompter.noSpeechId);
+  }
 
   // First run compiles the WebGPU shaders; do it now instead of on the first caption.
   await transcribe(new Float32Array(16000), 'en');
   postMessage({ type: 'ready', device, model: name });
+}
+
+// Fetches the files load() would, into the same cache, without loading the model.
+async function download(name) {
+  const { id } = MODELS[name];
+  ({ device, f16 } = await modelDevice());
+  const files = await ModelRegistry.get_files(id, { dtype: modelDtype(name, device, f16), device });
+  const url = (file) => `https://huggingface.co/${id}/resolve/main/${file}`;
+  const missing = [];
+  for (const file of files) if (!(await opfsCache.match(url(file)))) missing.push(file);
+  const sizes = await Promise.all(missing.map((file) => ModelRegistry.get_file_metadata(id, file)));
+  const total = sizes.reduce((n, m) => n + (m.size ?? 0), 0);
+  let loaded = 0;
+  let shown = -1;
+  for (const file of missing) {
+    const res = await fetch(url(file));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const count = new TransformStream({
+      transform(chunk, ctl) {
+        loaded += chunk.length;
+        const pct = Math.min(99, Math.floor((100 * loaded) / total));
+        if (pct !== shown) postMessage({ type: 'download-progress', progress: (shown = pct) });
+        ctl.enqueue(chunk);
+      },
+    });
+    await opfsCache.put(url(file), new Response(res.body.pipeThrough(count)));
+  }
 }
 
 async function loadTranslator() {
@@ -150,13 +179,19 @@ async function loadTranslator() {
 
 // prior: { language: weight } from earlier segments, used when the language is not fixed.
 async function transcribe(audio, language, prior) {
+  // Cap output by audio length so a hallucination loop cannot run for hundreds of tokens.
+  const max_new_tokens = Math.min(128, Math.ceil((audio.length / 16000) * 7) + 8);
+  if (arch === 'moonshine') {
+    const { input_values } = await processor(audio);
+    const out = await model.generate({ input_values, max_new_tokens });
+    const ids = (out.sequences ?? out).tolist()[0].map(Number);
+    return { text: tokenizer.decode(ids, { skip_special_tokens: true }).trim(), language: 'en', noSpeech: 0, langConf: 1 };
+  }
   const { input_features } = await processor(audio);
   prompter.fixed = language ? gen.lang_to_id[`<|${language}|>`] : null;
   prompter.prior = prior && Object.keys(prior).length ? prior : null;
   const logits_processor = new LogitsProcessorList();
   logits_processor.push(prompter);
-  // Cap output by audio length so a hallucination loop cannot run for hundreds of tokens.
-  const max_new_tokens = Math.min(128, Math.ceil((audio.length / 16000) * 7) + 8);
   const out = await model.generate({
     inputs: input_features,
     decoder_input_ids: [gen.decoder_start_token_id],
@@ -178,7 +213,12 @@ let chain = Promise.resolve();
 
 self.onmessage = ({ data }) => {
   if (data.type === 'load') {
-    chain = chain.then(() => load(data.model)).catch((e) => postMessage({ type: 'error', message: String(e?.message ?? e) }));
+    chain = chain.then(() => load(data.model, data.source)).catch((e) => postMessage({ type: 'error', message: String(e?.message ?? e) }));
+  } else if (data.type === 'download') {
+    download(data.model).then(
+      () => postMessage({ type: 'download-done' }),
+      (e) => postMessage({ type: 'download-done', error: String(e?.message ?? e) }),
+    );
   } else if (data.type === 'transcribe') {
     chain = chain.then(async () => {
       const t0 = performance.now();

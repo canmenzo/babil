@@ -1,8 +1,9 @@
 {
   "name": "babil",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "scripts": {
     "build": "node build.mjs",
+    "build:store": "node build.mjs --store",
     "build:firefox": "node build.mjs --firefox",
     "watch": "node build.mjs --watch"
   },

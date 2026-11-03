@@ -25,10 +25,18 @@
     <label class="field"><span data-i18n="target_label"></span> <select id="target"></select></label>
   </div>
 
-  <label class="field"><span data-i18n="model_label"></span>
-    <select id="model"></select>
-  </label>
-  <p id="modelHint" class="muted small hint"></p>
+  <div class="field">
+    <span data-i18n="model_label"></span>
+    <button type="button" id="modelToggle" class="model-toggle" aria-controls="modelList">
+      <span id="modelName"></span>
+      <span id="modelState" class="model-state"></span>
+      <span id="modelCaret" class="model-caret"></span>
+    </button>
+  </div>
+  <div id="modelList" class="model-list" hidden>
+    <div id="modelRows"></div>
+    <p class="muted small model-note" data-i18n="model_speed_note"></p>
+  </div>
 
   <label class="check"><input type="checkbox" id="showOriginal"> <span data-i18n="show_original_too"></span></label>
   <label class="check"><input type="checkbox" id="tts"> <span data-i18n="tts"></span></label>
@@ -47,7 +55,6 @@
     <button type="button" id="openOptions" class="subtle" data-i18n="settings"></button>
     <span class="shortcut muted small"><span data-i18n="shortcut"></span><kbd>Alt+Shift+T</kbd></span>
   </footer>
-  <div class="muted small version"><span id="version"></span></div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

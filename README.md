@@ -49,9 +49,9 @@ Each persona has its own voice, which Babil downloads once and then plays on you
 
 Chrome Web Store and Firefox Add-ons installations update automatically through the browser when a newer version is published to the same store listing. Babil does not check GitHub for updates. Your settings and downloaded models stay saved.
 
-Developer-mode ZIP and temporary Firefox installations do not receive automatic updates. Replace the files in the same folder, then reload the extension from `chrome://extensions` or `about:debugging`.
+Developer-mode ZIP and temporary Firefox installations do not receive automatic updates. Replace the files, then reload the extension from `chrome://extensions` or `about:debugging`. Downloaded models stay as long as the extension is not removed. Removing it deletes them.
 
-To publish an update, increase the version in `package.json`, `package-lock.json`, and both manifests, build with `npm run build` and `npm run build:firefox`, then upload a ZIP of each output folder's contents to the existing Chrome Web Store and Firefox Add-ons listings. Keep the Firefox add-on ID (`babil@canmenzo`) unchanged and omit custom `update_url` values so the stores manage updates. A GitHub push or release alone does not update installed extensions.
+To publish an update, increase the version in `package.json`, `package-lock.json`, and both manifests, build with `npm run build:store` and `npm run build:firefox`, then upload a ZIP of each output folder's contents to the existing Chrome Web Store and Firefox Add-ons listings. Keep the Firefox add-on ID (`babil@canmenzo`) unchanged and omit custom `update_url` values so the stores manage updates. A GitHub push or release alone does not update installed extensions.
 
 ## 🛠️ For developers
 

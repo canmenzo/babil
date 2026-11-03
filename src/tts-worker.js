@@ -115,10 +115,10 @@ async function synth(text, voice) {
   const t0 = performance.now();
   const pcm = voice.engine === 'supertonic' ? await e.synth(text, voice.lang, voice.style, voice.speed) : await e.synth(text, voice);
   const ms = performance.now() - t0;
-  // Supertonic now and then overshoots; scale down instead of clipping.
+  // A steady level over the ducked video: peaks at 0.9, whether the model came out quiet or clipped.
   let peak = 0;
   for (const x of pcm) peak = Math.max(peak, Math.abs(x));
-  if (peak > 1) for (let i = 0; i < pcm.length; i++) pcm[i] /= peak;
+  if (peak > 0) for (let i = 0; i < pcm.length; i++) pcm[i] *= 0.9 / peak;
   return { pcm, sampleRate: e.sampleRate, ms };
 }
 
