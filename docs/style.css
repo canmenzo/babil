@@ -44,6 +44,10 @@ h2{margin:0 0 32px;font-size:30px;line-height:40px;padding-bottom:2px;font-weigh
 .tagline .w.on{opacity:1}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
 .card{padding:24px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.card.wide{grid-column:1/-1}
+.features{grid-template-columns:repeat(4,1fr)}
+@media(max-width:960px){.features{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.features{grid-template-columns:1fr}}
 .card.rv.on{transition:opacity .9s var(--ease),transform .5s var(--ease),filter .9s var(--ease),border-color .5s var(--ease),box-shadow .5s var(--ease)}
 .card.rv.on:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 32px -12px color-mix(in srgb,var(--accent) 40%,transparent)}
 .card svg{transition:transform .5s var(--ease)}
