@@ -2,7 +2,7 @@
 @media(prefers-color-scheme:dark){:root{--bg:#131209;--surface:#1f1f1f;--text:#f2f0e8;--soft:#b3b0a4;--border:#313131;--accent:#f0b24a;--accent-bg:#f0b24a;--on-accent:#131209;--g1:#fff;--g2:#9b9b9b}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:0}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:24px;text-wrap:pretty}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Commissioner,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:24px;text-wrap:pretty}
 img{max-width:100%;height:auto;display:block}
 a{color:var(--accent)}
 code,kbd{font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 4px;overflow-wrap:anywhere}
