@@ -1,6 +1,6 @@
 {
   "name": "babil",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "scripts": {
     "build": "node build.mjs",
     "build:store": "node build.mjs --store",
