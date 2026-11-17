@@ -110,3 +110,6 @@ footer .social{gap:4px}
 footer .social a{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;color:var(--soft)}
 footer .social a:hover{color:var(--text);transform:none}
 footer .social svg{width:20px;height:20px}
+.nav-end{display:flex;align-items:center;gap:8px}
+.lang{padding:6px 8px;border-radius:8px;font-size:13px;line-height:20px;font-weight:600;color:var(--soft);text-decoration:none;transition:color .5s var(--ease)}
+.lang:hover{color:var(--text)}

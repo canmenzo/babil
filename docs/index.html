@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>(function(){var l;try{l=localStorage.getItem("lang")}catch(e){}if(l==="en")return;var n=(navigator.languages&&navigator.languages[0])||navigator.language||"";if(l==="tr"||/^tr\b/i.test(n))location.replace("tr/"+location.hash)})()</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Babil | Live Translated Captions</title>
 <meta name="description" content="Babil is a free browser extension that turns the audio of any video into live captions in 26 languages. Whisper and translation run on your computer. No account, no API key.">
 <link rel="canonical" href="https://babil.menzo.dev/">
+<link rel="alternate" hreflang="en" href="https://babil.menzo.dev/">
+<link rel="alternate" hreflang="tr" href="https://babil.menzo.dev/tr/">
+<link rel="alternate" hreflang="x-default" href="https://babil.menzo.dev/">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=20261031">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=20261031">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=20261031">
@@ -31,11 +35,12 @@
 <script>document.documentElement.className="js"</script>
 </head>
 <body>
+<!-- Turkish copy: tr/index.html. Any change to this page goes there too, in the same push. -->
 <a class="skip" href="#main">Skip to content</a>
 <nav class="pill" aria-label="Main">
 <a class="brand" href="#top"><img src="icon-128.png?v=20261031" alt="" width="24" height="24">Babil</a>
 <div class="links"><a href="#features">Features</a><a href="#install">Install</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></div>
-<a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a>
+<div class="nav-end"><a class="lang" href="tr/" hreflang="tr" lang="tr" onclick="try{localStorage.setItem('lang','tr')}catch(e){}" aria-label="Türkçe">TR</a><a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a></div>
 </nav>
 <main id="main">
 <header class="hero" id="top">
