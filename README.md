@@ -1,6 +1,7 @@
 # <img src="docs/icon-128.png" alt="" width="32" height="32"> Babil
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/cefpfhjoeffkhappaalllkoehccfcokk?label=Chrome%20Web%20Store&color=blue)](https://chromewebstore.google.com/detail/babil-live-captions-and-t/cefpfhjoeffkhappaalllkoehccfcokk)
+[![Firefox Add-ons](https://img.shields.io/amo/v/babil?label=Firefox%20Add-ons&color=blue)](https://addons.mozilla.org/firefox/addon/babil/)
 
 **Watch videos in your language. Live captions, translated on your computer.**
 
@@ -27,7 +28,9 @@ To install a release ZIP instead:
 
 ### Firefox
 
-Babil for Firefox is in review on Firefox Add-ons. Until it is listed there, build it from source (needs Node.js):
+Install it from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/babil/).
+
+To build it from source instead (needs Node.js):
 
 1. Run `npm install`, then `npm run build:firefox`
 2. Go to `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and choose `dist-firefox/manifest.json`
