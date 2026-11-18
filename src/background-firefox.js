@@ -57,6 +57,18 @@ const speaker = createSpeaker({
   },
 });
 
+// Firefox installs an update the moment it arrives unless this event is handled, which would cut
+// captions mid-video. Hold it while captions run or a model downloads, then let the overlay's
+// own timers clear the last caption before reloading.
+let updateWaiting = false;
+const busy = () => state.running || Object.keys(state.downloads ?? {}).length > 0;
+const applyUpdate = () => updateWaiting && !busy() && browser.runtime.reload();
+browser.runtime.onUpdateAvailable.addListener(async () => {
+  await restored;
+  if (!busy()) return browser.runtime.reload();
+  updateWaiting = true;
+});
+
 async function sendToEngine(message) {
   return window.__babilEngineMessage({ target: 'offscreen', ...message });
 }
@@ -85,6 +97,7 @@ async function stop(text = i18n('status_stopped')) {
   if (state.tabId != null) browser.tabs.sendMessage(state.tabId, { type: 'capture-stop' }).catch(() => {});
   await sendToEngine({ type: 'stop' });
   await save({ running: false, status: { state: 'stopped', text } });
+  setTimeout(applyUpdate, 15000);
 }
 
 async function handleBgMessage(msg) {
@@ -132,6 +145,7 @@ async function handleBgMessage(msg) {
     case 'model-done': {
       const { [msg.model]: _, ...rest } = state.downloads ?? {};
       await save({ downloads: rest, modelError: msg.error ? { model: msg.model, message: msg.error } : null });
+      applyUpdate();
       break;
     }
     case 'tts-started':
