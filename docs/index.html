@@ -2,13 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<script>(function(){var l;try{l=localStorage.getItem("lang")}catch(e){}if(l==="en")return;var n=(navigator.languages&&navigator.languages[0])||navigator.language||"";if(l==="tr"||/^tr\b/i.test(n))location.replace("tr/"+location.hash)})()</script>
+<script>(function(){var L=["tr","es","zh","hi","ar","fr"],l;try{l=localStorage.getItem("lang")}catch(e){}if(l==="en")return;var n=((navigator.languages&&navigator.languages[0])||navigator.language||"").toLowerCase().split("-")[0];var t=L.indexOf(l)>=0?l:L.indexOf(n)>=0?n:"";if(t)location.replace(t+"/"+location.hash)})()</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Babil | Live Translated Captions</title>
 <meta name="description" content="Babil is a free browser extension that turns the audio of any video into live captions in 26 languages. Whisper and translation run on your computer. No account, no API key.">
 <link rel="canonical" href="https://babil.menzo.dev/">
 <link rel="alternate" hreflang="en" href="https://babil.menzo.dev/">
 <link rel="alternate" hreflang="tr" href="https://babil.menzo.dev/tr/">
+<link rel="alternate" hreflang="es" href="https://babil.menzo.dev/es/">
+<link rel="alternate" hreflang="zh" href="https://babil.menzo.dev/zh/">
+<link rel="alternate" hreflang="hi" href="https://babil.menzo.dev/hi/">
+<link rel="alternate" hreflang="ar" href="https://babil.menzo.dev/ar/">
+<link rel="alternate" hreflang="fr" href="https://babil.menzo.dev/fr/">
 <link rel="alternate" hreflang="x-default" href="https://babil.menzo.dev/">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=20261031">
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=20261031">
@@ -35,13 +40,15 @@
 <script>document.documentElement.className="js"</script>
 </head>
 <body>
-<!-- Turkish copy: tr/index.html. Any change to this page goes there too, in the same push. -->
+<!-- Translated copies: tr/, es/, zh/, hi/, ar/, fr/ (each an index.html). Any change to this page goes into every one of them too, in the same push. -->
 <a class="skip" href="#main">Skip to content</a>
 <nav class="pill" aria-label="Main">
 <a class="brand" href="#top"><img src="icon-128.png?v=20261031" alt="" width="24" height="24">Babil</a>
 <div class="links"><a href="#features">Features</a><a href="#install">Install</a><a href="#privacy">Privacy</a><a href="#faq">FAQ</a></div>
-<div class="nav-end"><a class="lang" href="tr/" hreflang="tr" lang="tr" onclick="try{localStorage.setItem('lang','tr')}catch(e){}" aria-label="Türkçe">TR</a><a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a></div>
+<div class="nav-end"><a class="btn sm" href="https://github.com/canmenzo/babil/releases/latest">Download</a></div>
 </nav>
+<details class="langs"><summary aria-label="Language: English"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#b22234"/><rect y="1.538" width="30" height="1.538" fill="#fff"/><rect y="4.615" width="30" height="1.538" fill="#fff"/><rect y="7.692" width="30" height="1.538" fill="#fff"/><rect y="10.769" width="30" height="1.538" fill="#fff"/><rect y="13.846" width="30" height="1.538" fill="#fff"/><rect y="16.923" width="30" height="1.538" fill="#fff"/><rect width="12" height="10.769" fill="#3c3b6e"/><g fill="#fff"><circle cx="1.2" cy="1.1" r=".38"/><circle cx="3.6" cy="1.1" r=".38"/><circle cx="6.0" cy="1.1" r=".38"/><circle cx="8.4" cy="1.1" r=".38"/><circle cx="10.8" cy="1.1" r=".38"/><circle cx="1.2" cy="3.3" r=".38"/><circle cx="3.6" cy="3.3" r=".38"/><circle cx="6.0" cy="3.3" r=".38"/><circle cx="8.4" cy="3.3" r=".38"/><circle cx="10.8" cy="3.3" r=".38"/><circle cx="1.2" cy="5.5" r=".38"/><circle cx="3.6" cy="5.5" r=".38"/><circle cx="6.0" cy="5.5" r=".38"/><circle cx="8.4" cy="5.5" r=".38"/><circle cx="10.8" cy="5.5" r=".38"/><circle cx="1.2" cy="7.7" r=".38"/><circle cx="3.6" cy="7.7" r=".38"/><circle cx="6.0" cy="7.7" r=".38"/><circle cx="8.4" cy="7.7" r=".38"/><circle cx="10.8" cy="7.7" r=".38"/><circle cx="1.2" cy="9.9" r=".38"/><circle cx="3.6" cy="9.9" r=".38"/><circle cx="6.0" cy="9.9" r=".38"/><circle cx="8.4" cy="9.9" r=".38"/><circle cx="10.8" cy="9.9" r=".38"/></g></svg><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></summary><div class="langs-menu"><a href="./" hreflang="en" lang="en" data-lang="en" aria-current="page"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#b22234"/><rect y="1.538" width="30" height="1.538" fill="#fff"/><rect y="4.615" width="30" height="1.538" fill="#fff"/><rect y="7.692" width="30" height="1.538" fill="#fff"/><rect y="10.769" width="30" height="1.538" fill="#fff"/><rect y="13.846" width="30" height="1.538" fill="#fff"/><rect y="16.923" width="30" height="1.538" fill="#fff"/><rect width="12" height="10.769" fill="#3c3b6e"/><g fill="#fff"><circle cx="1.2" cy="1.1" r=".38"/><circle cx="3.6" cy="1.1" r=".38"/><circle cx="6.0" cy="1.1" r=".38"/><circle cx="8.4" cy="1.1" r=".38"/><circle cx="10.8" cy="1.1" r=".38"/><circle cx="1.2" cy="3.3" r=".38"/><circle cx="3.6" cy="3.3" r=".38"/><circle cx="6.0" cy="3.3" r=".38"/><circle cx="8.4" cy="3.3" r=".38"/><circle cx="10.8" cy="3.3" r=".38"/><circle cx="1.2" cy="5.5" r=".38"/><circle cx="3.6" cy="5.5" r=".38"/><circle cx="6.0" cy="5.5" r=".38"/><circle cx="8.4" cy="5.5" r=".38"/><circle cx="10.8" cy="5.5" r=".38"/><circle cx="1.2" cy="7.7" r=".38"/><circle cx="3.6" cy="7.7" r=".38"/><circle cx="6.0" cy="7.7" r=".38"/><circle cx="8.4" cy="7.7" r=".38"/><circle cx="10.8" cy="7.7" r=".38"/><circle cx="1.2" cy="9.9" r=".38"/><circle cx="3.6" cy="9.9" r=".38"/><circle cx="6.0" cy="9.9" r=".38"/><circle cx="8.4" cy="9.9" r=".38"/><circle cx="10.8" cy="9.9" r=".38"/></g></svg><span>English</span></a><a href="tr/" hreflang="tr" lang="tr" data-lang="tr"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#e30a17"/><circle cx="10.625" cy="10" r="5" fill="#fff"/><circle cx="11.875" cy="10" r="4" fill="#e30a17"/><path fill="#fff" d="M12.083 10L13.81 9.439 13.81 7.622 14.878 9.092 16.606 8.531 15.538 10 16.606 11.469 14.878 10.908 13.81 12.378 13.81 10.561z"/></svg><span>Türkçe</span></a><a href="es/" hreflang="es" lang="es" data-lang="es"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/></svg><span>Español</span></a><a href="zh/" hreflang="zh" lang="zh" data-lang="zh"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#ee1c25"/><path fill="#ffff00" d="M5 2l1.18 3.62H10L6.91 7.86 8.09 11.5 5 9.26 1.91 11.5 3.09 7.86 0 5.62h3.82z"/><circle cx="10" cy="2" r=".9" fill="#ffff00"/><circle cx="12" cy="4" r=".9" fill="#ffff00"/><circle cx="12" cy="7" r=".9" fill="#ffff00"/><circle cx="10" cy="9" r=".9" fill="#ffff00"/></svg><span>中文</span></a><a href="hi/" hreflang="hi" lang="hi" data-lang="hi"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#ff9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" stroke-width=".7"/><circle cx="15" cy="10" r=".6" fill="#000080"/></svg><span>हिन्दी</span></a><a href="ar/" hreflang="ar" lang="ar" data-lang="ar"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#ce1126"/><rect y="13.33" width="30" height="6.67" fill="#000"/><circle cx="15" cy="10" r="2" fill="#c09300"/></svg><span>العربية</span></a><a href="fr/" hreflang="fr" lang="fr" data-lang="fr"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#002395"/><rect x="20" width="10" height="20" fill="#ed2939"/></svg><span>Français</span></a></div></details>
+
 <main id="main">
 <header class="hero" id="top">
 <h1>Watch any video in your own language</h1>
@@ -123,5 +130,6 @@ var so=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isInter
 links.forEach(function(a){var s=document.querySelector(a.getAttribute("href"));if(s)so.observe(s)});
 })();
 </script>
+<script>(function(){var d=document.querySelector(".langs");if(!d)return;document.addEventListener("click",function(e){if(!d.contains(e.target))d.open=false});document.addEventListener("keydown",function(e){if(e.key==="Escape")d.open=false});d.addEventListener("click",function(e){var a=e.target.closest("a[data-lang]");if(a)try{localStorage.setItem("lang",a.dataset.lang)}catch(_){}})})()</script>
 </body>
 </html>

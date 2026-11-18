@@ -5,7 +5,7 @@ html{scroll-behavior:smooth;scroll-padding-top:0}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Commissioner,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:24px;text-wrap:pretty}
 img{max-width:100%;height:auto;display:block}
 a{color:var(--accent)}
-code,kbd{font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 4px;overflow-wrap:anywhere}
+code,kbd{font-family:ui-monospace,"Geist Mono",Consolas,monospace;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2px 4px;overflow-wrap:anywhere;direction:ltr;unicode-bidi:isolate}
 .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
 .skip{position:absolute;left:16px;top:-64px;background:var(--accent-bg);color:var(--on-accent);padding:8px 12px;border-radius:8px;z-index:10}
 .skip:focus{top:8px}
@@ -14,7 +14,7 @@ summary{transition:color .5s var(--ease)}
 summary:hover{color:var(--accent)}
 details{transition:border-color .5s var(--ease)}
 details:hover,details[open]{border-color:color-mix(in srgb,var(--accent) 50%,var(--border))}
-nav.pill{display:flex;align-items:center;gap:24px;width:max-content;max-width:calc(100% - 32px);margin:24px auto 0;padding:8px 8px 8px 16px;border:1px solid var(--border);border-radius:9999px;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:sticky;top:16px;z-index:5}
+nav.pill{display:flex;align-items:center;gap:24px;width:max-content;max-width:calc(100% - 32px);margin:24px auto 0;padding:8px;padding-inline-start:16px;border:1px solid var(--border);border-radius:9999px;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);position:sticky;top:16px;z-index:5}
 nav.pill .brand{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--text);text-decoration:none}
 nav.pill .brand img{width:24px;height:24px;border-radius:4px}
 nav.pill .links{display:flex;gap:16px;font-size:14px;line-height:20px;font-weight:600}
@@ -56,8 +56,8 @@ h2{margin:0 0 32px;font-size:30px;line-height:40px;padding-bottom:2px;font-weigh
 .card p{margin:0;color:var(--soft);font-size:14px;line-height:20px}
 .card svg{width:32px;height:32px;fill:none;stroke:var(--accent);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .steps{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:16px;max-width:760px}
-.steps li{counter-increment:s;position:relative;padding:16px 16px 16px 64px;border:1px solid var(--border);border-radius:16px}
-.steps li::before{content:counter(s);position:absolute;left:16px;top:16px;width:32px;height:32px;display:grid;place-items:center;border-radius:9999px;background:var(--accent-bg);color:var(--on-accent);font-weight:700}
+.steps li{counter-increment:s;position:relative;padding:16px;padding-inline-start:64px;border:1px solid var(--border);border-radius:16px}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:16px;top:16px;width:32px;height:32px;display:grid;place-items:center;border-radius:9999px;background:var(--accent-bg);color:var(--on-accent);font-weight:700}
 .steps strong{display:block}
 .steps span{color:var(--soft);font-size:14px;line-height:20px}
 .note{max-width:760px;margin:24px 0 0;padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--surface);font-size:14px;line-height:20px;color:var(--soft)}
@@ -111,5 +111,26 @@ footer .social a{display:inline-flex;align-items:center;justify-content:center;w
 footer .social a:hover{color:var(--text);transform:none}
 footer .social svg{width:20px;height:20px}
 .nav-end{display:flex;align-items:center;gap:8px}
-.lang{padding:6px 8px;border-radius:8px;font-size:13px;line-height:20px;font-weight:600;color:var(--soft);text-decoration:none;transition:color .5s var(--ease)}
-.lang:hover{color:var(--text)}
+.langs{position:fixed;top:29px;inset-inline-end:24px;z-index:6;max-width:none;margin:0;padding:0;border:0;border-radius:0}
+.langs summary::after{content:none}
+.langs summary{list-style:none;display:flex;justify-content:flex-start;align-items:center;gap:6px;padding:6px 8px 6px 10px;border:1px solid var(--border);border-radius:9999px;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);color:var(--soft);cursor:pointer;transition:border-color .5s var(--ease),color .5s var(--ease)}
+.langs summary::-webkit-details-marker{display:none}
+.langs summary:hover,.langs[open] summary{border-color:var(--accent);color:var(--text)}
+.langs svg:not(.chev){display:block;flex:none;width:24px;height:16px;clip-path:inset(0 round 3px)}
+.langs .chev{width:12px;height:12px;transition:transform .5s var(--ease)}
+.langs[open] .chev{transform:rotate(180deg)}
+.langs-menu{position:absolute;inset-inline-end:0;top:calc(100% + 8px);display:grid;min-width:176px;padding:6px;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.langs-menu a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:var(--soft);font-size:14px;line-height:20px;font-weight:600;text-decoration:none;transition:background-color .5s var(--ease),color .5s var(--ease)}
+.langs-menu a:hover{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--text)}
+.langs-menu a[aria-current]{color:var(--text)}
+.langs-menu a[aria-current]::after{content:"";margin-inline-start:auto;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+@media(max-width:640px){.langs{inset-inline-end:12px}}
+@media(min-width:641px) and (max-width:820px){nav.pill{margin-inline-start:16px;gap:16px}nav.pill .links{gap:12px}.langs{inset-inline-end:12px}}
+@media(max-width:420px){.langs .chev{display:none}.langs summary{padding:6px 10px}nav.pill{margin-inline-start:16px}}
+html[lang=zh] body{font-family:Commissioner,"Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif}
+html[lang=hi] body{font-family:Commissioner,"Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif}
+html[lang=ar] body{font-family:Commissioner,"Noto Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif}
+html:is([lang=zh],[lang=hi],[lang=ar]) :is(.hero h1,h2,.tagline p){letter-spacing:0}
+html:is([lang=hi],[lang=ar]) .hero h1{line-height:1.35}
+html:is([lang=hi],[lang=ar]) .tagline p{line-height:1.4}
+[dir=rtl] .hero h1{background-image:linear-gradient(270deg,var(--g1),var(--g2))}
